@@ -1,0 +1,1092 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bank on Yourself Strategy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --coral:   #FF6C6C;
+    --teal:    #2EC4B6;
+    --sun:     #FFB830;
+    --mint:    #5DD9A4;
+    --sky:     #4FB8FF;
+    --plum:    #9B72CF;
+    --bg:      #FFFFFF;
+    --card:    #F4F6FB;
+    --ink:     #0052CC;
+    --ink2:    #1A4FA0;
+    --muted:   #6A6A8A;
+    --border:  #DDE1EF;
+    --radius:  16px;
+    --shadow:  0 4px 24px rgba(26,26,46,0.07);
+    --shadow-hover: 0 8px 36px rgba(26,26,46,0.13);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Nunito', sans-serif;
+    font-size: 16px;
+    line-height: 1.7;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ────────── TOP NAV ────────── */
+  #nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 200;
+    background: rgba(255,255,255,0.97);
+    backdrop-filter: blur(12px);
+    border-bottom: 2px solid var(--border);
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 28px;
+    gap: 16px;
+  }
+
+  .nav-title {
+    font-weight: 800;
+    font-size: 15px;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+  }
+
+  .nav-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .progress-pill {
+    background: var(--ink);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 99px;
+    letter-spacing: 0.04em;
+    min-width: 52px;
+    text-align: center;
+  }
+
+  .nav-btn {
+    background: var(--card);
+    border: 2px solid var(--border);
+    color: var(--ink);
+    padding: 6px 18px;
+    border-radius: 99px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+  }
+
+  .nav-btn:hover:not(:disabled) {
+    border-color: var(--ink);
+    background: var(--ink);
+    color: #fff;
+    transform: translateY(-1px);
+  }
+
+  .nav-btn:disabled { opacity: 0.25; cursor: default; }
+
+  /* progress bar */
+  .progress-track {
+    flex: 1;
+    max-width: 140px;
+    height: 6px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    border-radius: 99px;
+    background: linear-gradient(90deg, var(--teal), var(--sky));
+    transition: width 0.4s ease;
+  }
+
+  /* ────────── ICON DOT NAV ────────── */
+  #dot-nav {
+    position: fixed;
+    top: 60px; left: 0; right: 0;
+    z-index: 199;
+    background: rgba(255,255,255,0.97);
+    backdrop-filter: blur(8px);
+    border-bottom: 2px solid var(--border);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 8px 16px;
+    gap: 4px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  #dot-nav::-webkit-scrollbar { display: none; }
+
+  .dot-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    padding: 6px 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 48px;
+  }
+
+  .dot-item:hover { background: rgba(26,26,46,0.05); }
+
+  .dot-item.active {
+    background: var(--ink);
+  }
+
+  .dot-emoji { font-size: 15px; line-height: 1; }
+
+  .dot-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+    text-transform: uppercase;
+  }
+
+  .dot-item.active .dot-label { color: #fff; }
+
+  /* ────────── SLIDE WRAPPER ────────── */
+  #app {
+    padding-top: 118px;
+  }
+
+  .slide {
+    display: none;
+    min-height: calc(100vh - 118px);
+    padding: 48px 24px 80px;
+    max-width: 820px;
+    margin: 0 auto;
+    animation: popIn 0.4s cubic-bezier(0.34,1.56,0.64,1) both;
+  }
+
+  .slide.active { display: block; }
+
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0.97) translateY(12px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  /* ────────── SECTION BADGE ────────── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 14px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    margin-bottom: 18px;
+  }
+
+  .badge-coral  { background: #FFF0F0; color: var(--coral); }
+  .badge-teal   { background: #E6FAF9; color: var(--teal); }
+  .badge-sun    { background: #FFF8E6; color: #D48B00; }
+  .badge-mint   { background: #E8FBF3; color: #1A9B66; }
+  .badge-sky    { background: #E8F5FF; color: #1A7FCC; }
+  .badge-plum   { background: #F4EFFE; color: var(--plum); }
+  .badge-ink    { background: #EBEBF0; color: var(--ink2); }
+
+  /* ────────── SLIDE TITLES ────────── */
+  .slide-title {
+    font-size: clamp(30px, 5vw, 48px);
+    font-weight: 900;
+    line-height: 1.1;
+    color: var(--ink);
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+  }
+
+  .slide-sub {
+    font-family: 'Lora', serif;
+    font-style: italic;
+    font-size: 18px;
+    color: var(--muted);
+    margin-bottom: 36px;
+  }
+
+  /* ────────── CARDS ────────── */
+  .card {
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px 24px;
+    margin-bottom: 14px;
+    transition: all 0.2s ease;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    box-shadow: var(--shadow);
+  }
+
+  .card:hover {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-2px);
+    border-color: rgba(26,26,46,0.15);
+  }
+
+  .card-icon {
+    font-size: 26px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .card-body {}
+
+  .card-title {
+    font-size: 15px;
+    font-weight: 800;
+    color: var(--ink);
+    margin-bottom: 5px;
+  }
+
+  .card-text {
+    font-size: 14px;
+    color: var(--ink2);
+    line-height: 1.65;
+  }
+
+  /* ────────── SECTION LABEL ────────── */
+  .section-tag {
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+    margin-top: 32px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-tag::after {
+    content: '';
+    display: block;
+    flex: 1;
+    height: 2px;
+    background: var(--border);
+    border-radius: 99px;
+  }
+
+  /* ────────── CALLOUT ────────── */
+  .callout {
+    border-radius: var(--radius);
+    padding: 18px 22px;
+    margin: 20px 0;
+    border-left: 5px solid;
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--ink2);
+  }
+
+  .callout-coral  { background: #FFF5F5; border-color: var(--coral); }
+  .callout-teal   { background: #F0FAFA; border-color: var(--teal); }
+  .callout-sun    { background: #FFFBF0; border-color: var(--sun); }
+  .callout-mint   { background: #F0FBF5; border-color: var(--mint); }
+
+  .callout strong { color: var(--ink); font-weight: 800; }
+
+  /* ────────── WELCOME SLIDE ────────── */
+  .welcome-wrap {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: calc(100vh - 200px);
+    gap: 28px;
+  }
+
+  .welcome-emoji { font-size: 64px; margin-bottom: 4px; }
+
+  .welcome-title {
+    font-size: clamp(38px, 6vw, 64px);
+    font-weight: 900;
+    line-height: 1.05;
+    color: var(--ink);
+    letter-spacing: -0.03em;
+  }
+
+  .welcome-title span { color: var(--teal); }
+
+  .welcome-desc {
+    font-size: 16px;
+    color: var(--ink2);
+    line-height: 1.75;
+    max-width: 560px;
+  }
+
+  .meta-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .meta-chip {
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-size: 13px;
+  }
+
+  .meta-chip strong {
+    display: block;
+    font-size: 10px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: 3px;
+  }
+
+  .begin-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--ink);
+    color: #fff;
+    border: none;
+    padding: 16px 32px;
+    border-radius: 99px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 16px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    align-self: flex-start;
+    box-shadow: 0 4px 20px rgba(26,26,46,0.2);
+  }
+
+  .begin-btn:hover {
+    background: var(--teal);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(46,196,182,0.35);
+  }
+
+  /* ────────── STACK DIAGRAM ────────── */
+  .stack {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin: 20px 0;
+  }
+
+  .stack-row {
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: all 0.2s ease;
+  }
+
+  .stack-row:hover { transform: translateX(4px); }
+
+  .stack-icon {
+    width: 52px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+  }
+
+  .stack-body {
+    flex: 1;
+    padding: 14px 18px;
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-left: none;
+    border-radius: 0 12px 12px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .stack-name {
+    font-size: 14px;
+    font-weight: 800;
+    color: var(--ink);
+  }
+
+  .stack-role {
+    font-size: 12px;
+    color: var(--muted);
+    font-weight: 600;
+    text-align: right;
+  }
+
+  .stack-active-badge {
+    background: var(--ink);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 800;
+    padding: 3px 10px;
+    border-radius: 99px;
+    white-space: nowrap;
+    letter-spacing: 0.04em;
+  }
+
+  /* ────────── FLOW DIAGRAM ────────── */
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin: 24px 0;
+    flex-wrap: wrap;
+  }
+
+  .flow-node {
+    flex: 1;
+    min-width: 100px;
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: 14px;
+    padding: 16px 14px;
+    text-align: center;
+    box-shadow: var(--shadow);
+    transition: all 0.2s ease;
+  }
+
+  .flow-node:hover {
+    border-color: var(--teal);
+    transform: translateY(-3px);
+    box-shadow: var(--shadow-hover);
+  }
+
+  .flow-node-icon { font-size: 24px; display: block; margin-bottom: 6px; }
+  .flow-node-name { font-size: 12px; font-weight: 800; color: var(--ink); }
+  .flow-node-sub  { font-size: 10px; color: var(--muted); margin-top: 3px; font-weight: 600; }
+
+  .flow-arrow {
+    font-size: 20px;
+    color: var(--muted);
+    flex-shrink: 0;
+    padding: 0 2px;
+  }
+
+  /* ────────── SPEC TABLE ────────── */
+  .spec-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 6px;
+    margin: 16px 0;
+  }
+
+  .spec-table tr { transition: all 0.2s ease; }
+  .spec-table tr:hover td { background: #F5F5FF; }
+
+  .spec-table td {
+    background: var(--card);
+    padding: 13px 18px;
+    font-size: 14px;
+    border-top: 2px solid var(--border);
+    border-bottom: 2px solid var(--border);
+  }
+
+  .spec-table td:first-child {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    width: 38%;
+    border-left: 2px solid var(--border);
+    border-radius: 12px 0 0 12px;
+  }
+
+  .spec-table td:last-child {
+    color: var(--ink2);
+    font-weight: 600;
+    border-right: 2px solid var(--border);
+    border-radius: 0 12px 12px 0;
+  }
+
+  /* ────────── TRADEOFF GRID ────────── */
+  .tradeoff-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin: 20px 0;
+  }
+
+  .to-card {
+    background: var(--card);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 18px;
+    box-shadow: var(--shadow);
+    transition: all 0.2s ease;
+  }
+
+  .to-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+  }
+
+  .to-card-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+
+  .to-card-icon { font-size: 20px; }
+
+  .to-card-label {
+    font-size: 13px;
+    font-weight: 800;
+    color: var(--ink);
+  }
+
+  .to-card-text {
+    font-size: 13px;
+    color: var(--ink2);
+    line-height: 1.6;
+    font-weight: 600;
+  }
+
+  /* ────────── CLOSING ────────── */
+  .closing-card {
+    background: var(--ink);
+    border-radius: 20px;
+    padding: 44px 40px;
+    margin-top: 36px;
+    box-shadow: 0 12px 48px rgba(26,26,46,0.22);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .closing-card::before {
+    content: '💡';
+    position: absolute;
+    right: 36px; top: 32px;
+    font-size: 60px;
+    opacity: 0.12;
+  }
+
+  .closing-quote {
+    font-family: 'Lora', serif;
+    font-style: italic;
+    font-size: clamp(22px, 3.5vw, 30px);
+    font-weight: 400;
+    color: #fff;
+    line-height: 1.4;
+    margin-bottom: 20px;
+  }
+
+  .closing-sub {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+  }
+
+  /* ────────── RESPONSIVE ────────── */
+  @media (max-width: 600px) {
+    .slide { padding: 32px 16px 60px; }
+    #nav { padding: 0 16px; }
+    .tradeoff-grid { grid-template-columns: 1fr; }
+    .flow { gap: 6px; }
+    .flow-node { min-width: 72px; padding: 12px 8px; }
+    .nav-title { display: none; }
+    .progress-track { max-width: 80px; }
+  }
+</style>
+</head>
+<body>
+  <a href="./index.html" style="position:fixed;top:12px;left:12px;z-index:9999;background:rgba(255,255,255,.88);padding:8px 12px;border-radius:10px;text-decoration:none;color:#111;font-weight:700;">← Home</a>
+
+
+<!-- TOP NAV -->
+<nav id="nav">
+  <span class="nav-title">Bank on Yourself Strategy</span>
+  <div class="nav-right">
+    <button class="nav-btn" id="btn-prev" onclick="navigate(-1)" disabled>← Back</button>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill" style="width:11.1%"></div>
+    </div>
+    <span class="progress-pill" id="progress-pill">1/9</span>
+    <button class="nav-btn" id="btn-next" onclick="navigate(1)">Next →</button>
+  </div>
+</nav>
+
+<!-- DOT NAV -->
+<div id="dot-nav">
+  <div class="dot-item active" onclick="goTo(0)"><span class="dot-emoji">🏠</span><span class="dot-label">Start</span></div>
+  <div class="dot-item" onclick="goTo(1)"><span class="dot-emoji">🎯</span><span class="dot-label">Goal</span></div>
+  <div class="dot-item" onclick="goTo(2)"><span class="dot-emoji">📋</span><span class="dot-label">Policy</span></div>
+  <div class="dot-item" onclick="goTo(3)"><span class="dot-emoji">🏗️</span><span class="dot-label">Stack</span></div>
+  <div class="dot-item" onclick="goTo(4)"><span class="dot-emoji">⚙️</span><span class="dot-label">Usage</span></div>
+  <div class="dot-item" onclick="goTo(5)"><span class="dot-emoji">✅</span><span class="dot-label">Fit</span></div>
+  <div class="dot-item" onclick="goTo(6)"><span class="dot-emoji">⚖️</span><span class="dot-label">Trade-offs</span></div>
+  <div class="dot-item" onclick="goTo(7)"><span class="dot-emoji">🔭</span><span class="dot-label">Future</span></div>
+  <div class="dot-item" onclick="goTo(8)"><span class="dot-emoji">💡</span><span class="dot-label">Close</span></div>
+</div>
+
+<main id="app">
+
+  <!-- ── SLIDE 0: WELCOME ── -->
+  <div class="slide active" data-index="0">
+    <div class="welcome-wrap">
+      <div class="welcome-emoji">🌳</div>
+      <h1 class="welcome-title">Bank on<br><span>Yourself</span><br>Strategy.</h1>
+      <p class="welcome-desc">
+        A clear, no-hype walkthrough of how a dividend-paying whole life policy works as a controlled liquidity layer within a layered financial architecture. Practical, analytical, honest about trade-offs.
+      </p>
+      <div class="meta-chips">
+        <div class="meta-chip"><strong>Insurer Type</strong>Mutual (Foresters Financial)</div>
+        <div class="meta-chip"><strong>Policy Type</strong>Dividend-Paying Whole Life</div>
+        <div class="meta-chip"><strong>Framework</strong>Bank on Yourself</div>
+        <div class="meta-chip"><strong>Sections</strong>8 Core Sections</div>
+      </div>
+      <button class="begin-btn" onclick="navigate(1)">Let's dive in →</button>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 1: OBJECTIVE ── -->
+  <div class="slide" data-index="1">
+    <div class="badge badge-teal">🎯 Section 01</div>
+    <h2 class="slide-title">The Objective</h2>
+    <p class="slide-sub">Capital control, not performance chasing</p>
+
+    <div class="section-tag">What this strategy is actually designed to do</div>
+
+    <div class="card">
+      <span class="card-icon">🔑</span>
+      <div class="card-body">
+        <p class="card-title">Control liquidity</p>
+        <p class="card-text">Maintain a pool of accessible capital that the owner controls directly — no bank approval, no credit checks, no explaining what the money is for.</p>
+      </div>
+    </div>
+    <div class="card">
+      <span class="card-icon">🏦</span>
+      <div class="card-body">
+        <p class="card-title">Reduce dependency on institutional lenders</p>
+        <p class="card-text">Borrowing against cash value replaces transactions that would otherwise require conventional bank financing — cutting out the underwriting timelines and qualification friction.</p>
+      </div>
+    </div>
+    <div class="card">
+      <span class="card-icon">⚡</span>
+      <div class="card-body">
+        <p class="card-title">Preserve uninterrupted compounding</p>
+        <p class="card-text">Cash value keeps growing at the declared dividend rate <em>even when</em> a policy loan is outstanding. The compounding base isn't reduced by loans taken against it.</p>
+      </div>
+    </div>
+    <div class="card">
+      <span class="card-icon">🧩</span>
+      <div class="card-body">
+        <p class="card-title">Increase capital flexibility</p>
+        <p class="card-text">Unlike retirement accounts — no age restrictions, no required distributions, no penalties on access. The capital can be deployed at will.</p>
+      </div>
+    </div>
+
+    <div class="callout callout-teal">
+      <strong>The right frame:</strong> This is a capital control strategy. The question isn't "how do I get the highest return?" — it's "how do I maintain the most useful capital position at the lowest friction cost?" These are completely different objectives.
+    </div>
+  </div>
+
+  <!-- ── SLIDE 2: POLICY STRUCTURE ── -->
+  <div class="slide" data-index="2">
+    <div class="badge badge-sun">📋 Section 02</div>
+    <h2 class="slide-title">The Policy Structure</h2>
+    <p class="slide-sub">How the instrument is built and why the details matter</p>
+
+    <div class="section-tag">Core policy specifications</div>
+
+    <table class="spec-table">
+      <tr><td>Insurer Type</td><td>Mutual company (Foresters Financial) — policyholders are members, not shareholders</td></tr>
+      <tr><td>Policy Type</td><td>Dividend-paying whole life — permanent coverage with non-guaranteed but historically consistent dividends</td></tr>
+      <tr><td>PUA Rider</td><td>Paid-Up Additions structured to accelerate early cash value accumulation relative to the base premium</td></tr>
+      <tr><td>Loan Structure</td><td>Non-direct recognition — cash value earns dividends in full regardless of outstanding loans</td></tr>
+      <tr><td>Loan Rate</td><td>Fixed 5% simple interest — not compound, not variable</td></tr>
+      <tr><td>Holding Period</td><td>Structured for long-term holding (20+ years) to maximize dividend accumulation and cash value depth</td></tr>
+    </table>
+
+    <div class="callout callout-sun">
+      <strong>Why "non-direct recognition" matters:</strong> The policy's dividend crediting is <em>not reduced</em> by the presence of a loan — the full cash value base earns the declared rate. This is the structural basis for what practitioners call uninterrupted compounding.
+    </div>
+
+    <div class="section-tag">Design intent</div>
+    <div class="card">
+      <span class="card-icon">🏗️</span>
+      <div class="card-body">
+        <p class="card-title">Built for liquidity efficiency, not return arbitrage</p>
+        <p class="card-text">PUA allocations are front-loaded to increase early cash value access relative to a standard base policy design. The goal is usability as a liquidity vehicle — not maximizing the death benefit or chasing yield.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SLIDE 3: ARCHITECTURE ── -->
+  <div class="slide" data-index="3">
+    <div class="badge badge-sky">🏗️ Section 03</div>
+    <h2 class="slide-title">The Financial Architecture</h2>
+    <p class="slide-sub">Where whole life sits in the layered capital stack</p>
+
+    <div class="section-tag">The layered capital stack</div>
+
+    <div class="stack">
+      <div class="stack-row">
+        <div class="stack-icon" style="background:#F5F5F5;">💵</div>
+        <div class="stack-body">
+          <div>
+            <div class="stack-name">Cash — Emergency &amp; Operating Reserves</div>
+          </div>
+          <div class="stack-role">Stability / Zero-friction access</div>
+        </div>
+      </div>
+      <div class="stack-row">
+        <div class="stack-icon" style="background:#E6FAF9;">🌳</div>
+        <div class="stack-body" style="border-color:#2EC4B6; background:#F5FFFF;">
+          <div>
+            <div class="stack-name">Whole Life — Controlled Liquidity Layer</div>
+          </div>
+          <span class="stack-active-badge">This guide ↑</span>
+        </div>
+      </div>
+      <div class="stack-row">
+        <div class="stack-icon" style="background:#EEF0FF;">📊</div>
+        <div class="stack-body">
+          <div>
+            <div class="stack-name">Retirement — 401(k) / IRA / HSA</div>
+          </div>
+          <div class="stack-role">Tax-advantaged compounding</div>
+        </div>
+      </div>
+      <div class="stack-row">
+        <div class="stack-icon" style="background:#F0FBF5;">🏠</div>
+        <div class="stack-body">
+          <div>
+            <div class="stack-name">Real Estate — Rental / Investment Properties</div>
+          </div>
+          <div class="stack-role">Leveraged appreciation + cash flow</div>
+        </div>
+      </div>
+      <div class="stack-row">
+        <div class="stack-icon" style="background:#FFF5F0;">📈</div>
+        <div class="stack-body">
+          <div>
+            <div class="stack-name">Brokerage — Taxable Equities</div>
+          </div>
+          <div class="stack-role">Flexible growth exposure</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout callout-mint">
+      <strong>Important:</strong> Whole life is not the growth engine of this architecture. Retirement accounts and real estate carry that role. The policy is a structural reserve — capital that can be extracted and redeployed without disturbing the other positions.
+    </div>
+  </div>
+
+  <!-- ── SLIDE 4: PRACTICAL USE ── -->
+  <div class="slide" data-index="4">
+    <div class="badge badge-mint">⚙️ Section 04</div>
+    <h2 class="slide-title">How It's Used in Practice</h2>
+    <p class="slide-sub">Operational mechanics of the liquidity layer</p>
+
+    <div class="section-tag">Common deployment scenarios</div>
+
+    <div class="card">
+      <span class="card-icon">⏱️</span>
+      <div class="card-body">
+        <p class="card-title">Strategic opportunity timing</p>
+        <p class="card-text">When an investment opportunity arises, policy loans allow rapid capital deployment without liquidating equities or triggering taxable events.</p>
+      </div>
+    </div>
+    <div class="card">
+      <span class="card-icon">🏘️</span>
+      <div class="card-body">
+        <p class="card-title">Real estate acquisition bridges</p>
+        <p class="card-text">Serves as a short-term bridge during property acquisition — covering earnest money, down payment gaps, or closing costs — before conventional financing closes.</p>
+      </div>
+    </div>
+    <div class="card">
+      <span class="card-icon">📉</span>
+      <div class="card-body">
+        <p class="card-title">Capital smoothing</p>
+        <p class="card-text">Irregular income periods (variable bonuses, commission timing, self-employment fluctuation) can be bridged without drawing down invested assets.</p>
+      </div>
+    </div>
+    <div class="card">
+      <span class="card-icon">✂️</span>
+      <div class="card-body">
+        <p class="card-title">Reducing underwriting friction</p>
+        <p class="card-text">Certain transactions that would otherwise require bank financing — with documentation, approval timelines, and fees — can be executed directly from policy cash value.</p>
+      </div>
+    </div>
+
+    <div class="section-tag">What actually happens when you take a loan</div>
+
+    <div class="flow">
+      <div class="flow-node">
+        <span class="flow-node-icon">🏦</span>
+        <div class="flow-node-name">Policy Loan</div>
+        <div class="flow-node-sub">Insurer lends against CV</div>
+      </div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-node">
+        <span class="flow-node-icon">💰</span>
+        <div class="flow-node-name">Cash Deployed</div>
+        <div class="flow-node-sub">Capital put to use</div>
+      </div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-node">
+        <span class="flow-node-icon">⚡</span>
+        <div class="flow-node-name">CV Compounds</div>
+        <div class="flow-node-sub">Full base earns dividends</div>
+      </div>
+      <span class="flow-arrow">→</span>
+      <div class="flow-node">
+        <span class="flow-node-icon">🔄</span>
+        <div class="flow-node-name">Repayment</div>
+        <div class="flow-node-sub">Owner's timeline</div>
+      </div>
+    </div>
+
+    <div class="callout callout-coral">
+      <strong>This is not free leverage.</strong> Loans accrue 5% simple interest annually on the outstanding balance. If loans aren't repaid, they reduce the eventual death benefit and can — at sufficient scale — lapse the policy. Repayment discipline isn't optional; it's structural to the whole thing working as intended.
+    </div>
+  </div>
+
+  <!-- ── SLIDE 5: PROFILE FIT ── -->
+  <div class="slide" data-index="5">
+    <div class="badge badge-plum">✅ Section 05</div>
+    <h2 class="slide-title">Why It Works in This Profile</h2>
+    <p class="slide-sub">The specific conditions that make this strategy coherent</p>
+
+    <div class="section-tag">Enabling conditions</div>
+
+    <div class="card">
+      <span class="card-icon">💼</span>
+      <div class="card-body">
+        <p class="card-title">High, stable income</p>
+        <p class="card-text">Premium commitments — including PUA contributions — can be funded consistently without financial stress. The policy doesn't absorb a disproportionate share of cash flow.</p>
+      </div>
+    </div>
+    <div class="card">
+      <span class="card-icon">💧</span>
+      <div class="card-body">
+        <p class="card-title">Strong existing cash flow</p>
+        <p class="card-text">The strategy works best when the policy is one component of an already well-capitalized financial position — not the primary savings vehicle.</p>
+      </div>
+    </div>
+    <div class="card">
+      <span class="card-icon">📅</span>
+      <div class="card-body">
+        <p class="card-title">Long time horizon</p>
+        <p class="card-text">Whole life policies require years before cash value meaningfully exceeds cumulative premiums paid. A 15–25 year horizon allows the strategy to reach its structural utility.</p>
+      </div>
+    </div>
+    <div class="card">
+      <span class="card-icon">🏠</span>
+      <div class="card-body">
+        <p class="card-title">Real estate exposure</p>
+        <p class="card-text">Active or planned real estate activity creates natural use cases for short-term capital deployment — exactly the scenario this liquidity layer is built for.</p>
+      </div>
+    </div>
+    <div class="card">
+      <span class="card-icon">🧠</span>
+      <div class="card-body">
+        <p class="card-title">Strategic mindset</p>
+        <p class="card-text">Capacity to fund PUAs from genuine cash flow surplus, and the discipline to treat the policy as an intentional part of a larger capital structure — not as a quick financial fix.</p>
+      </div>
+    </div>
+
+    <div class="callout callout-sun">
+      <strong>This is not universal advice.</strong> For a household with inconsistent income, limited existing assets, or a short time horizon, the same policy structure carries materially different risk-adjusted characteristics.
+    </div>
+  </div>
+
+  <!-- ── SLIDE 6: TRADE-OFFS ── -->
+  <div class="slide" data-index="6">
+    <div class="badge badge-coral">⚖️ Section 06</div>
+    <h2 class="slide-title">Trade-Offs</h2>
+    <p class="slide-sub">What this strategy costs and where it underperforms</p>
+
+    <div class="section-tag">Known limitations and costs</div>
+
+    <div class="tradeoff-grid">
+      <div class="to-card">
+        <div class="to-card-top">
+          <span class="to-card-icon">📉</span>
+          <span class="to-card-label">Lower long-term return</span>
+        </div>
+        <p class="to-card-text">The internal rate of return on whole life cash value will be lower than a diversified equity portfolio over 20–30 years. That's the cost of stability and guaranteed growth.</p>
+      </div>
+      <div class="to-card">
+        <div class="to-card-top">
+          <span class="to-card-icon">🐢</span>
+          <span class="to-card-label">Slow early liquidity</span>
+        </div>
+        <p class="to-card-text">In the first 3–7 years, cash value accumulation is slow relative to premiums paid. The policy becomes most useful as a liquidity vehicle in years 8–10 and beyond.</p>
+      </div>
+      <div class="to-card">
+        <div class="to-card-top">
+          <span class="to-card-icon">📌</span>
+          <span class="to-card-label">Requires discipline</span>
+        </div>
+        <p class="to-card-text">Premiums are contractual. Missing payments or over-borrowing without repayment can destabilize the policy. Unlike a brokerage account, you can't just stop contributing without consequence.</p>
+      </div>
+      <div class="to-card">
+        <div class="to-card-top">
+          <span class="to-card-icon">🧩</span>
+          <span class="to-card-label">Not a replacement</span>
+        </div>
+        <p class="to-card-text">This should not replace diversified retirement contributions, equity exposure, or real estate. It's a complement — not a substitute — within a broader capital structure.</p>
+      </div>
+    </div>
+
+    <div class="callout callout-coral">
+      <strong>The honest framing:</strong> The trade-offs are explicit and priced in. Using this strategy means paying a cost — in the form of lower potential return — in exchange for liquidity control, stability, and reduced dependency on conventional lending. Whether that exchange makes sense depends entirely on the individual's architecture and objectives.
+    </div>
+  </div>
+
+  <!-- ── SLIDE 7: LONG-TERM ROLE ── -->
+  <div class="slide" data-index="7">
+    <div class="badge badge-sky">🔭 Section 07</div>
+    <h2 class="slide-title">Long-Term Role</h2>
+    <p class="slide-sub">How the policy's function evolves over a 20–30 year horizon</p>
+
+    <div class="section-tag">Structural roles in late-stage planning</div>
+
+    <div class="card">
+      <span class="card-icon">🛡️</span>
+      <div class="card-body">
+        <p class="card-title">Retirement volatility buffer</p>
+        <p class="card-text">During equity market downturns near or in retirement, the policy provides a capital pool that can be accessed without drawing down invested assets at depressed values. This is sequence-of-returns risk mitigation in practice.</p>
+      </div>
+    </div>
+    <div class="card">
+      <span class="card-icon">🌊</span>
+      <div class="card-body">
+        <p class="card-title">Supplemental income source</p>
+        <p class="card-text">After meaningful cash value accumulation (typically year 15+), systematic policy loans can supplement retirement income in a tax-advantaged manner — loans are not taxable events.</p>
+      </div>
+    </div>
+    <div class="card">
+      <span class="card-icon">🏛️</span>
+      <div class="card-body">
+        <p class="card-title">Permanent capital reserve</p>
+        <p class="card-text">Doesn't require rebalancing, doesn't decline in bear markets, and doesn't create taxable events on access. This simplifies the overall capital management burden in later decades.</p>
+      </div>
+    </div>
+    <div class="card">
+      <span class="card-icon">⏳</span>
+      <div class="card-body">
+        <p class="card-title">Sequence risk mitigator</p>
+        <p class="card-text">A significant market drawdown combined with required withdrawals in early retirement is one of the largest financial risks retirees face. A policy loan bridge during such periods can be the difference between a plan that sustains and one that doesn't.</p>
+      </div>
+    </div>
+
+    <div class="callout callout-sky" style="background:#EEF8FF; border-color:var(--sky);">
+      These long-term roles are most meaningful when the policy has been held and funded consistently for 15 or more years. The depth of cash value — and thus the utility of the instrument — is a direct function of time and consistent premium commitment.
+    </div>
+  </div>
+
+  <!-- ── SLIDE 8: CLOSING ── -->
+  <div class="slide" data-index="8">
+    <div class="badge badge-ink">💡 Closing</div>
+    <h2 class="slide-title">Closing Philosophy</h2>
+    <p class="slide-sub">The posture that makes this framework coherent</p>
+
+    <div class="section-tag">Core principles of the approach</div>
+
+    <div class="card">
+      <span class="card-icon">🔄</span>
+      <div class="card-body">
+        <p class="card-title">Control the banking function</p>
+        <p class="card-text">Rather than routing all capital decisions through institutional lenders, this strategy creates an internal capital pool with self-determined access terms.</p>
+      </div>
+    </div>
+    <div class="card">
+      <span class="card-icon">↩️</span>
+      <div class="card-body">
+        <p class="card-title">Understand where interest goes</p>
+        <p class="card-text">Interest on policy loans is paid to the insurance company — not back to the policyholder. The advantage is that your cash value continues compounding on the full base regardless of the outstanding loan, but the interest cost is real and accrues to the institution.</p>
+      </div>
+    </div>
+    <div class="card">
+      <span class="card-icon">⚡</span>
+      <div class="card-body">
+        <p class="card-title">Liquidity as leverage</p>
+        <p class="card-text">Having accessible, non-correlated capital is itself a strategic asset. The ability to move quickly on opportunities — without approval delays, liquidation costs, or tax consequences — has measurable value.</p>
+      </div>
+    </div>
+    <div class="card">
+      <span class="card-icon">🧭</span>
+      <div class="card-body">
+        <p class="card-title">Capital control over return chasing</p>
+        <p class="card-text">The philosophy de-emphasizes the pursuit of maximum yield in favor of structural resilience. A portfolio built for control tends to behave better under stress than one optimized purely for return.</p>
+      </div>
+    </div>
+
+
+  </div>
+
+</main>
+
+<script>
+  const slides = document.querySelectorAll('.slide');
+  const dots   = document.querySelectorAll('.dot-item');
+  const total  = slides.length;
+  let current  = 0;
+
+  function goTo(i) {
+    slides[current].classList.remove('active');
+    dots[current].classList.remove('active');
+    current = i;
+    slides[current].classList.add('active');
+    dots[current].classList.add('active');
+    updateUI();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    dots[current].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  }
+
+  function navigate(dir) {
+    const n = current + dir;
+    if (n >= 0 && n < total) goTo(n);
+  }
+
+  function updateUI() {
+    document.getElementById('btn-prev').disabled = current === 0;
+    document.getElementById('btn-next').disabled = current === total - 1;
+    document.getElementById('progress-fill').style.width = ((current + 1) / total * 100) + '%';
+    document.getElementById('progress-pill').textContent = `${current + 1}/${total}`;
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') navigate(1);
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   navigate(-1);
+  });
+</script>
+</body>
+</html>
