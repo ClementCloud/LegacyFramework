@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Sunshine Trust - Interactive Guide</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Playfair+Display:wght@700;900&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .app-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    .header {
+      text-align: center;
+      padding: 30px 20px;
+      color: white;
+    }
+
+    .header h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 48px;
+      font-weight: 900;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .header p {
+      font-size: 18px;
+      opacity: 0.95;
+    }
+
+    /* Progress Bar */
+    .progress-container {
+      background: rgba(255,255,255,0.2);
+      height: 8px;
+      border-radius: 10px;
+      margin: 20px 0;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+    }
+
+    .progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #FFD700 0%, #FFA500 100%);
+      width: 0%;
+      transition: width 0.5s ease;
+      border-radius: 10px;
+    }
+
+    .progress-text {
+      text-align: center;
+      color: white;
+      font-size: 14px;
+      font-weight: 600;
+      margin-top: 10px;
+      opacity: 0.9;
+    }
+
+    /* Main Content Area */
+    .content-area {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px 0;
+    }
+
+    .step-container {
+      background: white;
+      border-radius: 20px;
+      padding: 50px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+      max-width: 900px;
+      width: 100%;
+      min-height: 500px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .step-container::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 6px;
+      background: linear-gradient(90deg, #FFD700 0%, #FFA500 100%);
+    }
+
+    .step-header {
+      margin-bottom: 30px;
+    }
+
+    .step-number {
+      font-size: 14px;
+      font-weight: 700;
+      color: #999;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+    }
+
+    .step-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 42px;
+      font-weight: 900;
+      color: #1a1a1a;
+      margin-bottom: 15px;
+      line-height: 1.2;
+    }
+
+    .step-subtitle {
+      font-size: 18px;
+      color: #666;
+      font-weight: 500;
+    }
+
+    .step-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    /* Card Styles */
+    .info-card {
+      background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+      padding: 25px;
+      border-radius: 15px;
+      border-left: 5px solid #FFD700;
+    }
+
+    .info-card h3 {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 12px;
+    }
+
+    .info-card p {
+      font-size: 16px;
+      color: #666;
+      line-height: 1.6;
+    }
+
+    /* Grid Layouts */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .grid-4 {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 15px;
+    }
+
+    .grid-5 {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 15px;
+    }
+
+    /* Stat Card */
+    .stat-card {
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      border-top: 4px solid #FFD700;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+
+    .stat-value {
+      font-size: 36px;
+      font-weight: 900;
+      color: #FFD700;
+      margin-bottom: 8px;
+    }
+
+    .stat-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: #666;
+      line-height: 1.3;
+    }
+
+    /* Feature Card */
+    .feature-card {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 25px;
+      border-radius: 12px;
+      color: white;
+      transition: transform 0.3s;
+    }
+
+    .feature-card:hover {
+      transform: scale(1.03);
+    }
+
+    .feature-icon {
+      font-size: 48px;
+      margin-bottom: 15px;
+    }
+
+    .feature-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .feature-desc {
+      font-size: 14px;
+      opacity: 0.95;
+      line-height: 1.5;
+    }
+
+    .feature-list {
+      list-style: none;
+      margin-top: 15px;
+    }
+
+    .feature-list li {
+      font-size: 14px;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+    }
+
+    .feature-list li:last-child {
+      border-bottom: none;
+    }
+
+    /* Tier Card */
+    .tier-card {
+      background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      padding: 20px;
+      border-radius: 12px;
+      text-align: center;
+      color: white;
+      transition: transform 0.3s;
+    }
+
+    .tier-card:hover {
+      transform: scale(1.05);
+    }
+
+    .tier-number {
+      font-size: 32px;
+      font-weight: 900;
+      margin-bottom: 8px;
+    }
+
+    .tier-name {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .tier-allocation {
+      font-size: 24px;
+      font-weight: 800;
+      margin-bottom: 5px;
+    }
+
+    .tier-label {
+      font-size: 12px;
+      opacity: 0.9;
+    }
+
+    /* Score Card */
+    .score-card {
+      background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+      padding: 25px;
+      border-radius: 12px;
+      text-align: center;
+      color: white;
+      transition: transform 0.3s;
+    }
+
+    .score-card:hover {
+      transform: scale(1.05);
+    }
+
+    .score-percentage {
+      font-size: 48px;
+      font-weight: 900;
+      margin-bottom: 10px;
+    }
+
+    .score-name {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    /* Highlight Box */
+    .highlight-box {
+      background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+      padding: 30px;
+      border-radius: 15px;
+      text-align: center;
+      color: #1a1a1a;
+    }
+
+    .highlight-box h3 {
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 15px;
+    }
+
+    .highlight-box p {
+      font-size: 18px;
+      font-weight: 500;
+      line-height: 1.6;
+    }
+
+    /* Value List */
+    .value-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .value-item {
+      background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+      padding: 18px 25px;
+      border-radius: 12px;
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      transition: transform 0.3s;
+    }
+
+    .value-item:hover {
+      transform: translateX(10px);
+    }
+
+    .value-icon {
+      font-size: 28px;
+    }
+
+    /* Navigation */
+    .navigation {
+      display: flex;
+      gap: 15px;
+      margin-top: 30px;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .nav-btn {
+      padding: 15px 35px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    .nav-btn:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    }
+
+    .nav-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-prev {
+      background: #f8f9fa;
+      color: #666;
+    }
+
+    .btn-next {
+      background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+      color: #1a1a1a;
+    }
+
+    .btn-finish {
+      background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+      color: white;
+    }
+
+    .nav-center {
+      display: flex;
+      gap: 10px;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.3);
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .dot.active {
+      background: #FFD700;
+      width: 30px;
+      border-radius: 6px;
+    }
+
+    /* Welcome Screen */
+    .welcome-screen {
+      text-align: center;
+      padding: 50px;
+    }
+
+    .welcome-icon {
+      font-size: 100px;
+      margin-bottom: 30px;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+
+    .welcome-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 52px;
+      font-weight: 900;
+      color: #1a1a1a;
+      margin-bottom: 20px;
+      line-height: 1.2;
+    }
+
+    .welcome-subtitle {
+      font-size: 20px;
+      color: #666;
+      margin-bottom: 40px;
+      line-height: 1.6;
+    }
+
+    .start-btn {
+      padding: 20px 50px;
+      background: linear-gradient(135deg, #FFD700 0%, #FFA500 100%);
+      color: #1a1a1a;
+      border: none;
+      border-radius: 12px;
+      font-size: 20px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 8px 25px rgba(255,215,0,0.3);
+      transition: all 0.3s;
+    }
+
+    .start-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 35px rgba(255,215,0,0.4);
+    }
+
+    /* Completion Screen */
+    .completion-screen {
+      text-align: center;
+      padding: 50px;
+    }
+
+    .completion-icon {
+      font-size: 100px;
+      margin-bottom: 30px;
+    }
+
+    .completion-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 48px;
+      font-weight: 900;
+      color: #1a1a1a;
+      margin-bottom: 20px;
+    }
+
+    .completion-text {
+      font-size: 18px;
+      color: #666;
+      margin-bottom: 30px;
+      line-height: 1.6;
+    }
+
+    .completion-actions {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+    }
+
+    .action-btn {
+      padding: 15px 30px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+
+    .restart-btn {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .download-btn {
+      background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+      color: white;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .header h1 {
+        font-size: 32px;
+      }
+
+      .step-container {
+        padding: 30px 25px;
+        min-height: 400px;
+      }
+
+      .step-title {
+        font-size: 32px;
+      }
+
+      .grid-2,
+      .grid-3,
+      .grid-4,
+      .grid-5 {
+        grid-template-columns: 1fr;
+      }
+
+      .navigation {
+        flex-direction: column;
+      }
+
+      .nav-btn {
+        width: 100%;
+      }
+
+      .welcome-title {
+        font-size: 36px;
+      }
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <div class="header">
+      <h1>☀️ The Sunshine Trust</h1>
+      <p>Interactive Framework Guide</p>
+    </div>
+
+    <div class="progress-container">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <div class="progress-text" id="progressText">Ready to begin</div>
+
+    <div class="content-area">
+      <div class="step-container" id="stepContainer">
+        <!-- Steps will be dynamically inserted here -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const steps = [
+      {
+        type: 'welcome',
+        content: `
+          <div class="welcome-screen">
+            <div class="welcome-icon">☀️</div>
+            <h1 class="welcome-title">Welcome to<br>The Sunshine Trust</h1>
+            <p class="welcome-subtitle">A guided tour through our family's multi-generational wealth framework.<br><br>This interactive experience will show you exactly how the Trust works,<br>how you benefit, and what you can do to maximize your participation.</p>
+            <button class="start-btn" onclick="nextStep()">Begin Your Journey →</button>
+          </div>
+        `
+      },
+      {
+        number: 'Step 1',
+        title: 'The Foundation',
+        subtitle: 'Protected Principal + Conservative Growth',
+        content: `
+          <div class="step-content">
+            <div class="highlight-box">
+              <h3>The Core Principle</h3>
+              <p>Principal is <strong>sacred and protected</strong>. We only distribute the yield it generates.</p>
+            </div>
+            
+            <div class="grid-3">
+              <div class="stat-card">
+                <div class="stat-value">$6M</div>
+                <div class="stat-label">Example Trust Corpus</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-value">4%</div>
+                <div class="stat-label">Conservative Annual Yield</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-value">$240K</div>
+                <div class="stat-label">Annual Distribution Pool</div>
+              </div>
+            </div>
+
+            <div class="info-card">
+              <h3>💡 What This Means for You</h3>
+              <p>The Trust grows forever while providing annual benefits to family members. You benefit today, and your children benefit tomorrow.</p>
+            </div>
+          </div>
+        `
+      },
+      {
+        number: 'Step 2',
+        title: 'Who's in Charge?',
+        subtitle: 'Governance Structure',
+        content: `
+          <div class="step-content">
+            <div class="grid-3">
+              <div class="feature-card">
+                <div class="feature-icon">⚖️</div>
+                <div class="feature-title">Independent Trustee</div>
+                <div class="feature-desc">Non-family professional with veto power on major decisions</div>
+              </div>
+              <div class="feature-card">
+                <div class="feature-icon">👥</div>
+                <div class="feature-title">Family Trustee #1</div>
+                <div class="feature-desc">3-year term, represents family interests</div>
+              </div>
+              <div class="feature-card">
+                <div class="feature-icon">👥</div>
+                <div class="feature-title">Family Trustee #2</div>
+                <div class="feature-desc">3-year term, rotates as Summit Chair</div>
+              </div>
+            </div>
+
+            <div class="info-card">
+              <h3>🛡️ Protection & Fairness</h3>
+              <p>The Independent Trustee ensures decisions are fair and protects the principal from being raided. All major changes require unanimous agreement including the Independent Trustee.</p>
+            </div>
+          </div>
+        `
+      },
+      {
+        number: 'Step 3',
+        title: 'Where the Money Goes',
+        subtitle: 'Annual Yield Allocation (60-20-10-10)',
+        content: `
+          <div class="step-content">
+            <div class="grid-4">
+              <div class="stat-card">
+                <div class="stat-value">60%</div>
+                <div class="stat-label">Tier Distribution Pool</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-value">20%</div>
+                <div class="stat-label">Growth Reserve</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-value">10%</div>
+                <div class="stat-label">Family Bank</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-value">10%</div>
+                <div class="stat-label">Admin & Summit</div>
+              </div>
+            </div>
+
+            <div class="info-card">
+              <h3>📊 Example Breakdown ($240K Annual Yield)</h3>
+              <p><strong>$144K</strong> → Distributed to family based on tier<br>
+              <strong>$48K</strong> → Reinvested + insurance premiums<br>
+              <strong>$24K</strong> → Available for family loans<br>
+              <strong>$24K</strong> → Operations + annual summit</p>
+            </div>
+          </div>
+        `
+      },
+      {
+        number: 'Step 4',
+        title: 'The Five Tiers',
+        subtitle: 'Performance-Based Distribution System',
+        content: `
+          <div class="step-content">
+            <div class="grid-5">
+              <div class="tier-card">
+                <div class="tier-number">5</div>
+                <div class="tier-name">💎 PILLAR</div>
+                <div class="tier-allocation">35%</div>
+                <div class="tier-label">of pool</div>
+              </div>
+              <div class="tier-card">
+                <div class="tier-number">4</div>
+                <div class="tier-name">🏛️ ARCHITECT</div>
+                <div class="tier-allocation">25%</div>
+                <div class="tier-label">of pool</div>
+              </div>
+              <div class="tier-card">
+                <div class="tier-number">3</div>
+                <div class="tier-name">🌟 STEWARD</div>
+                <div class="tier-allocation">20%</div>
+                <div class="tier-label">of pool</div>
+              </div>
+              <div class="tier-card">
+                <div class="tier-number">2</div>
+                <div class="tier-name">🔨 BUILDER</div>
+                <div class="tier-allocation">15%</div>
+                <div class="tier-label">of pool</div>
+              </div>
+              <div class="tier-card">
+                <div class="tier-number">1</div>
+                <div class="tier-name">🌱 FOUNDATION</div>
+                <div class="tier-allocation">5%</div>
+                <div class="tier-label">of pool</div>
+              </div>
+            </div>
+
+            <div class="info-card">
+              <h3>🎯 How It Works</h3>
+              <p>Higher tier = larger share of the 60% distribution pool. Tiers are reviewed every 6 months based on your performance. <strong>Completely confidential</strong> — no public rankings or comparisons.</p>
+            </div>
+          </div>
+        `
+      },
+      {
+        number: 'Step 5',
+        title: 'How You're Scored',
+        subtitle: 'Weighted Performance Criteria',
+        content: `
+          <div class="step-content">
+            <div class="grid-4">
+              <div class="score-card">
+                <div class="score-percentage">40%</div>
+                <div class="score-name">Financial Stability</div>
+              </div>
+              <div class="score-card">
+                <div class="score-percentage">30%</div>
+                <div class="score-name">Productivity</div>
+              </div>
+              <div class="score-card">
+                <div class="score-percentage">20%</div>
+                <div class="score-name">Reinvestment</div>
+              </div>
+              <div class="score-card">
+                <div class="score-percentage">10%</div>
+                <div class="score-name">Contribution</div>
+              </div>
+            </div>
+
+            <div class="info-card">
+              <h3>✅ Key Points</h3>
+              <p><strong>Voluntary:</strong> You choose to participate<br>
+              <strong>Confidential:</strong> Only you and trustees know your score<br>
+              <strong>Fair:</strong> Same criteria for everyone<br>
+              <strong>Semi-Annual:</strong> Reviewed every 6 months</p>
+            </div>
+          </div>
+        `
+      },
+      {
+        number: 'Step 6',
+        title: 'The Four Pillars of Benefit',
+        subtitle: 'How the Trust Helps You',
+        content: `
+          <div class="step-content">
+            <div class="grid-2">
+              <div class="feature-card">
+                <div class="feature-icon">🏆</div>
+                <div class="feature-title">Tier Distributions</div>
+                <ul class="feature-list">
+                  <li>✓ Performance-based rewards</li>
+                  <li>✓ Annual cash distributions</li>
+                  <li>✓ Higher tier = more money</li>
+                </ul>
+              </div>
+              <div class="feature-card">
+                <div class="feature-icon">🏦</div>
+                <div class="feature-title">Family Bank</div>
+                <ul class="feature-list">
+                  <li>✓ Education loans</li>
+                  <li>✓ Housing down payments</li>
+                  <li>✓ Business capital</li>
+                  <li>✓ Emergency liquidity</li>
+                </ul>
+              </div>
+              <div class="feature-card">
+                <div class="feature-icon">🚀</div>
+                <div class="feature-title">Insurance Multiplier</div>
+                <ul class="feature-list">
+                  <li>✓ Trust funds life insurance</li>
+                  <li>✓ 5-10x your income</li>
+                  <li>✓ Boost your tier score</li>
+                  <li>✓ Strengthen future generations</li>
+                </ul>
+              </div>
+              <div class="feature-card">
+                <div class="feature-icon">🎉</div>
+                <div class="feature-title">Family Summit</div>
+                <ul class="feature-list">
+                  <li>✓ Annual family gathering</li>
+                  <li>✓ Financial education</li>
+                  <li>✓ Relationship building</li>
+                  <li>✓ All expenses covered</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      {
+        number: 'Step 7',
+        title: 'Insurance Multiplier',
+        subtitle: 'Optional Program to Supercharge the Trust',
+        content: `
+          <div class="step-content">
+            <div class="highlight-box">
+              <h3>How It Works</h3>
+              <p>Trust pays for life insurance on you (5-10x your income). When you pass, Trust receives the payout, strengthening capital for future generations. You get tier score boost today!</p>
+            </div>
+
+            <div class="grid-2">
+              <div class="info-card">
+                <h3>🎁 Your Benefits</h3>
+                <p>• +5% to +15% tier score boost<br>
+                • No cost to you (Trust pays premiums)<br>
+                • Strengthen family legacy<br>
+                • Optional participation</p>
+              </div>
+              <div class="info-card">
+                <h3>🚫 No Pressure</h3>
+                <p>• Completely voluntary<br>
+                • No penalty for opting out<br>
+                • Insurability issues = no impact<br>
+                • Dignified choice</p>
+              </div>
+            </div>
+
+            <div class="info-card">
+              <h3>💰 Bonus Structure</h3>
+              <p>Base participation: <strong>+5%</strong> | Policy ≥5x income: <strong>+7.5%</strong> | Policy ≥10x income: <strong>+10%</strong> | You fund ≥25% premium: <strong>+2.5%</strong> | You fund ≥50% premium: <strong>+5%</strong> | <strong>Total cap: +15%</strong></p>
+            </div>
+          </div>
+        `
+      },
+      {
+        number: 'Step 8',
+        title: 'Our Core Values',
+        subtitle: 'The Cultural Foundation',
+        content: `
+          <div class="step-content">
+            <div class="value-list">
+              <div class="value-item">
+                <span class="value-icon">🛡️</span>
+                <span>Principal is sacred and protected</span>
+              </div>
+              <div class="value-item">
+                <span class="value-icon">🌾</span>
+                <span>Yield is earned through stewardship, not entitlement</span>
+              </div>
+              <div class="value-item">
+                <span class="value-icon">🤝</span>
+                <span>Participation is voluntary and dignified</span>
+              </div>
+              <div class="value-item">
+                <span class="value-icon">🚫</span>
+                <span>No entitlement mentality</span>
+              </div>
+              <div class="value-item">
+                <span class="value-icon">🔒</span>
+                <span>No public comparisons or rankings</span>
+              </div>
+              <div class="value-item">
+                <span class="value-icon">❤️</span>
+                <span>Unity is our #1 priority</span>
+              </div>
+            </div>
+          </div>
+        `
+      },
+      {
+        type: 'completion',
+        content: `
+          <div class="completion-screen">
+            <div class="completion-icon">🎉</div>
+            <h1 class="completion-title">You're All Set!</h1>
+            <p class="completion-text">You now understand how The Sunshine Trust works and how you can benefit.<br><br>Ready to get started? Complete the financial literacy curriculum and sign your participation agreement.</p>
+            <div class="completion-actions">
+              <button class="action-btn restart-btn" onclick="restart()">← Start Over</button>
+              <button class="action-btn download-btn" onclick="alert('Download feature coming soon!')">Download Summary</button>
+            </div>
+          </div>
+        `
+      }
+    ];
+
+    let currentStep = 0;
+
+    function renderStep(index) {
+      const step = steps[index];
+      const container = document.getElementById('stepContainer');
+      
+      if (step && (step.type === 'welcome' || step.type === 'completion')) {
+        container.innerHTML = step.content;
+      } else if (step) {
+        container.innerHTML = `
+          <div class="step-header">
+            <div class="step-number">${step.number} of ${steps.length - 2}</div>
+            <h1 class="step-title">${step.title}</h1>
+            <p class="step-subtitle">${step.subtitle}</p>
+          </div>
+          ${step.content}
+          <div class="navigation">
+            <button class="nav-btn btn-prev" onclick="prevStep()" ${index <= 1 ? 'disabled' : ''}>
+              ← Previous
+            </button>
+            <div class="nav-center">
+              ${steps.map((s, i) => {
+                if (s.type === 'welcome' || s.type === 'completion') return '';
+                return `<div class="dot ${i === index ? 'active' : ''}" onclick="goToStep(${i})"></div>`;
+              }).join('')}
+            </div>
+            <button class="nav-btn ${index === steps.length - 1 ? 'btn-finish' : 'btn-next'}" onclick="nextStep()">
+              ${index === steps.length - 1 ? 'Finish ✓' : 'Next →'}
+            </button>
+          </div>
+        `;
+      }
+
+      updateProgress(index);
+    }
+
+    function updateProgress(index) {
+      const progress = (index / (steps.length - 1)) * 100;
+      document.getElementById('progressBar').style.width = progress + '%';
+      
+      let progressText = '';
+      if (index === 0) {
+        progressText = 'Ready to begin';
+      } else if (index === steps.length - 1) {
+        progressText = 'Complete! 🎉';
+      } else {
+        progressText = `Step ${index} of ${steps.length - 2}`;
+      }
+      document.getElementById('progressText').textContent = progressText;
+    }
+
+    function nextStep() {
+      if (currentStep < steps.length - 1) {
+        currentStep++;
+        renderStep(currentStep);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    function prevStep() {
+      if (currentStep > 0) {
+        currentStep--;
+        renderStep(currentStep);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    }
+
+    function goToStep(index) {
+      currentStep = index;
+      renderStep(currentStep);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function restart() {
+      currentStep = 0;
+      renderStep(currentStep);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Initialize
+    renderStep(currentStep);
+  </script>
+</body>
+</html>
