@@ -3,40 +3,532 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Interactive Guides</title>
+  <title>Strategy & Framework Guides</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <style>
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 0; padding: 48px 20px; background: #0b1220; color: #fff; }
-    .wrap { max-width: 920px; margin: 0 auto; }
-    h1 { font-size: 40px; margin: 0 0 10px; }
-    p { color: rgba(255,255,255,0.82); margin: 0 0 28px; line-height: 1.6; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; }
-    a.card { display: block; text-decoration: none; color: inherit; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); border-radius: 16px; padding: 18px; transition: transform .15s ease, background .15s ease; }
-    a.card:hover { transform: translateY(-2px); background: rgba(255,255,255,0.10); }
-    .title { font-weight: 800; font-size: 18px; margin-bottom: 6px; }
-    .desc { color: rgba(255,255,255,0.75); font-size: 14px; line-height: 1.5; }
-    .hint { margin-top: 20px; font-size: 12px; color: rgba(255,255,255,0.6); }
-    code { background: rgba(255,255,255,0.08); padding: 2px 6px; border-radius: 8px; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #06080f;
+      --card-bg: rgba(255,255,255,0.04);
+      --card-border: rgba(255,255,255,0.09);
+      --text: #f0f2f8;
+      --muted: rgba(255,255,255,0.5);
+      --radius: 20px;
+    }
+
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ANIMATED BACKGROUND */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 80% 60% at 10% 0%, rgba(99,60,255,0.18) 0%, transparent 60%),
+        radial-gradient(ellipse 60% 50% at 90% 10%, rgba(236,72,153,0.14) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 40% at 50% 100%, rgba(16,185,129,0.1) 0%, transparent 55%);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    .wrap {
+      position: relative;
+      z-index: 1;
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 72px 28px 80px;
+    }
+
+    /* HERO */
+    .hero { margin-bottom: 64px; }
+
+    .hero-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.45);
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 100px;
+      padding: 5px 14px;
+      margin-bottom: 24px;
+    }
+    .hero-eyebrow::before {
+      content: '';
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #10b981;
+      box-shadow: 0 0 8px #10b981;
+      animation: pulse 2s ease-in-out infinite;
+    }
+
+    h1 {
+      font-size: clamp(38px, 6vw, 62px);
+      font-weight: 900;
+      line-height: 1.05;
+      letter-spacing: -0.03em;
+      margin-bottom: 20px;
+      background: linear-gradient(135deg, #ffffff 0%, rgba(255,255,255,0.75) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-sub {
+      font-size: 17px;
+      line-height: 1.7;
+      color: rgba(255,255,255,0.6);
+      max-width: 580px;
+    }
+    .hero-sub strong { color: rgba(255,255,255,0.85); font-weight: 600; }
+
+    /* SECTION LABELS */
+    .section-label {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.35);
+      margin-bottom: 18px;
+    }
+    .section-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(255,255,255,0.07);
+    }
+
+    /* GRID */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+      margin-bottom: 56px;
+    }
+
+    /* CARDS */
+    a.card {
+      display: flex;
+      flex-direction: column;
+      text-decoration: none;
+      color: inherit;
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: var(--radius);
+      padding: 24px;
+      position: relative;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1),
+                  border-color 0.2s ease,
+                  box-shadow 0.2s ease;
+      will-change: transform;
+    }
+
+    /* Per-card gradient accent */
+    a.card::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      border-radius: var(--radius);
+    }
+    a.card:hover::before { opacity: 1; }
+    a.card:hover {
+      transform: translateY(-4px) scale(1.01);
+      border-color: rgba(255,255,255,0.2);
+      box-shadow: 0 20px 60px -10px rgba(0,0,0,0.5);
+    }
+    a.card:active { transform: translateY(-1px) scale(0.99); }
+
+    .card-1::before { background: linear-gradient(135deg, rgba(251,191,36,0.08) 0%, rgba(245,158,11,0.04) 100%); }
+    .card-1:hover { box-shadow: 0 20px 60px -10px rgba(251,191,36,0.15); border-color: rgba(251,191,36,0.3); }
+
+    .card-2::before { background: linear-gradient(135deg, rgba(52,211,153,0.08) 0%, rgba(16,185,129,0.04) 100%); }
+    .card-2:hover { box-shadow: 0 20px 60px -10px rgba(52,211,153,0.15); border-color: rgba(52,211,153,0.3); }
+
+    .card-3::before { background: linear-gradient(135deg, rgba(139,92,246,0.1) 0%, rgba(99,60,255,0.05) 100%); }
+    .card-3:hover { box-shadow: 0 20px 60px -10px rgba(139,92,246,0.2); border-color: rgba(139,92,246,0.35); }
+
+    .card-4::before { background: linear-gradient(135deg, rgba(236,72,153,0.08) 0%, rgba(219,39,119,0.04) 100%); }
+    .card-4:hover { box-shadow: 0 20px 60px -10px rgba(236,72,153,0.15); border-color: rgba(236,72,153,0.3); }
+
+    .card-icon {
+      font-size: 30px;
+      margin-bottom: 16px;
+      display: block;
+      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    a.card:hover .card-icon { transform: scale(1.15) rotate(-3deg); }
+
+    .card-tag {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 3px 9px;
+      border-radius: 100px;
+      display: inline-block;
+      margin-bottom: 10px;
+      width: fit-content;
+    }
+    .tag-amber { background: rgba(251,191,36,0.15); color: #fbbf24; border: 1px solid rgba(251,191,36,0.25); }
+    .tag-green { background: rgba(52,211,153,0.12); color: #34d399; border: 1px solid rgba(52,211,153,0.25); }
+    .tag-purple { background: rgba(139,92,246,0.15); color: #a78bfa; border: 1px solid rgba(139,92,246,0.3); }
+    .tag-pink { background: rgba(236,72,153,0.12); color: #f472b6; border: 1px solid rgba(236,72,153,0.25); }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+      line-height: 1.2;
+    }
+
+    .card-desc {
+      font-size: 14px;
+      line-height: 1.6;
+      color: rgba(255,255,255,0.55);
+      flex: 1;
+    }
+
+    .card-arrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      margin-top: 18px;
+      color: rgba(255,255,255,0.35);
+      transition: color 0.2s, gap 0.2s;
+    }
+    a.card:hover .card-arrow { color: rgba(255,255,255,0.75); gap: 10px; }
+
+    /* DIVIDER */
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+      margin: 8px 0 52px;
+    }
+
+    /* CF SECTION */
+    .cf-section {}
+    .cf-header { display: flex; align-items: center; gap: 12px; margin-bottom: 22px; }
+    .cf-header h2 {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+    .cf-badge {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 4px 12px;
+      border-radius: 100px;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.4);
+      transition: all 0.3s ease;
+    }
+    .cf-badge.unlocked {
+      background: rgba(52,211,153,0.12);
+      border-color: rgba(52,211,153,0.3);
+      color: #34d399;
+    }
+
+    /* GATE */
+    #cf-gate {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: var(--radius);
+      padding: 32px 28px;
+      max-width: 420px;
+      position: relative;
+      overflow: hidden;
+    }
+    #cf-gate::before {
+      content: '';
+      position: absolute;
+      top: -60px; left: -60px;
+      width: 200px; height: 200px;
+      background: radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .gate-icon {
+      font-size: 36px;
+      margin-bottom: 12px;
+      display: block;
+    }
+    .gate-title {
+      font-size: 17px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .gate-sub {
+      font-size: 14px;
+      color: rgba(255,255,255,0.45);
+      margin-bottom: 22px;
+      line-height: 1.5;
+    }
+
+    .pw-row { display: flex; gap: 8px; }
+    #cf-input {
+      flex: 1;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 12px;
+      color: #fff;
+      font-size: 15px;
+      font-family: 'Inter', sans-serif;
+      padding: 12px 16px;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+    }
+    #cf-input::placeholder { color: rgba(255,255,255,0.25); }
+    #cf-input:focus {
+      border-color: rgba(139,92,246,0.6);
+      background: rgba(139,92,246,0.07);
+      box-shadow: 0 0 0 3px rgba(139,92,246,0.12);
+    }
+    #cf-input.error {
+      border-color: #f87171;
+      background: rgba(248,113,113,0.07);
+      box-shadow: 0 0 0 3px rgba(248,113,113,0.12);
+      animation: shake 0.35s ease;
+    }
+
+    #cf-btn {
+      background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%);
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 700;
+      font-family: 'Inter', sans-serif;
+      padding: 12px 22px;
+      cursor: pointer;
+      white-space: nowrap;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s;
+      box-shadow: 0 4px 20px rgba(109,40,217,0.4);
+    }
+    #cf-btn::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, transparent 60%);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    #cf-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(109,40,217,0.5); }
+    #cf-btn:hover::after { opacity: 1; }
+    #cf-btn:active { transform: translateY(0); }
+
+    #cf-error {
+      font-size: 13px;
+      color: #f87171;
+      margin-top: 10px;
+      display: none;
+      align-items: center;
+      gap: 6px;
+    }
+    #cf-error::before { content: '✕'; font-weight: 700; }
+
+    /* UNLOCKED CONTENT */
+    #cf-content {
+      display: none;
+      animation: fadeUp 0.4s ease forwards;
+    }
+
+    /* FOOTER */
+    .footer {
+      margin-top: 72px;
+      padding-top: 28px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      font-size: 12px;
+      color: rgba(255,255,255,0.25);
+      text-align: center;
+    }
+
+    /* ANIMATIONS */
+    @keyframes pulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(0.85); }
+    }
+
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      20% { transform: translateX(-7px); }
+      40% { transform: translateX(7px); }
+      60% { transform: translateX(-4px); }
+      80% { transform: translateX(4px); }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* RESPONSIVE */
+    @media (max-width: 600px) {
+      .wrap { padding: 48px 18px 60px; }
+      .pw-row { flex-direction: column; }
+      #cf-gate { padding: 24px 20px; }
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <h1>Strategy/Framework Guides</h1>
-    <p>I have put together a strategies that I have implemented and/or hashig out. Feel free to send your feedback or any clarifying questions to me. I really do appreciate your inpt!</p>
 
+    <!-- HERO -->
+    <div class="hero">
+      <div class="hero-eyebrow">Living Documents</div>
+      <h1>Frameworks Built<br>to Last Generations.</h1>
+      <p class="hero-sub">
+        These aren't just ideas — they're <strong>systems I'm actively building and refining</strong>. 
+        Each guide walks through the thinking, the structure, and the reasoning behind how I'm approaching wealth, legacy, and strategy.
+        Feedback and questions are always welcome.
+      </p>
+    </div>
+
+    <!-- PUBLIC GUIDES -->
+    <div class="section-label">Public Guides</div>
     <div class="grid">
-      <a class="card" href="./sunshine-trust.html">
-        <div class="title">☀️ The Trust Framework</div>
-        <div class="desc">Interactive framework guide (multi-step walkthrough).</div>
+
+      <a class="card card-1" href="./sunshine-trust.html">
+        <span class="card-icon">☀️</span>
+        <span class="card-tag tag-amber">Trust & Legacy</span>
+        <div class="card-title">The Trust Framework</div>
+        <div class="card-desc">A visual walkthrough of how The Sunshine Trust is structured — covering capital flow, governance, tiers, and the multi-generational vision behind it.</div>
+        <div class="card-arrow">Open guide <span>→</span></div>
       </a>
 
-      <a class="card" href="./bank-on-yourself.html">
-        <div class="title">🌳 Bank on Yourself Framework</div>
-        <div class="desc">Slide-style walkthrough of the strategy and trade-offs.</div>
+      <a class="card card-2" href="./bank-on-yourself.html">
+        <span class="card-icon">🌳</span>
+        <span class="card-tag tag-green">Wealth Strategy</span>
+        <div class="card-title">Bank on Yourself</div>
+        <div class="card-desc">A slide-by-slide breakdown of the Whole Life strategy I'm using as a private liquidity and compounding layer — what it is, how it works, and the real trade-offs.</div>
+        <div class="card-arrow">Open guide <span>→</span></div>
       </a>
+
     </div>
 
-    <div class="hint">
+    <div class="divider"></div>
+
+    <!-- CF CONTENT -->
+    <div class="cf-section">
+      <div class="cf-header">
+        <h2>CF Content</h2>
+        <span class="cf-badge" id="cf-lock-badge">🔒 Password Protected</span>
+      </div>
+
+      <div id="cf-gate">
+        <span class="gate-icon">🔐</span>
+        <div class="gate-title">Private Access Only</div>
+        <div class="gate-sub">This section contains personal financial frameworks and internal strategy guides. Enter the password to unlock.</div>
+        <div class="pw-row">
+          <input id="cf-input" type="password" placeholder="Enter password…" autocomplete="off" />
+          <button id="cf-btn" onclick="checkPassword()">Unlock →</button>
+        </div>
+        <div id="cf-error">Incorrect password — try again.</div>
+      </div>
+
+      <div id="cf-content">
+        <div class="grid">
+
+          <a class="card card-3" href="./sunshine-trust-guide.html">
+            <span class="card-icon">📋</span>
+            <span class="card-tag tag-purple">Governance Manual</span>
+            <div class="card-title">Sunshine Trust, Master Manual</div>
+            <div class="card-desc">The full interactive guide to Trust governance — tier mechanics, 100-point scoring, insurance requirements, Family Bank, TFGP, and trustee structure. Attorney-ready.</div>
+            <div class="card-arrow">Open guide <span>→</span></div>
+          </a>
+
+          <a class="card card-4" href="./family-position-guide.html">
+            <span class="card-icon">🌿</span>
+            <span class="card-tag tag-pink">Financial Blueprint</span>
+            <div class="card-title">The Family Position</div>
+            <div class="card-desc">A full breakdown of our current financial architecture — net worth snapshot, passive income trajectory, asset allocation philosophy, and the long arc toward work-optional living.</div>
+            <div class="card-arrow">Open guide <span>→</span></div>
+          </a>
+
+        </div>
+      </div>
     </div>
+
+    <div class="footer">Built for clarity. Refined over time.</div>
   </div>
+
+  <script>
+    function checkPassword() {
+      var input   = document.getElementById('cf-input');
+      var error   = document.getElementById('cf-error');
+      var gate    = document.getElementById('cf-gate');
+      var content = document.getElementById('cf-content');
+      var badge   = document.getElementById('cf-lock-badge');
+      var btn     = document.getElementById('cf-btn');
+
+      if (input.value.toLowerCase() === 'affluence') {
+        // Animate button before revealing
+        btn.textContent = '✓ Unlocked';
+        btn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+        btn.style.boxShadow = '0 4px 20px rgba(16,185,129,0.4)';
+
+        setTimeout(function() {
+          gate.style.display = 'none';
+          content.style.display = 'block';
+          badge.textContent = '🔓 Unlocked';
+          badge.classList.add('unlocked');
+        }, 420);
+
+      } else {
+        error.style.display = 'flex';
+        input.classList.remove('error');
+        void input.offsetWidth;
+        input.classList.add('error');
+        input.value = '';
+        input.focus();
+      }
+    }
+
+    document.getElementById('cf-input').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') checkPassword();
+      // Clear error state on typing
+      this.classList.remove('error');
+      document.getElementById('cf-error').style.display = 'none';
+    });
+
+    // Subtle tilt effect on cards
+    document.querySelectorAll('a.card').forEach(function(card) {
+      card.addEventListener('mousemove', function(e) {
+        var rect = card.getBoundingClientRect();
+        var x = (e.clientX - rect.left) / rect.width  - 0.5;
+        var y = (e.clientY - rect.top)  / rect.height - 0.5;
+        card.style.transform = 'translateY(-4px) scale(1.01) rotateX(' + (-y * 5) + 'deg) rotateY(' + (x * 5) + 'deg)';
+      });
+      card.addEventListener('mouseleave', function() {
+        card.style.transform = '';
+      });
+    });
+  </script>
 </body>
 </html>
