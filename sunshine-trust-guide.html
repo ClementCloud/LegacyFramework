@@ -1,0 +1,1435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Sunshine Trust, Master Manual</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=DM+Mono:wght@300;400&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --forest: #1a2e1a;
+  --deep: #0f1f0f;
+  --moss: #2d4a2d;
+  --sage: #4a6741;
+  --gold: #c9a84c;
+  --gold-light: #e8c97a;
+  --ivory: #faf6ee;
+  --cream: #f0e8d5;
+  --danger: #b85c38;
+  --safe: #4a8a5c;
+  --radius: 4px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Libre Baskerville', Georgia, serif;
+  background: var(--deep);
+  color: var(--ivory);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* PROGRESS BAR */
+#progress-bar {
+  position: fixed; top: 0; left: 0;
+  height: 3px; width: 0%;
+  background: linear-gradient(90deg, var(--gold), var(--gold-light));
+  z-index: 9999;
+  transition: width 0.15s ease;
+}
+
+/* SIDEBAR */
+#sidebar {
+  position: fixed;
+  left: 0; top: 0; bottom: 0;
+  width: 268px;
+  background: var(--forest);
+  border-right: 1px solid rgba(201,168,76,0.15);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  transform: translateX(0);
+  transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+  overflow-y: auto;
+}
+#sidebar.hidden { transform: translateX(-268px); }
+#sidebar::-webkit-scrollbar { width: 3px; }
+#sidebar::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.2); border-radius: 2px; }
+
+.sidebar-logo {
+  padding: 28px 24px 18px;
+  border-bottom: 1px solid rgba(201,168,76,0.15);
+  flex-shrink: 0;
+}
+.sidebar-logo h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--gold);
+  line-height: 1.3;
+  letter-spacing: 0.03em;
+}
+.sidebar-logo p {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.58rem;
+  color: rgba(201,168,76,0.45);
+  margin-top: 5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.sidebar-group {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.56rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(201,168,76,0.35);
+  padding: 14px 24px 5px;
+  flex-shrink: 0;
+}
+
+.nav-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 24px;
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  color: rgba(250,246,238,0.55);
+  font-family: 'DM Mono', monospace;
+  font-size: 0.66rem;
+  letter-spacing: 0.01em;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.nav-item:hover { background: rgba(201,168,76,0.08); color: var(--gold-light); }
+.nav-item.active { border-left-color: var(--gold); background: rgba(201,168,76,0.1); color: var(--gold-light); }
+
+.nav-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+.nav-item.active .nav-dot, .nav-item.visited .nav-dot { background: var(--gold); border-color: var(--gold); }
+
+/* TOGGLE */
+#toggle-btn {
+  position: fixed; top: 14px; left: 278px;
+  z-index: 200;
+  background: var(--forest);
+  border: 1px solid rgba(201,168,76,0.3);
+  color: var(--gold);
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px;
+  transition: left 0.35s cubic-bezier(0.4,0,0.2,1), background 0.2s;
+}
+#toggle-btn:hover { background: var(--moss); }
+#toggle-btn.collapsed { left: 14px; }
+
+/* MAIN */
+#main {
+  margin-left: 268px;
+  transition: margin-left 0.35s cubic-bezier(0.4,0,0.2,1);
+  min-height: 100vh;
+}
+#main.full { margin-left: 0; }
+
+/* SECTIONS */
+.section {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 80px 68px;
+  position: relative;
+  border-bottom: 1px solid rgba(201,168,76,0.07);
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.55s ease, transform 0.55s ease;
+}
+.section.visible { opacity: 1; transform: translateY(0); }
+.section:nth-child(odd) { background: var(--deep); }
+.section:nth-child(even) { background: var(--forest); }
+
+/* HERO */
+#s-hero {
+  background: linear-gradient(155deg, #080f08 0%, #111f11 50%, #0a1515 100%) !important;
+  text-align: center;
+  align-items: center;
+  padding: 110px 68px;
+  overflow: hidden;
+}
+#s-hero::before {
+  content: '';
+  position: absolute; inset: 0;
+  background:
+    radial-gradient(ellipse at 25% 35%, rgba(201,168,76,0.06) 0%, transparent 55%),
+    radial-gradient(ellipse at 75% 65%, rgba(45,74,45,0.25) 0%, transparent 55%);
+}
+
+.hero-eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(201,168,76,0.5);
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.hero-scripture {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 1.1rem;
+  color: var(--gold);
+  opacity: 0.85;
+  max-width: 520px;
+  line-height: 1.75;
+  margin: 0 auto 8px;
+  position: relative;
+}
+.hero-scripture-ref {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  color: rgba(201,168,76,0.4);
+  text-transform: uppercase;
+  margin-bottom: 48px;
+  position: relative;
+}
+
+.hero-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(2.6rem, 5vw, 4.4rem);
+  font-weight: 300;
+  line-height: 1.08;
+  letter-spacing: -0.02em;
+  color: var(--ivory);
+  position: relative;
+  margin-bottom: 12px;
+}
+.hero-title span { color: var(--gold); }
+
+.hero-sub {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 1.1rem;
+  color: rgba(250,246,238,0.45);
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.hero-tag {
+  display: inline-block;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold);
+  border: 1px solid rgba(201,168,76,0.3);
+  padding: 5px 14px;
+  border-radius: 20px;
+  margin-bottom: 52px;
+  position: relative;
+}
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  max-width: 660px;
+  margin: 0 auto;
+  position: relative;
+}
+.hero-btn {
+  background: rgba(201,168,76,0.07);
+  border: 1px solid rgba(201,168,76,0.2);
+  color: var(--gold-light);
+  padding: 13px 14px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.62rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  transition: all 0.2s;
+  text-align: left;
+  line-height: 1.4;
+}
+.hero-btn:hover {
+  background: rgba(201,168,76,0.16);
+  border-color: var(--gold);
+  transform: translateY(-2px);
+}
+.hero-btn span {
+  display: block;
+  font-family: 'Libre Baskerville', serif;
+  font-size: 0.72rem;
+  color: rgba(250,246,238,0.45);
+  font-style: italic;
+  text-transform: none;
+  letter-spacing: 0;
+  margin-top: 3px;
+}
+
+.scroll-cue {
+  position: absolute;
+  bottom: 28px; left: 50%;
+  transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  cursor: pointer;
+  opacity: 0.35;
+  animation: bob 2.2s ease-in-out infinite;
+}
+.scroll-cue span { font-family: 'DM Mono', monospace; font-size: 0.55rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--gold); }
+@keyframes bob { 0%,100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(7px); } }
+
+/* PAGE HEADER */
+.pg-header { display: flex; align-items: flex-start; gap: 18px; margin-bottom: 42px; }
+.pg-icon { font-size: 1.9rem; line-height: 1; flex-shrink: 0; margin-top: 3px; }
+.pg-meta { flex: 1; }
+.pg-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+  opacity: 0.55;
+  margin-bottom: 5px;
+}
+.pg-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1.9rem, 3.2vw, 2.8rem);
+  font-weight: 300;
+  line-height: 1.15;
+  color: var(--ivory);
+}
+.pg-title em { color: var(--gold); font-style: normal; }
+
+.gold-rule { width: 56px; height: 1px; background: var(--gold); opacity: 0.35; margin: 18px 0 30px; }
+
+/* CONTENT */
+.content { max-width: 700px; }
+.content p {
+  font-size: 1rem;
+  line-height: 1.85;
+  color: rgba(250,246,238,0.78);
+  margin-bottom: 18px;
+}
+.content p strong { color: var(--gold-light); font-weight: 700; }
+
+/* PULL QUOTE */
+.pull-quote {
+  border-left: 2px solid var(--gold);
+  padding: 14px 22px;
+  margin: 28px 0;
+  background: rgba(201,168,76,0.05);
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+.pull-quote p {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 1.25rem;
+  line-height: 1.6;
+  color: var(--gold-light) !important;
+  margin: 0 !important;
+}
+
+/* NOTICE BOXES */
+.notice {
+  background: rgba(201,168,76,0.07);
+  border: 1px solid rgba(201,168,76,0.2);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin: 20px 0;
+  font-size: 0.9rem;
+  color: rgba(250,246,238,0.7);
+  line-height: 1.6;
+  font-style: italic;
+}
+.notice.warn { background: rgba(184,92,56,0.08); border-color: rgba(184,92,56,0.3); color: rgba(255,200,180,0.75); }
+.notice.safe { background: rgba(74,138,92,0.08); border-color: rgba(74,138,92,0.3); color: rgba(180,240,200,0.75); }
+
+/* CARDS GRID */
+.card-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; margin-top: 28px; }
+.card-grid.three { grid-template-columns: repeat(3, 1fr); }
+
+.card {
+  background: rgba(201,168,76,0.05);
+  border: 1px solid rgba(201,168,76,0.13);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  transition: all 0.22s;
+}
+.card:hover { background: rgba(201,168,76,0.1); border-color: rgba(201,168,76,0.3); transform: translateY(-2px); }
+.card .c-icon { font-size: 1.35rem; margin-bottom: 9px; }
+.card h4 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.05rem;
+  color: var(--gold-light);
+  margin-bottom: 5px;
+}
+.card p { font-size: 0.83rem; color: rgba(250,246,238,0.58); line-height: 1.55; margin: 0 !important; }
+
+/* ALLOCATION FLOW */
+.alloc-flow { margin-top: 28px; }
+.alloc-header {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(201,168,76,0.45);
+  margin-bottom: 14px;
+}
+
+.alloc-row {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 12px;
+}
+.alloc-pct {
+  font-family: 'DM Mono', monospace;
+  font-size: 1.4rem;
+  color: var(--gold);
+  width: 56px;
+  flex-shrink: 0;
+  text-align: right;
+}
+.alloc-track {
+  flex: 1;
+  background: rgba(201,168,76,0.08);
+  border-radius: 2px;
+  height: 32px;
+  overflow: hidden;
+}
+.alloc-fill {
+  height: 100%;
+  width: 0%;
+  transition: width 1.2s cubic-bezier(0.4,0,0.2,1);
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.65rem;
+  color: var(--ivory);
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+/* TIER CARDS */
+.tier-grid { display: flex; flex-direction: column; gap: 10px; margin-top: 28px; }
+.tier-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 18px;
+  background: rgba(201,168,76,0.04);
+  border: 1px solid rgba(201,168,76,0.12);
+  border-radius: var(--radius);
+  transition: all 0.2s;
+  cursor: default;
+}
+.tier-card:hover { background: rgba(201,168,76,0.1); border-color: rgba(201,168,76,0.3); transform: translateX(5px); }
+.tier-badge {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 20px;
+  flex-shrink: 0;
+  width: 110px;
+  text-align: center;
+}
+.tier-pct {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.6rem;
+  color: var(--gold);
+  width: 56px;
+  text-align: right;
+  flex-shrink: 0;
+}
+.tier-info { flex: 1; }
+.tier-name { font-size: 0.95rem; color: var(--ivory); margin-bottom: 2px; }
+.tier-desc { font-size: 0.78rem; color: rgba(250,246,238,0.5); line-height: 1.4; }
+
+.t5 { background: rgba(201,168,76,0.15) !important; border-color: rgba(201,168,76,0.4) !important; }
+.t5 .tier-badge { background: rgba(201,168,76,0.25); color: var(--gold); border: 1px solid rgba(201,168,76,0.4); }
+.t4 .tier-badge { background: rgba(180,155,80,0.15); color: #d4b86a; border: 1px solid rgba(180,155,80,0.3); }
+.t3 .tier-badge { background: rgba(120,140,80,0.15); color: #a8bb78; border: 1px solid rgba(120,140,80,0.3); }
+.t2 .tier-badge { background: rgba(80,120,100,0.15); color: #7aab96; border: 1px solid rgba(80,120,100,0.3); }
+.t1 .tier-badge { background: rgba(60,100,80,0.12); color: #6a9b8a; border: 1px solid rgba(60,100,80,0.25); }
+
+/* SCORE METER */
+.score-grid { display: flex; flex-direction: column; gap: 14px; margin-top: 28px; }
+.score-row { }
+.score-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 6px; }
+.score-label { font-size: 0.88rem; color: rgba(250,246,238,0.75); }
+.score-pts { font-family: 'DM Mono', monospace; font-size: 0.7rem; color: var(--gold); }
+.score-track { height: 22px; background: rgba(201,168,76,0.08); border-radius: 2px; overflow: hidden; }
+.score-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 2px;
+  transition: width 1.3s cubic-bezier(0.4,0,0.2,1);
+  display: flex; align-items: center; padding-right: 8px;
+  justify-content: flex-end;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  color: var(--ivory);
+  opacity: 0.9;
+}
+.score-sub { font-size: 0.76rem; color: rgba(250,246,238,0.42); margin-top: 4px; line-height: 1.4; }
+
+/* TABLE */
+.data-table { width: 100%; border-collapse: collapse; margin-top: 24px; font-size: 0.88rem; }
+.data-table thead tr { border-bottom: 1px solid rgba(201,168,76,0.3); }
+.data-table th {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.58rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(201,168,76,0.55);
+  text-align: left;
+  padding: 8px 12px;
+  font-weight: 400;
+}
+.data-table td { padding: 11px 12px; color: rgba(250,246,238,0.76); border-bottom: 1px solid rgba(201,168,76,0.07); }
+.data-table tr:hover td { background: rgba(201,168,76,0.04); }
+.data-table .mono { font-family: 'DM Mono', monospace; color: var(--gold-light); font-size: 0.82rem; }
+.data-table .tag {
+  display: inline-block;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.55rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 2px;
+}
+.tag-u { background: rgba(184,92,56,0.15); color: #e0956a; border: 1px solid rgba(184,92,56,0.3); }
+.tag-m { background: rgba(74,138,92,0.15); color: #7ac896; border: 1px solid rgba(74,138,92,0.3); }
+
+/* PROCESS STEPS */
+.steps { display: flex; flex-direction: column; gap: 0; margin-top: 28px; }
+.step {
+  display: flex; gap: 18px;
+  padding-bottom: 24px;
+  border-left: 1px solid rgba(201,168,76,0.2);
+  padding-left: 20px;
+  position: relative;
+  margin-left: 12px;
+}
+.step:last-child { border-color: transparent; }
+.step-num {
+  position: absolute;
+  left: -12px; top: 0;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--forest);
+  border: 1px solid var(--gold);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.58rem;
+  color: var(--gold);
+  flex-shrink: 0;
+}
+.step-body { padding-top: 2px; flex: 1; }
+.step-title { font-family: 'Cormorant Garamond', serif; font-size: 1.05rem; color: var(--gold-light); margin-bottom: 4px; }
+.step-desc { font-size: 0.84rem; color: rgba(250,246,238,0.6); line-height: 1.55; }
+
+/* AGE TRACK */
+.age-track { display: flex; flex-direction: column; gap: 12px; margin-top: 28px; }
+.age-row {
+  display: flex; align-items: stretch; gap: 0;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid rgba(201,168,76,0.12);
+}
+.age-label {
+  background: rgba(201,168,76,0.1);
+  padding: 14px 18px;
+  font-family: 'DM Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--gold);
+  display: flex; align-items: center;
+  width: 140px;
+  flex-shrink: 0;
+  border-right: 1px solid rgba(201,168,76,0.12);
+}
+.age-content {
+  padding: 14px 18px;
+  flex: 1;
+}
+.age-track-name { font-size: 0.88rem; color: var(--ivory); margin-bottom: 3px; }
+.age-track-desc { font-size: 0.78rem; color: rgba(250,246,238,0.5); line-height: 1.4; }
+
+/* INSURANCE MULTIPLIER */
+.mult-rows { display: flex; flex-direction: column; gap: 8px; margin-top: 24px; }
+.mult-row {
+  display: flex; align-items: center; gap: 14px;
+  background: rgba(201,168,76,0.04);
+  border: 1px solid rgba(201,168,76,0.1);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  transition: all 0.2s;
+}
+.mult-row:hover { background: rgba(201,168,76,0.09); border-color: rgba(201,168,76,0.25); }
+.mult-level { font-size: 0.85rem; color: rgba(250,246,238,0.75); flex: 1; }
+.mult-boost {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.8rem;
+  color: var(--gold-light);
+  flex-shrink: 0;
+  background: rgba(201,168,76,0.1);
+  border: 1px solid rgba(201,168,76,0.2);
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+/* VALUES LIST */
+.values-list { display: flex; flex-direction: column; gap: 12px; margin-top: 28px; }
+.value-item {
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 14px 18px;
+  background: rgba(201,168,76,0.04);
+  border: 1px solid rgba(201,168,76,0.1);
+  border-radius: var(--radius);
+  transition: all 0.2s;
+}
+.value-item:hover { background: rgba(201,168,76,0.09); border-color: rgba(201,168,76,0.25); transform: translateX(4px); }
+.value-icon { font-size: 1.1rem; flex-shrink: 0; margin-top: 1px; }
+.value-text { font-size: 0.88rem; color: rgba(250,246,238,0.75); line-height: 1.55; }
+.value-text strong { color: var(--gold-light); }
+
+/* QUICK REF */
+.qr-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-top: 28px; }
+.qr-card {
+  background: rgba(201,168,76,0.05);
+  border: 1px solid rgba(201,168,76,0.13);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+}
+.qr-card h4 {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--gold);
+  opacity: 0.7;
+  margin-bottom: 10px;
+}
+.qr-card .qr-items { display: flex; flex-direction: column; gap: 5px; }
+.qr-item {
+  font-size: 0.82rem;
+  color: rgba(250,246,238,0.65);
+  display: flex; align-items: baseline; gap: 8px;
+  line-height: 1.45;
+}
+.qr-item::before { content: '·'; color: var(--gold); flex-shrink: 0; font-size: 0.9rem; }
+
+/* CLOSING */
+#s-close {
+  background: linear-gradient(155deg, #060e06 0%, #0a130a 100%) !important;
+  text-align: center;
+  align-items: center;
+}
+.close-scripture {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: clamp(1.2rem, 2.2vw, 1.65rem);
+  color: var(--gold-light);
+  max-width: 560px;
+  line-height: 1.75;
+  margin-bottom: 10px;
+  opacity: 0.9;
+}
+.close-ref {
+  font-family: 'DM Mono', monospace;
+  font-size: 0.6rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: rgba(201,168,76,0.35);
+  margin-bottom: 52px;
+}
+.close-head {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1.9rem, 3.5vw, 3rem);
+  font-weight: 300;
+  color: var(--ivory);
+  line-height: 1.2;
+  margin-bottom: 18px;
+}
+.close-sub {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 1.05rem;
+  color: rgba(250,246,238,0.42);
+  max-width: 480px;
+  line-height: 1.75;
+  margin: 0 auto;
+}
+.divider {
+  display: flex; align-items: center; gap: 16px;
+  margin: 36px auto;
+  max-width: 260px;
+}
+.divider span { flex: 1; height: 1px; background: rgba(201,168,76,0.25); }
+.divider-icon { color: var(--gold); font-size: 0.9rem; }
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  #sidebar { transform: translateX(-268px); }
+  #sidebar.open { transform: translateX(0); }
+  #toggle-btn { left: 14px; }
+  #toggle-btn.open-mobile { left: 278px; }
+  #main { margin-left: 0; }
+  .section { padding: 70px 24px; }
+  #s-hero { padding: 90px 24px; }
+  .card-grid, .card-grid.three, .qr-grid { grid-template-columns: 1fr; }
+  .hero-grid { grid-template-columns: repeat(2, 1fr); }
+  .age-label { width: 100px; font-size: 0.62rem; padding: 12px 10px; }
+}
+</style>
+</head>
+<body>
+
+<div id="progress-bar"></div>
+
+<!-- SIDEBAR -->
+<nav id="sidebar">
+  <div class="sidebar-logo">
+    <h2>The Sunshine Trust</h2>
+    <p>Master Governance Manual</p>
+  </div>
+
+  <div class="sidebar-group">Foundation</div>
+  <div class="nav-item" onclick="nav('s-hero')"><span class="nav-dot"></span>Opening</div>
+  <div class="nav-item" onclick="nav('s-purpose')"><span class="nav-dot"></span>Purpose & Principles</div>
+  <div class="nav-item" onclick="nav('s-alloc')"><span class="nav-dot"></span>15 / 35 / 50 Allocation</div>
+  <div class="nav-item" onclick="nav('s-scaling')"><span class="nav-dot"></span>Scaling Policy</div>
+
+  <div class="sidebar-group">Governance</div>
+  <div class="nav-item" onclick="nav('s-gov')"><span class="nav-dot"></span>Trustee Structure</div>
+  <div class="nav-item" onclick="nav('s-eligibility')"><span class="nav-dot"></span>Eligibility & Age Tracks</div>
+  <div class="nav-item" onclick="nav('s-tiers')"><span class="nav-dot"></span>Tier System</div>
+  <div class="nav-item" onclick="nav('s-scoring')"><span class="nav-dot"></span>100-Point Scoring</div>
+
+  <div class="sidebar-group">Programs</div>
+  <div class="nav-item" onclick="nav('s-insurance')"><span class="nav-dot"></span>Insurance Requirements</div>
+  <div class="nav-item" onclick="nav('s-multiplier')"><span class="nav-dot"></span>Multiplier Program</div>
+  <div class="nav-item" onclick="nav('s-summit')"><span class="nav-dot"></span>Family Summit</div>
+  <div class="nav-item" onclick="nav('s-tfgp')"><span class="nav-dot"></span>Formation Grants (TFGP)</div>
+  <div class="nav-item" onclick="nav('s-bank')"><span class="nav-dot"></span>Family Bank</div>
+
+  <div class="sidebar-group">Culture</div>
+  <div class="nav-item" onclick="nav('s-enforcement')"><span class="nav-dot"></span>Enforcement & Disputes</div>
+  <div class="nav-item" onclick="nav('s-culture')"><span class="nav-dot"></span>Values & Philosophy</div>
+  <div class="nav-item" onclick="nav('s-quickref')"><span class="nav-dot"></span>Quick Reference</div>
+  <div class="nav-item" onclick="nav('s-close')"><span class="nav-dot"></span>Closing</div>
+</nav>
+
+<!-- TOGGLE BUTTON -->
+<button id="toggle-btn" onclick="toggleSidebar()">✕</button>
+
+<!-- MAIN -->
+<main id="main">
+
+<!-- HERO -->
+<section class="section" id="s-hero">
+  <div class="hero-eyebrow">Master Governance, Capital Allocation & Operations Manual</div>
+  <div class="hero-scripture">"A good man leaves an inheritance to his children's children, and the wealth of the sinner is stored up for the righteous."</div>
+  <div class="hero-scripture-ref">Proverbs 13:22</div>
+  <h1 class="hero-title">The <span>Sunshine</span> Trust</h1>
+  <p class="hero-sub">A perpetual family capital system, built for every generation to come.</p>
+  <div class="hero-tag">Attorney-Ready Draft, March 2026</div>
+  <div class="hero-grid">
+    <button class="hero-btn" onclick="nav('s-purpose')">🌿 Purpose<span>Core principles & definitions</span></button>
+    <button class="hero-btn" onclick="nav('s-alloc')">📊 Allocation<span>The 15 / 35 / 50 model</span></button>
+    <button class="hero-btn" onclick="nav('s-tiers')">🏛️ Tiers<span>Pillar through Foundation</span></button>
+    <button class="hero-btn" onclick="nav('s-scoring')">📋 Scoring<span>100-point evaluation system</span></button>
+    <button class="hero-btn" onclick="nav('s-bank')">🏦 Family Bank<span>Internal lending program</span></button>
+    <button class="hero-btn" onclick="nav('s-culture')">🌱 Culture<span>Values & generational covenant</span></button>
+  </div>
+  <div class="scroll-cue" onclick="nav('s-purpose')">
+    <span>Scroll to begin</span>
+    <div style="color:var(--gold)">↓</div>
+  </div>
+</section>
+
+<!-- PURPOSE -->
+<section class="section" id="s-purpose">
+  <div class="pg-header">
+    <div class="pg-icon">🌿</div>
+    <div class="pg-meta">
+      <div class="pg-label">Section I, Purpose & Definitions</div>
+      <h2 class="pg-title">Purpose, Principles <em>&amp; Core Definitions</em></h2>
+    </div>
+  </div>
+  <div class="gold-rule"></div>
+  <div class="content">
+    <p>The Sunshine Trust is a perpetual family capital system designed to preserve principal across generations while allocating only annual net yield for governance, compounding, and merit-based family benefits. It is not a vehicle for wealth consumption. It is a vehicle for wealth perpetuation and cultural infrastructure.</p>
+
+    <div class="pull-quote"><p>"Principal is sacred and protected. We only distribute the yield it generates. The Trust grows forever while providing annual benefits to family members."</p></div>
+
+    <div class="values-list">
+      <div class="value-item"><div class="value-icon">🛡️</div><div class="value-text"><strong>Capital Preservation First.</strong> Corpus is sacred and protected. It may not be invaded for tier payouts, grants, insurance premiums, or Family Bank lending under any circumstance.</div></div>
+      <div class="value-item"><div class="value-icon">🏆</div><div class="value-text"><strong>Merit-Based Participation.</strong> Distribution eligibility is earned annually through documented financial behavior, family contribution, and compliance. It can be lost.</div></div>
+      <div class="value-item"><div class="value-icon">🌱</div><div class="value-text"><strong>Youth Protection.</strong> Ages 16-20 may qualify for tier placement, but all distributions are restricted to investment, education, and insurance channels. No cash payments.</div></div>
+      <div class="value-item"><div class="value-icon">🤝</div><div class="value-text"><strong>Family Unity Above All.</strong> Tier placements are strictly confidential. Anti-shaming rules and structured dispute resolution prevent family-destroying dynamics.</div></div>
+      <div class="value-item"><div class="value-icon">⚖️</div><div class="value-text"><strong>Non-Dilution is Mandatory.</strong> No program expands beneficiary rights beyond the governing instrument. Program participation does not create beneficiary status unless already defined.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ALLOCATION -->
+<section class="section" id="s-alloc">
+  <div class="pg-header">
+    <div class="pg-icon">📊</div>
+    <div class="pg-meta">
+      <div class="pg-label">Section II & III, System Architecture</div>
+      <h2 class="pg-title">The <em>15 / 35 / 50</em> Allocation Model</h2>
+    </div>
+  </div>
+  <div class="gold-rule"></div>
+  <div class="content" style="max-width:760px">
+    <p>Every dollar generated by the corpus flows through a defined allocation model before reaching any beneficiary or program. This structure is mandatory and may only be changed by formal amendment.</p>
+
+    <div class="alloc-flow">
+      <div class="alloc-header">Annual Net Yield Distribution (Example: $80K yield on $2M corpus at 4%)</div>
+
+      <div class="alloc-row">
+        <div class="alloc-pct">15%</div>
+        <div class="alloc-track">
+          <div class="alloc-fill" data-pct="15" style="background: linear-gradient(90deg,#3a4a2a,#7a8a5a)">Administration & Governance, $12,000</div>
+        </div>
+      </div>
+      <div style="margin-left:70px; margin-bottom:14px; font-size:0.78rem; color:rgba(250,246,238,0.45);">Trustee comp (2% of yield cap), CPA/tax, legal review, Family Summit, audits</div>
+
+      <div class="alloc-row">
+        <div class="alloc-pct">35%</div>
+        <div class="alloc-track">
+          <div class="alloc-fill" data-pct="35" style="background: linear-gradient(90deg,#2d5a3a,#5a9a6a)">Growth / Retained Earnings, $28,000</div>
+        </div>
+      </div>
+      <div style="margin-left:70px; margin-bottom:14px; font-size:0.78rem; color:rgba(250,246,238,0.45);">Corpus reinvestment, insurance reserve buffer, TFGP grants, Family Bank capital</div>
+
+      <div class="alloc-row">
+        <div class="alloc-pct">50%</div>
+        <div class="alloc-track">
+          <div class="alloc-fill" data-pct="50" style="background: linear-gradient(90deg,#3a4a1a,#c9a84c)">Tier Distribution Pool, $40,000</div>
+        </div>
+      </div>
+      <div style="margin-left:70px; font-size:0.78rem; color:rgba(250,246,238,0.45);">Tier-based family distributions, insurance premium withholding. Unused amounts revert to Growth.</div>
+    </div>
+
+    <div class="notice warn" style="margin-top:28px">No bucket may be raided to supplement another bucket, except where explicitly permitted (unused Tier Pool reverts to Growth). No corpus invasion is permitted under any circumstances.</div>
+  </div>
+</section>
+
+<!-- SCALING -->
+<section class="section" id="s-scaling">
+  <div class="pg-header">
+    <div class="pg-icon">📉</div>
+    <div class="pg-meta">
+      <div class="pg-label">Section IV, Scaling Policy</div>
+      <h2 class="pg-title">Administration <em>Scaling Policy</em></h2>
+    </div>
+  </div>
+  <div class="gold-rule"></div>
+  <div class="content">
+    <p>As corpus grows and operations mature, the Administration percentage scales downward. Scaling rewards growth: as the Trust grows larger, more resources flow to reinvestment, not operations. Reduced admin percentages redirect savings to Growth/Retained only.</p>
+
+    <table class="data-table">
+      <thead><tr><th>Corpus Level</th><th>Admin Target</th><th>Notes</th></tr></thead>
+      <tbody>
+        <tr><td>Below $3M</td><td class="mono">15%</td><td>Default administration level</td></tr>
+        <tr><td>$3M, $6M</td><td class="mono">13%</td><td>Efficiency gains expected. Maintain audit/legal buffers</td></tr>
+        <tr><td>$6M, $10M</td><td class="mono">11-12%</td><td>Range determined annually based on operational complexity</td></tr>
+        <tr><td>$10M and above</td><td class="mono">10%</td><td>Mature operations. Emphasis on automation and standardized reviews</td></tr>
+      </tbody>
+    </table>
+
+    <div class="notice" style="margin-top:20px">Scaling adjustments do not increase the Tier Pool above 50% absent a formal amendment. Reduced Admin percentages redirect savings to Growth/Retained only.</div>
+  </div>
+</section>
+
+<!-- GOVERNANCE -->
+<section class="section" id="s-gov">
+  <div class="pg-header">
+    <div class="pg-icon">⚖️</div>
+    <div class="pg-meta">
+      <div class="pg-label">Section V, Governance</div>
+      <h2 class="pg-title">Trustee Structure <em>&amp; Decision Rights</em></h2>
+    </div>
+  </div>
+  <div class="gold-rule"></div>
+  <div class="content" style="max-width:760px">
+    <p>The Trust is governed by a three-person Board: one Independent Trustee (non-family professional) and two Family Trustees with staggered terms. The Independent Trustee serves as the structural safeguard against corpus raids, inconsistent rule application, and family-interest conflicts. Trustee compensation is capped at 2% of annual yield, paid from Administration only.</p>
+
+    <div class="card-grid" style="margin-top:28px">
+      <div class="card">
+        <div class="c-icon">🗳️</div>
+        <h4>Unanimous Vote Required</h4>
+        <p>Allocation % changes, tier rule changes, Family Bank loans above 5% corpus, loan forgiveness, and any action that could impair corpus integrity.</p>
+      </div>
+      <div class="card">
+        <div class="c-icon">✅</div>
+        <h4>Majority Vote (2 of 3)</h4>
+        <p>Standard Family Bank loans within limits, routine summit budget approvals, vendor selection, and tier placement confirmations after scoring committee review.</p>
+      </div>
+    </div>
+
+    <div class="notice" style="margin-top:20px">All decisions require written minutes stored in the Trust governance repository. Verbal decisions carry no weight and must be ratified in writing within 15 days.</div>
+
+    <div style="margin-top:24px">
+      <div class="alloc-header">Annual Operating Cycle</div>
+      <div class="steps">
+        <div class="step"><div class="step-num">Q1</div><div class="step-body"><div class="step-title">Close Books & Allocate</div><div class="step-desc">Close prior-year books, calculate net yield (Y), apply the 15/35/50 split, set annual caps and committee calendar.</div></div></div>
+        <div class="step"><div class="step-num">Q2</div><div class="step-body"><div class="step-title">Score & Place Members</div><div class="step-desc">Collect documentation packets, conduct scoring, preliminary tier placements, publish confidential tier decisions to each member.</div></div></div>
+        <div class="step"><div class="step-num">Q3</div><div class="step-body"><div class="step-title">Execute Distributions</div><div class="step-desc">Execute Tier distributions and Family Bank decisions. Withhold and pay approved insurance premiums.</div></div></div>
+        <div class="step"><div class="step-num">Q4</div><div class="step-body"><div class="step-title">Family Summit & Review</div><div class="step-desc">Hold the Family Summit and annual governance review. Capture improvement opportunities for the next-year cycle.</div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ELIGIBILITY -->
+<section class="section" id="s-eligibility">
+  <div class="pg-header">
+    <div class="pg-icon">👨‍👩‍👧‍👦</div>
+    <div class="pg-meta">
+      <div class="pg-label">Section VI, Eligibility</div>
+      <h2 class="pg-title">Eligibility, Active Status <em>&amp; Youth Rules</em></h2>
+    </div>
+  </div>
+  <div class="gold-rule"></div>
+  <div class="content" style="max-width:760px">
+    <div class="age-track">
+      <div class="age-row">
+        <div class="age-label">Ages 0, 15</div>
+        <div class="age-content">
+          <div class="age-track-name">Development Track</div>
+          <div class="age-track-desc">No tier distributions. Eligible for financial literacy programming, mentorship, and family cultural activities only.</div>
+        </div>
+      </div>
+      <div class="age-row">
+        <div class="age-label">Ages 16, 20</div>
+        <div class="age-content">
+          <div class="age-track-name">Restricted Distribution Track</div>
+          <div class="age-track-desc">Tier-eligible, but distributions restricted to: Investment accounts (Roth IRA, brokerage, 529), education expenses, and insurance coverage. No cash, no vehicles, no travel, no consumer goods.</div>
+        </div>
+      </div>
+      <div class="age-row" style="border-color: rgba(201,168,76,0.3);">
+        <div class="age-label" style="background: rgba(201,168,76,0.12); color: var(--gold-light);">Ages 21+</div>
+        <div class="age-content">
+          <div class="age-track-name" style="color: var(--gold-light);">Full Participation</div>
+          <div class="age-track-desc">Direct distributions allowed, subject to per-person caps and annual compliance requirements. All prior restrictions removed.</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:28px">
+      <div class="alloc-header">Annual Active Status Requirements (All Members)</div>
+      <div class="card-grid">
+        <div class="card"><div class="c-icon">📄</div><h4>Documentation Packet</h4><p>Submit the annual documentation packet by the stated deadline, typically 30 days before evaluation. Missed deadline = automatic tier suspension for the full cycle. No retroactive reinstatement.</p></div>
+        <div class="card"><div class="c-icon">🏔️</div><h4>Family Summit Attendance</h4><p>Attend the Family Summit in person, or submit an approved written alternative. Summit attendance earns 5 points toward tier scoring.</p></div>
+        <div class="card" style="grid-column: span 2"><div class="c-icon">✍️</div><h4>Compliance Affidavit</h4><p>Sign the annual compliance and integrity affidavit. This certifies accuracy of all submitted documentation and affirms adherence to Trust policies.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TIERS -->
+<section class="section" id="s-tiers">
+  <div class="pg-header">
+    <div class="pg-icon">🏛️</div>
+    <div class="pg-meta">
+      <div class="pg-label">Section VII, Tier System</div>
+      <h2 class="pg-title">Tier Structure <em>&amp; Distribution Mechanics</em></h2>
+    </div>
+  </div>
+  <div class="gold-rule"></div>
+  <div class="content" style="max-width:760px">
+    <p>The tier system creates a meritocratic, confidential structure for distributing the 50% Tier Pool among eligible beneficiaries. Higher tier means a larger share of the annual pool. Tier placement is reviewed based on documented performance, not self-reporting alone.</p>
+
+    <div class="tier-grid">
+      <div class="tier-card t5">
+        <div class="tier-badge" style="background:rgba(201,168,76,0.25);color:var(--gold);border:1px solid rgba(201,168,76,0.5)">Tier 5, PILLAR</div>
+        <div class="tier-info"><div class="tier-name">Maximum Tier, Exemplary Stewardship</div><div class="tier-desc">Exemplary stewardship across all pillars. Highest contribution to corpus, family, and culture.</div></div>
+        <div class="tier-pct">35%</div>
+      </div>
+      <div class="tier-card t4">
+        <div class="tier-badge">Tier 4, ARCHITECT</div>
+        <div class="tier-info"><div class="tier-name">High Performance</div><div class="tier-desc">Strong financial behavior and meaningful family contribution across most categories.</div></div>
+        <div class="tier-pct">25%</div>
+      </div>
+      <div class="tier-card t3">
+        <div class="tier-badge">Tier 3, STEWARD</div>
+        <div class="tier-info"><div class="tier-name">Solid Engagement</div><div class="tier-desc">Meets most criteria consistently. Reliable participant in Trust programs and culture.</div></div>
+        <div class="tier-pct">20%</div>
+      </div>
+      <div class="tier-card t2">
+        <div class="tier-badge">Tier 2, BUILDER</div>
+        <div class="tier-info"><div class="tier-name">Growing</div><div class="tier-desc">Demonstrating meaningful progress in wealth-building habits. On an upward trajectory.</div></div>
+        <div class="tier-pct">15%</div>
+      </div>
+      <div class="tier-card t1">
+        <div class="tier-badge">Tier 1, FOUNDATION</div>
+        <div class="tier-info"><div class="tier-name">Entry Level</div><div class="tier-desc">Meets baseline eligibility requirements. Building toward higher-tier qualification.</div></div>
+        <div class="tier-pct">5%</div>
+      </div>
+    </div>
+
+    <div class="notice warn" style="margin-top:24px">Per-person cap: each distribution is the lesser of (a) the member's tier pool share, (b) 2% of corpus (absolute ceiling), or (c) the trustee-set annual cap. All tier placements and scores are strictly confidential. Public comparisons are prohibited.</div>
+  </div>
+</section>
+
+<!-- SCORING -->
+<section class="section" id="s-scoring">
+  <div class="pg-header">
+    <div class="pg-icon">📋</div>
+    <div class="pg-meta">
+      <div class="pg-label">Section VIII, Evaluation</div>
+      <h2 class="pg-title">The <em>100-Point</em> Scoring Framework</h2>
+    </div>
+  </div>
+  <div class="gold-rule"></div>
+  <div class="content" style="max-width:760px">
+    <p>Members are evaluated annually across four categories to determine tier placement. All criteria are measurable and must be documented. A minimum score of 50 points is required to qualify for any tier.</p>
+
+    <div class="score-grid">
+      <div class="score-row">
+        <div class="score-top"><div class="score-label">1. Financial Stability</div><div class="score-pts">40 pts max</div></div>
+        <div class="score-track"><div class="score-fill" data-pct="40" style="background:linear-gradient(90deg,#2d4a2d,#c9a84c)">40 pts</div></div>
+        <div class="score-sub">Verified income (12+ months), no high-interest debt above $1K at 15%+ APR, 3-month emergency fund, positive and growing net worth. Must meet 2 of 3 baseline criteria to qualify.</div>
+      </div>
+      <div class="score-row">
+        <div class="score-top"><div class="score-label">2. Wealth Building</div><div class="score-pts">25 pts max</div></div>
+        <div class="score-track"><div class="score-fill" data-pct="25" style="background:linear-gradient(90deg,#2d4a2d,#a08030)">25 pts</div></div>
+        <div class="score-sub">Saves 10%+ consistently, invests in at least 6 of the last 12 months, year-over-year net worth growth, appropriate insurance coverage (5x income if dependents).</div>
+      </div>
+      <div class="score-row">
+        <div class="score-top"><div class="score-label">3. Family Contribution</div><div class="score-pts">20 pts max</div></div>
+        <div class="score-track"><div class="score-fill" data-pct="20" style="background:linear-gradient(90deg,#2d4a2d,#7a9a5a)">20 pts</div></div>
+        <div class="score-sub">Summit attendance (5 pts), committee service with 75% attendance (5 pts), Trust-approved venture investment of $2,500+ (5 pts), hosting/teaching (5 pts), mentorship documented (3 pts), leading operations (5 pts).</div>
+      </div>
+      <div class="score-row">
+        <div class="score-top"><div class="score-label">4. Character & Compliance</div><div class="score-pts">15 pts max</div></div>
+        <div class="score-track"><div class="score-fill" data-pct="15" style="background:linear-gradient(90deg,#2d3a2d,#5a7a5a)">15 pts</div></div>
+        <div class="score-sub">Annual reporting submitted by deadline (5 pts), no felony convictions in past 7 years, no fraud or financial crimes ever (5 pts), no tier confidentiality breaches or policy violations (5 pts).</div>
+      </div>
+    </div>
+
+    <div class="notice safe" style="margin-top:24px">Minimum 50 points required to qualify for any tier. Tiers are reviewed every 6 months for mid-cycle adjustments where operationally permitted.</div>
+  </div>
+</section>
+
+<!-- INSURANCE -->
+<section class="section" id="s-insurance">
+  <div class="pg-header">
+    <div class="pg-icon">🛡️</div>
+    <div class="pg-meta">
+      <div class="pg-label">Section IX, Insurance</div>
+      <h2 class="pg-title">Mandatory <em>Insurance Requirement</em></h2>
+    </div>
+  </div>
+  <div class="gold-rule"></div>
+  <div class="content" style="max-width:760px">
+    <p>Insurance coverage is a condition of distribution participation, not an option. All eligible members receiving tier distributions must carry a minimum required policy. The premium is withheld directly from the member's distribution before any cash or directed payment is made.</p>
+
+    <div class="pull-quote"><p>"Distributions are not suspended, they are reduced by the withheld premium amount."</p></div>
+
+    <table class="data-table">
+      <thead><tr><th>Requirement</th><th>Standard</th></tr></thead>
+      <tbody>
+        <tr><td>Minimum face amount</td><td class="mono">3x verified annual income</td></tr>
+        <tr><td>Policy type</td><td class="mono">Term Life (10-year min) or Whole Life</td></tr>
+        <tr><td>Beneficiary</td><td class="mono">Trust named as primary for Trust-funded portion</td></tr>
+        <tr><td>Annual verification</td><td class="mono">Required. Lapse triggers immediate withholding</td></tr>
+        <tr><td>Premium withholding</td><td class="mono">Deducted from top of tier distribution first</td></tr>
+        <tr><td>Shortfall handling</td><td class="mono">Carried forward to next cycle or member payment</td></tr>
+      </tbody>
+    </table>
+
+    <div class="card-grid" style="margin-top:22px">
+      <div class="card">
+        <div class="c-icon">📝</div>
+        <h4>Insurability Exception</h4>
+        <p>Members unable to obtain coverage due to documented medical issues may apply for a waiver. Requires two written carrier declinations plus a trustee-approved alternative. Waivers are documented exceptions, not penalties, and do not reduce tier scoring.</p>
+      </div>
+      <div class="card">
+        <div class="c-icon">⚰️</div>
+        <h4>Death Benefit Flow</h4>
+        <p>Mandatory minimum policy payout flows to Trust corpus, strengthening the principal base. Additional Multiplier coverage payout also flows to Trust corpus unless a trustee-approved rider designates a split for surviving dependents.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MULTIPLIER -->
+<section class="section" id="s-multiplier">
+  <div class="pg-header">
+    <div class="pg-icon">✨</div>
+    <div class="pg-meta">
+      <div class="pg-label">Section IX (Continued), Multiplier</div>
+      <h2 class="pg-title">Insurance <em>Multiplier Program</em></h2>
+    </div>
+  </div>
+  <div class="gold-rule"></div>
+  <div class="content" style="max-width:700px">
+    <p>The Insurance Multiplier Program rewards members who go beyond the mandatory minimum, carrying additional coverage that further strengthens the Trust's long-term capital position. The Multiplier applies exclusively to verified coverage above the 3x baseline.</p>
+
+    <div class="notice" style="margin-bottom:24px">The mandatory minimum policy (3x income) earns no tier score bonus. The Multiplier Program begins where the minimum ends. Additional coverage beyond 3x qualifies for tier score boosts, capped at +15%.</div>
+
+    <div class="mult-rows">
+      <div class="mult-row"><div class="mult-level">Base participation in the Multiplier Program</div><div class="mult-boost">+5%</div></div>
+      <div class="mult-row"><div class="mult-level">Policy equals 5x annual income</div><div class="mult-boost">+7.5%</div></div>
+      <div class="mult-row"><div class="mult-level">Policy equals 10x annual income</div><div class="mult-boost">+10%</div></div>
+      <div class="mult-row"><div class="mult-level">Member personally funds 25% of additional premium</div><div class="mult-boost">+2.5%</div></div>
+      <div class="mult-row"><div class="mult-level">Member personally funds 50% of additional premium</div><div class="mult-boost">+5%</div></div>
+      <div class="mult-row" style="background:rgba(201,168,76,0.1);border-color:rgba(201,168,76,0.35)"><div class="mult-level" style="color:var(--gold-light);font-weight:700">Total cap on combined bonus</div><div class="mult-boost" style="background:rgba(201,168,76,0.2);border-color:rgba(201,168,76,0.4)">+15% MAX</div></div>
+    </div>
+
+    <div class="card-grid" style="margin-top:22px">
+      <div class="card">
+        <div class="c-icon">🌹</div>
+        <h4>Funeral Reimbursement</h4>
+        <p>Multiplier participants only. Trust reimburses $15,000, $25,000 in documented funeral expenses upon passing. Does not apply to members carrying only the mandatory minimum policy.</p>
+      </div>
+      <div class="card">
+        <div class="c-icon">📌</div>
+        <h4>Eligibility Rules</h4>
+        <p>Both Term and Whole Life are acceptable for additional coverage. All additional policies must name the Trust as primary beneficiary for the Trust-funded portion to qualify for bonus scoring.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SUMMIT -->
+<section class="section" id="s-summit">
+  <div class="pg-header">
+    <div class="pg-icon">🏔️</div>
+    <div class="pg-meta">
+      <div class="pg-label">Section X, Summit</div>
+      <h2 class="pg-title">Family Capital <em>Summit</em></h2>
+    </div>
+  </div>
+  <div class="gold-rule"></div>
+  <div class="content" style="max-width:760px">
+    <p>The Family Capital Summit is the annual gathering that aligns, educates, and strengthens the family unit. It reinforces the principles of stewardship, growth, contribution, and unity. The Summit is not about comparison, it is about collective elevation.</p>
+
+    <div class="notice safe" style="margin-bottom:24px">At least 25% of all programming time must be dedicated to family connection, relationship-building, and unity activities. This is a non-negotiable requirement.</div>
+
+    <div class="card-grid">
+      <div class="card"><div class="c-icon">📈</div><h4>Annual Performance Report</h4><p>Review Trust health, yield, and principal growth. Full transparency on the corpus position and year-over-year progress.</p></div>
+      <div class="card"><div class="c-icon">📚</div><h4>Financial Education Workshop</h4><p>Learn strategies to improve tier standing and personal financial position. Practical, actionable content for every family member.</p></div>
+      <div class="card"><div class="c-icon">🏛️</div><h4>Governance Update</h4><p>Transparency on Trust decisions, allocation, and structural changes. Members understand where the Trust stands and where it is going.</p></div>
+      <div class="card"><div class="c-icon">❤️</div><h4>Family Building Activity</h4><p>Structured activities to strengthen relationships and reinforce family unity. The non-negotiable cultural core of every Summit.</p></div>
+    </div>
+
+    <table class="data-table" style="margin-top:20px">
+      <thead><tr><th>Expense Category</th><th>Coverage</th></tr></thead>
+      <tbody>
+        <tr><td>Lodging, meals, event activities</td><td><span class="tag tag-m">Always Covered</span></td></tr>
+        <tr><td>Local transportation to/from venue</td><td><span class="tag tag-m">Always Covered</span></td></tr>
+        <tr><td>Childcare during sessions</td><td><span class="tag tag-m">Always Covered</span></td></tr>
+        <tr><td>Travel (corpus below $8M)</td><td><span class="tag" style="background:rgba(150,130,60,0.15);color:#d4c060;border:1px solid rgba(150,130,60,0.3)">Optional / Board Policy</span></td></tr>
+        <tr><td>Travel (corpus $8M and above)</td><td><span class="tag tag-m">Full Coverage</span></td></tr>
+        <tr><td>Lost wages</td><td><span class="tag tag-u">Never Covered</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- TFGP -->
+<section class="section" id="s-tfgp">
+  <div class="pg-header">
+    <div class="pg-icon">🌐</div>
+    <div class="pg-meta">
+      <div class="pg-label">Section XI, Grants</div>
+      <h2 class="pg-title">Trust Formation <em>Grant Program (TFGP)</em></h2>
+    </div>
+  </div>
+  <div class="gold-rule"></div>
+  <div class="content" style="max-width:760px">
+    <p>The TFGP exists to help eligible extended family members establish independent trust structures, strengthening governance culture across the broader family ecosystem without diluting The Sunshine Trust.</p>
+
+    <div class="notice warn" style="margin-bottom:24px">TFGP grants are funded exclusively from the 35% Growth/Retained Earnings allocation. Never from the Tier Pool, never from Administration, and never from corpus. This is non-negotiable.</div>
+
+    <div class="card-grid">
+      <div class="card">
+        <div class="c-icon">📏</div>
+        <h4>Annual Grant Limits</h4>
+        <p>Total annual TFGP grants may not exceed 25% of the annual Growth allocation. Individual grant may not exceed 10% of the annual Growth allocation. If insufficient Growth allocation exists, grants are deferred, never borrowed from other buckets.</p>
+      </div>
+      <div class="card">
+        <div class="c-icon">🚫</div>
+        <h4>Non-Dilution Protection</h4>
+        <p>TFGP recipients gain zero rights in The Sunshine Trust: no beneficiary rights, no distribution rights from any bucket, no governance authority, no voting rights, and no access to Trust financial information beyond grant documentation.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FAMILY BANK -->
+<section class="section" id="s-bank">
+  <div class="pg-header">
+    <div class="pg-icon">🏦</div>
+    <div class="pg-meta">
+      <div class="pg-label">Section XII, Family Bank</div>
+      <h2 class="pg-title">The <em>Family Bank</em> Program</h2>
+    </div>
+  </div>
+  <div class="gold-rule"></div>
+  <div class="content" style="max-width:760px">
+    <p>The Family Bank is a structured, interest-bearing internal lending facility designed to support productive uses: business formation, real estate, education. Family Bank loans are funded exclusively from Growth/Retained reserves. No Tier Pool, no Administration, and absolutely no corpus.</p>
+
+    <div class="pull-quote"><p>"APR: Prime Rate minus 1.50%, with a floor at the current Applicable Federal Rate (AFR). All interest payments return to Growth/Retained and compound the corpus over time."</p></div>
+
+    <div class="alloc-header" style="margin-top:4px">Dual-Gate Approval Process</div>
+    <div class="steps">
+      <div class="step"><div class="step-num">1</div><div class="step-body"><div class="step-title">External Institution Approval</div><div class="step-desc">Applicant secures approval from a major lending institution. Approval letter and loan terms required.</div></div></div>
+      <div class="step"><div class="step-num">2</div><div class="step-body"><div class="step-title">Submit to Trust Committee</div><div class="step-desc">Institution approval letter and terms submitted to the Trust Committee for independent review.</div></div></div>
+      <div class="step"><div class="step-num">3</div><div class="step-body"><div class="step-title">Board Vote</div><div class="step-desc">Majority vote for standard loans at or below 5% corpus. Unanimous vote required for any loan exceeding 5% corpus.</div></div></div>
+      <div class="step"><div class="step-num">4</div><div class="step-body"><div class="step-title">Trust Issues Loan</div><div class="step-desc">If approved, Trust issues loan from Growth/Retained reserves at Prime minus 1.50% (not below AFR).</div></div></div>
+      <div class="step"><div class="step-num">5</div><div class="step-body"><div class="step-title">Repayment to Growth</div><div class="step-desc">Borrower services loan. All interest and principal payments return to Growth/Retained, not the Tier Pool.</div></div></div>
+    </div>
+
+    <div class="alloc-header" style="margin-top:28px">Default Protocol</div>
+    <table class="data-table">
+      <thead><tr><th>Timeline</th><th>Action</th></tr></thead>
+      <tbody>
+        <tr><td>30 days</td><td>Written notice of delinquency issued to borrower</td></tr>
+        <tr><td>60 days</td><td>Formal restructuring offer presented. Borrower must respond in writing.</td></tr>
+        <tr><td>90 days</td><td>Formal default declared. <strong>Tier suspension triggered automatically.</strong></td></tr>
+        <tr><td>90+ days</td><td>Collateral enforcement where applicable. Legal action at trustee discretion.</td></tr>
+        <tr><td>Forgiveness</td><td>Requires unanimous vote and documented, verified hardship analysis</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ENFORCEMENT -->
+<section class="section" id="s-enforcement">
+  <div class="pg-header">
+    <div class="pg-icon">⚖️</div>
+    <div class="pg-meta">
+      <div class="pg-label">Section XIV, Enforcement</div>
+      <h2 class="pg-title">Enforcement <em>&amp; Dispute Resolution</em></h2>
+    </div>
+  </div>
+  <div class="gold-rule"></div>
+  <div class="content" style="max-width:760px">
+
+    <div class="card-grid">
+      <div class="card" style="border-color:rgba(184,92,56,0.25); background:rgba(184,92,56,0.05)">
+        <div class="c-icon">🚨</div>
+        <h4 style="color:#e0956a">Enforcement Actions</h4>
+        <p>Misrepresentation/fraud: immediate ineligibility, potential legal action, permanent bar from all programs. Missed documentation deadline: automatic tier suspension, no retroactive reinstatement. Harassment or tier disclosure: formal discipline up to removal. Loan default: tier suspension triggered at 90 days.</p>
+      </div>
+      <div class="card" style="border-color:rgba(74,138,92,0.25); background:rgba(74,138,92,0.05)">
+        <div class="c-icon">🕊️</div>
+        <h4 style="color:#7ac896">Dispute Resolution</h4>
+        <p>Step 1: Informal direct resolution between parties. Step 2: Neutral third-party mediation by mutual consent. Step 3: Formal written Trustee Board ruling. Step 4: Legal counsel only if trustee decision is challenged.</p>
+      </div>
+    </div>
+
+    <div class="pull-quote" style="margin-top:24px"><p>"The Trust prioritizes family unity. Disputes should be resolved at the lowest level possible. Escalation to legal counsel is a last resort, not a first response."</p></div>
+
+    <div class="notice" style="margin-top:20px"><strong>Non-Dilution Standard (Strict):</strong> No program participation expands beneficiary status. Beneficiary status may only be created through a formal amendment. Reclassification of any person as a beneficiary without a proper amendment is void and of no legal effect.</div>
+  </div>
+</section>
+
+<!-- CULTURE -->
+<section class="section" id="s-culture">
+  <div class="pg-header">
+    <div class="pg-icon">🌱</div>
+    <div class="pg-meta">
+      <div class="pg-label">Section XV, Culture & Philosophy</div>
+      <h2 class="pg-title">Values, Culture <em>&amp; Generational Covenant</em></h2>
+    </div>
+  </div>
+  <div class="gold-rule"></div>
+  <div class="content" style="max-width:700px">
+    <p>The Sunshine Trust is more than a legal structure. It is a family philosophy in motion. The governance systems, allocation rules, and tier mechanics exist to express and reinforce a set of deeply held values about money, family, and legacy.</p>
+
+    <div class="values-list">
+      <div class="value-item"><div class="value-icon">🛡️</div><div class="value-text"><strong>Principal is sacred and protected.</strong> We do not consume what produces our abundance.</div></div>
+      <div class="value-item"><div class="value-icon">🏆</div><div class="value-text"><strong>Yield is earned through stewardship, not entitlement.</strong></div></div>
+      <div class="value-item"><div class="value-icon">🤝</div><div class="value-text"><strong>Participation is voluntary and dignified.</strong> No one is compelled. No one is shamed.</div></div>
+      <div class="value-item"><div class="value-icon">🚫</div><div class="value-text"><strong>No entitlement mindset.</strong> Benefits are merit-based and earned annually.</div></div>
+      <div class="value-item"><div class="value-icon">🔒</div><div class="value-text"><strong>No public comparisons or rankings.</strong> Tier information is private, always.</div></div>
+      <div class="value-item"><div class="value-icon">❤️</div><div class="value-text"><strong>Unity is our #1 priority.</strong> The Trust exists to bring the family together, not to create hierarchy.</div></div>
+      <div class="value-item"><div class="value-icon">⚙️</div><div class="value-text"><strong>We build systems, not dependencies.</strong> Every program is designed to make members more capable, not more reliant.</div></div>
+    </div>
+
+    <div class="pull-quote" style="margin-top:24px"><p>"We use money as a tool, not as identity. We protect principal while deploying yield. We build cultural infrastructure for future generations. We create disciplined systems that outlive us."</p></div>
+
+    <p style="margin-top:18px; color:rgba(250,246,238,0.6); font-style:italic; font-family:'Cormorant Garamond',serif; font-size:1.05rem; line-height:1.75;">Every decision made by the current generation echoes forward in time. The choices we make today become the foundation our children and grandchildren build upon. We do not build the Trust for today. We build it for the generation that hasn't been born yet.</p>
+  </div>
+</section>
+
+<!-- QUICK REFERENCE -->
+<section class="section" id="s-quickref">
+  <div class="pg-header">
+    <div class="pg-icon">📌</div>
+    <div class="pg-meta">
+      <div class="pg-label">Appendix, Quick Reference</div>
+      <h2 class="pg-title">Quick <em>Reference Summary</em></h2>
+    </div>
+  </div>
+  <div class="gold-rule"></div>
+  <div class="content" style="max-width:800px">
+    <div class="qr-grid">
+      <div class="qr-card">
+        <h4>Allocation at a Glance</h4>
+        <div class="qr-items">
+          <div class="qr-item">15% Administration & Governance (scales to 10% at $10M+ corpus)</div>
+          <div class="qr-item">35% Growth / Retained Earnings, corpus reinvestment, reserves, TFGP, Family Bank</div>
+          <div class="qr-item">50% Tier Distribution Pool, family benefits and insurance premiums</div>
+        </div>
+      </div>
+      <div class="qr-card">
+        <h4>Tier Pool Shares</h4>
+        <div class="qr-items">
+          <div class="qr-item">Tier 5 PILLAR: 35% of Tier Pool</div>
+          <div class="qr-item">Tier 4 ARCHITECT: 25% of Tier Pool</div>
+          <div class="qr-item">Tier 3 STEWARD: 20% of Tier Pool</div>
+          <div class="qr-item">Tier 2 BUILDER: 15% of Tier Pool</div>
+          <div class="qr-item">Tier 1 FOUNDATION: 5% of Tier Pool</div>
+        </div>
+      </div>
+      <div class="qr-card">
+        <h4>Scoring Categories</h4>
+        <div class="qr-items">
+          <div class="qr-item">Financial Stability: 40 pts</div>
+          <div class="qr-item">Wealth Building: 25 pts</div>
+          <div class="qr-item">Family Contribution: 20 pts</div>
+          <div class="qr-item">Character & Compliance: 15 pts</div>
+          <div class="qr-item">Minimum to qualify: 50 points</div>
+        </div>
+      </div>
+      <div class="qr-card">
+        <h4>Eligibility at a Glance</h4>
+        <div class="qr-items">
+          <div class="qr-item">Ages 0-15: Literacy and mentorship only</div>
+          <div class="qr-item">Ages 16-20: Tier-eligible, restricted distributions only</div>
+          <div class="qr-item">Ages 21+: Full distributions, subject to caps</div>
+          <div class="qr-item">Annual active status required for all participants</div>
+        </div>
+      </div>
+      <div class="qr-card">
+        <h4>Governance Thresholds</h4>
+        <div class="qr-items">
+          <div class="qr-item">Unanimous: allocation changes, tier rule changes, loans above 5% corpus, forgiveness</div>
+          <div class="qr-item">Majority: standard Family Bank loans, routine approvals, vendor selection</div>
+        </div>
+      </div>
+      <div class="qr-card">
+        <h4>Insurance & Family Bank</h4>
+        <div class="qr-items">
+          <div class="qr-item">Mandatory minimum: 3x income, Term or Whole Life, premium withheld from distribution</div>
+          <div class="qr-item">Multiplier: additional coverage above 3x earns +5% to +15% tier score boost</div>
+          <div class="qr-item">Funeral reimbursement: $15K-$25K for Multiplier participants only</div>
+          <div class="qr-item">Family Bank rate: Prime Rate minus 1.50%, floor at AFR</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CLOSING -->
+<section class="section" id="s-close">
+  <div class="close-scripture">"For I know the plans I have for you, declares the Lord, plans to prosper you and not to harm you, plans to give you a hope and a future."</div>
+  <div class="close-ref">Jeremiah 29:11</div>
+  <div class="divider"><span></span><div class="divider-icon">☀️</div><span></span></div>
+  <h2 class="close-head">Culture Compounds.<br>Longer Than Capital.</h2>
+  <div class="divider"><span></span><span></span></div>
+  <p class="close-sub">This is not just a governance document. It is a promise to every generation that follows. The Sunshine Trust grows forever, while the family it protects grows stronger, wiser, and more united with every passing year.</p>
+  <div style="margin-top:52px; font-family:'DM Mono',monospace; font-size:0.56rem; letter-spacing:0.14em; text-transform:uppercase; color:rgba(201,168,76,0.2);">The Sunshine Trust, Master Governance Manual, Consolidated March 2026</div>
+</section>
+
+</main>
+
+<script>
+// SIDEBAR
+let open = true;
+
+function toggleSidebar() {
+  open = !open;
+  const sb = document.getElementById('sidebar');
+  const main = document.getElementById('main');
+  const btn = document.getElementById('toggle-btn');
+  if (open) {
+    sb.classList.remove('hidden');
+    main.classList.remove('full');
+    btn.classList.remove('collapsed');
+    btn.textContent = '✕';
+  } else {
+    sb.classList.add('hidden');
+    main.classList.add('full');
+    btn.classList.add('collapsed');
+    btn.textContent = '☰';
+  }
+}
+
+// NAVIGATION
+function nav(id) {
+  const el = document.getElementById(id);
+  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// PROGRESS
+window.addEventListener('scroll', () => {
+  const pct = window.scrollY / (document.documentElement.scrollHeight - window.innerHeight) * 100;
+  document.getElementById('progress-bar').style.width = pct + '%';
+});
+
+// INTERSECTION OBSERVER
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (!entry.isIntersecting) return;
+    entry.target.classList.add('visible');
+
+    // bar fills
+    entry.target.querySelectorAll('.alloc-fill').forEach(el => {
+      const pct = el.getAttribute('data-pct');
+      if (pct) setTimeout(() => { el.style.width = pct + '%'; }, 200);
+    });
+
+    // score fills
+    entry.target.querySelectorAll('.score-fill').forEach(el => {
+      const pct = el.getAttribute('data-pct');
+      if (pct) setTimeout(() => { el.style.width = pct + '%'; }, 250);
+    });
+
+    // active nav
+    const id = entry.target.id;
+    document.querySelectorAll('.nav-item').forEach(item => {
+      item.classList.remove('active');
+      const oc = item.getAttribute('onclick') || '';
+      if (oc.includes(id)) {
+        item.classList.add('active', 'visited');
+      }
+    });
+  });
+}, { threshold: 0.12 });
+
+document.querySelectorAll('.section').forEach(s => observer.observe(s));
+
+// MOBILE: start closed
+if (window.innerWidth < 769) {
+  open = true;
+  toggleSidebar();
+}
+
+document.getElementById('toggle-btn').textContent = '✕';
+</script>
+</body>
+</html>
