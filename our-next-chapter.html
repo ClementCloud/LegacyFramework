@@ -42,6 +42,10 @@
     --fs-stat-value: clamp(13px, 3.4vw, 16px);
     --fs-note: clamp(11.5px, 2.9vw, 13px);
     --fs-eyebrow: clamp(10px, 2.5vw, 11.5px);
+
+    --slide-w: 100%;
+    --slide-gap: clamp(8px, 2vw, 14px);
+    --carousel-pad: 0px;
   }
   *{ box-sizing: border-box; }
   html{
@@ -99,6 +103,118 @@
     100% { transform: translate(40px, 30px) scale(1.08); }
   }
 
+  /* floating ambient shapes (tablet+) */
+  .ambient-floaties{
+    position: absolute; inset: 0; pointer-events: none; overflow: hidden; z-index: 0;
+    display: none;
+  }
+  .ambient-floaties .floater{
+    position: absolute;
+    font-size: clamp(14px, 2vw, 22px);
+    opacity: 0;
+    animation: floatDrift var(--dur, 14s) ease-in-out infinite;
+    animation-delay: var(--delay, 0s);
+  }
+  @keyframes floatDrift{
+    0%   { transform: translate(0, 0) rotate(0deg); opacity: 0; }
+    12%  { opacity: var(--peak, 0.35); }
+    88%  { opacity: var(--peak, 0.35); }
+    100% { transform: translate(var(--dx, 30px), var(--dy, -80px)) rotate(var(--rot, 20deg)); opacity: 0; }
+  }
+
+  .carousel-row{
+    width: 100%;
+    height: 100%;
+    max-height: var(--card-h);
+    min-height: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(8px, 1.5vw, 20px);
+    position: relative;
+    z-index: 1;
+  }
+
+  .stage-shell{
+    width: var(--card-w);
+    height: 100%;
+    max-height: var(--card-h);
+    min-height: 0;
+    flex: 1;
+    max-width: var(--shell-max, 100%);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--controls-gap);
+    position: relative;
+    z-index: 1;
+    transition: transform 0.15s ease-out;
+    transform-style: preserve-3d;
+  }
+
+  .deck-header{
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 0 2px;
+  }
+  .deck-phase{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+  }
+  .deck-phase-emoji{
+    font-size: clamp(18px, 2.5vw, 22px);
+    line-height: 1;
+    transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .deck-phase-emoji.pop{ animation: emojiPop 0.55s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  @keyframes emojiPop{
+    0% { transform: scale(0.5) rotate(-15deg); }
+    100% { transform: scale(1) rotate(0); }
+  }
+  .deck-phase-text{
+    font-family: 'JetBrains Mono', monospace;
+    font-size: clamp(10px, 1.8vw, 11.5px);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .deck-phase-text b{ color: var(--deck-accent, var(--gold)); font-weight: 600; }
+  .deck-counter{
+    flex-shrink: 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: clamp(11px, 2vw, 12px);
+    color: var(--muted);
+    background: rgba(246,239,227,0.05);
+    border: 1px solid rgba(246,239,227,0.1);
+    border-radius: 999px;
+    padding: 5px 12px;
+  }
+  .deck-counter #slide-num{
+    color: var(--gold);
+    font-weight: 700;
+    display: inline-block;
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .deck-counter #slide-num.bump{ animation: numBump 0.4s cubic-bezier(0.34, 1.56, 0.64, 1); }
+  @keyframes numBump{
+    0% { transform: scale(1); }
+    40% { transform: scale(1.35); }
+    100% { transform: scale(1); }
+  }
+
+  .navbtn-outer{
+    display: none;
+    flex-shrink: 0;
+  }
+
   .home-link{
     position: fixed;
     top: calc(var(--safe-top) + clamp(10px, 2vh, 18px));
@@ -122,23 +238,12 @@
     transform: translateY(-1px);
   }
 
-  .stage-shell{
-    width: var(--card-w);
-    height: 100%;
-    max-height: var(--card-h);
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: var(--controls-gap);
-    position: relative;
-    z-index: 1;
-  }
   .stage{
     width: 100%;
     flex: 1 1 auto;
     min-height: 0;
     position: relative;
+    perspective: 1200px;
   }
   .track{
     display:flex;
@@ -148,10 +253,13 @@
     -webkit-overflow-scrolling: touch;
     border-radius: var(--card-radius);
     scrollbar-width:none;
+    gap: var(--slide-gap);
+    padding-inline: var(--carousel-pad);
+    scroll-padding-inline: var(--carousel-pad);
   }
   .track::-webkit-scrollbar{ display:none; }
   .slide{
-    flex: 0 0 100%;
+    flex: 0 0 var(--slide-w, 100%);
     scroll-snap-align: start;
     height:100%;
     min-height: 0;
@@ -163,8 +271,25 @@
     flex-direction:column;
     position:relative;
     overflow:hidden;
+    transform-origin: center center;
+    will-change: transform, opacity, filter;
+    transition:
+      transform 0.5s cubic-bezier(0.34, 1.2, 0.64, 1),
+      opacity 0.4s ease,
+      box-shadow 0.4s ease,
+      border-color 0.4s ease,
+      filter 0.4s ease;
   }
-  .slide + .slide{ margin-left: clamp(8px, 2vw, 14px); }
+  .slide.is-near{
+    opacity: 0.72;
+    transform: scale(0.96) translateY(6px);
+    filter: saturate(0.85);
+  }
+  .slide.is-far{
+    opacity: 0.38;
+    transform: scale(0.9) translateY(10px);
+    filter: saturate(0.65) blur(0.3px);
+  }
   .slide-scroll{
     flex: 1 1 auto;
     min-height: 0;
@@ -203,6 +328,15 @@
   .slide [data-animate]{
     opacity: 0;
     transform: translateY(14px);
+  }
+  /* show first slide before JS boots */
+  .track:not(.deck-ready) .slide:first-child [data-animate]{
+    opacity: 1;
+    transform: none;
+  }
+  .track:not(.deck-ready) .slide:first-child .badge{
+    opacity: 1;
+    transform: none;
   }
   .slide.is-active [data-animate]{
     animation: riseIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -276,7 +410,7 @@
     padding: clamp(8px, 1.6vh, 10px) clamp(10px, 2.5vw, 13px);
     background: rgba(246,239,227,0.04);
     border: 1px solid rgba(246,239,227,0.07); border-radius: 11px;
-    transition: border-color 0.3s, background 0.3s;
+    transition: border-color 0.3s, background 0.3s, transform 0.25s cubic-bezier(0.34, 1.2, 0.64, 1);
   }
   .stat .label{
     font-size: var(--fs-stat-label); color: var(--muted);
@@ -392,15 +526,209 @@
   /* phase label tint on slide border when active */
   .slide.is-active{
     border-color: color-mix(in srgb, var(--accent, var(--sage)) 35%, var(--panel-edge));
-    box-shadow: 0 0 40px -12px color-mix(in srgb, var(--accent, var(--sage)) 25%, transparent);
-    transition: border-color 0.4s, box-shadow 0.4s;
+    box-shadow:
+      0 0 40px -12px color-mix(in srgb, var(--accent, var(--sage)) 25%, transparent),
+      0 18px 50px -20px rgba(0,0,0,0.45);
+    transform: scale(1) translateY(0);
+    opacity: 1;
+    filter: none;
+    z-index: 2;
   }
 
-  @media (min-width: 768px){
-    :root{ --card-w: min(520px, 72vw); }
+  .slide-card-glow{
+    position: absolute; inset: -1px; border-radius: var(--card-radius);
+    pointer-events: none; opacity: 0;
+    background: radial-gradient(circle at 50% 0%, color-mix(in srgb, var(--accent, var(--gold)) 22%, transparent), transparent 65%);
+    transition: opacity 0.45s ease;
   }
-  @media (min-width: 1200px){
-    :root{ --card-w: min(560px, 44vw); }
+  .slide.is-active .slide-card-glow{ opacity: 1; }
+
+  #confetti-layer{
+    position: fixed; inset: 0; pointer-events: none; z-index: 150; overflow: hidden;
+  }
+  .confetti-bit{
+    position: absolute;
+    width: 8px; height: 8px;
+    border-radius: 2px;
+    animation: confettiFall var(--fall, 1.8s) cubic-bezier(0.25, 0.8, 0.35, 1) forwards;
+    animation-delay: var(--delay, 0s);
+  }
+  @keyframes confettiFall{
+    0% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+    100% { transform: translate(var(--dx, 0px), var(--dy, 100vh)) rotate(var(--rot, 360deg)); opacity: 0; }
+  }
+
+  .keyboard-hint{
+    display: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(169,186,184,0.45);
+    text-align: center;
+    margin-top: 2px;
+  }
+
+  /* ── Timeline overview slide ── */
+  .timeline-rail{
+    position: relative;
+    margin: 4px 0 10px;
+    padding: 4px 0 4px 34px;
+  }
+  .timeline-rail::before{
+    content: '';
+    position: absolute;
+    left: 13px;
+    top: 14px;
+    bottom: 14px;
+    width: 3px;
+    border-radius: 99px;
+    background: rgba(246,239,227,0.1);
+  }
+  .timeline-fill{
+    position: absolute;
+    left: 13px;
+    top: 14px;
+    width: 3px;
+    height: 0;
+    border-radius: 99px;
+    background: linear-gradient(180deg, var(--gold) 0%, var(--coral) 28%, var(--sage) 55%, var(--sky) 78%, var(--gold) 100%);
+    transition: height 1.1s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .slide.is-active .timeline-fill{ height: calc(100% - 28px); }
+
+  .tl-stop{
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1px;
+    padding: 7px 10px 7px 0;
+    margin-bottom: 2px;
+    border-radius: 10px;
+    transition: background 0.25s ease;
+  }
+  .tl-stop:last-child{ margin-bottom: 0; }
+  .slide.is-active .tl-stop:hover{ background: rgba(246,239,227,0.04); }
+
+  .tl-node{
+    position: absolute;
+    left: -34px;
+    top: 50%;
+    transform: translateY(-50%) scale(0.6);
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    line-height: 1;
+    background: var(--panel);
+    border: 2px solid var(--tl-color, var(--gold));
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--tl-color, var(--gold)) 12%, transparent);
+    z-index: 1;
+    opacity: 0;
+  }
+  .slide.is-active .tl-node{
+    animation: tlNodePop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    animation-delay: calc(var(--d, 0) * 75ms + 180ms);
+  }
+  @keyframes tlNodePop{
+    0% { opacity: 0; transform: translateY(-50%) scale(0.4) rotate(-12deg); }
+    100% { opacity: 1; transform: translateY(-50%) scale(1) rotate(0deg); }
+  }
+
+  .tl-when{
+    font-family: 'JetBrains Mono', monospace;
+    font-size: clamp(9.5px, 2.2vw, 10.5px);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--tl-color, var(--gold));
+    font-weight: 600;
+  }
+  .tl-what{
+    font-size: clamp(12px, 2.8vw, 13.5px);
+    color: var(--cream);
+    line-height: 1.35;
+  }
+  .tl-what em{
+    font-style: normal;
+    color: var(--muted);
+    font-size: 0.92em;
+  }
+  .tl-what strong{ color: var(--cream); font-weight: 600; }
+
+  .tl-banner{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+    padding: 9px 12px;
+    border-radius: 11px;
+    background: color-mix(in srgb, var(--sky) 10%, transparent);
+    border: 1px dashed color-mix(in srgb, var(--sky) 35%, transparent);
+    font-size: clamp(11px, 2.6vw, 12.5px);
+    color: var(--cream);
+    line-height: 1.4;
+  }
+  .tl-banner span{ font-size: 16px; flex-shrink: 0; }
+
+  @media (min-width: 768px){
+    :root{
+      --card-w: min(920px, 94vw);
+      --shell-max: 680px;
+      --app-pad-top: calc(var(--safe-top) + clamp(48px, 6vh, 58px));
+      --fs-h1: clamp(24px, 3.2vw, 34px);
+      --fs-sub: clamp(14px, 1.8vw, 16px);
+    }
+    .ambient-floaties{ display: block; }
+    .slide{ scroll-snap-align: center; }
+    .dots button{
+      width: 8px; height: 8px;
+    }
+    .dots button.active{ width: 22px; }
+    .navbtn{
+      width: 44px; height: 44px;
+    }
+    .navbtn:hover{ transform: scale(1.06); }
+    .keyboard-hint{ display: block; }
+  }
+  @media (min-width: 1024px){
+    :root{
+      --card-w: min(1040px, 92vw);
+      --shell-max: 620px;
+      --app-pad-x: clamp(20px, 4vw, 48px);
+    }
+    .navbtn-outer{
+      display: flex;
+      width: clamp(44px, 5vw, 52px);
+      height: clamp(44px, 5vw, 52px);
+    }
+    .controls .navbtn{ display: none; }
+    .carousel-row{ gap: clamp(16px, 2vw, 28px); }
+    .dots{ max-width: min(360px, 42vw); }
+  }
+  @media (min-width: 1280px){
+    :root{
+      --shell-max: 640px;
+      --fs-h1: clamp(26px, 2.4vw, 36px);
+    }
+  }
+  @media (max-width: 767px){
+    .deck-header{ display: none; }
+    .slide.is-near,
+    .slide.is-far{
+      opacity: 1;
+      transform: none;
+      filter: none;
+    }
+  }
+  @media (hover: hover){
+    .stat:hover{
+      transform: translateX(4px);
+      border-color: rgba(246,239,227,0.14);
+    }
+    .navbtn-outer:hover{ transform: scale(1.08); }
   }
   @media (max-height: 640px){
     :root{
@@ -426,6 +754,7 @@
     }
     .slide [data-animate]{ opacity: 1; transform: none; }
     .track-fill{ width: var(--target-w, 0) !important; }
+    .slide.is-near, .slide.is-far{ opacity: 1; transform: none; filter: none; }
   }
 
   /* ── Password gate ── */
@@ -574,23 +903,93 @@
 <a class="home-link" href="./index.html">Home →</a>
 
 <div class="app">
-  <div class="stage-shell">
+  <div class="ambient-floaties" id="floaties" aria-hidden="true"></div>
+  <div class="carousel-row">
+    <button class="navbtn navbtn-outer" id="prev-outer" aria-label="Previous slide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 6l-6 6 6 6"/></svg></button>
+
+  <div class="stage-shell" id="stage-shell">
+    <div class="deck-header">
+      <div class="deck-phase">
+        <span class="deck-phase-emoji" id="deck-emoji">🗺️</span>
+        <span class="deck-phase-text" id="deck-label"><b>Cover</b> · Our Next Chapter</span>
+      </div>
+      <div class="deck-counter"><span id="slide-num">1</span> / <span id="slide-total">12</span></div>
+    </div>
   <div class="stage">
     <div class="track" id="track">
 
       <!-- 1: Cover -->
-      <section class="slide" style="--accent: var(--gold)">
+      <section class="slide is-active" style="--accent: var(--gold)">
         <div class="path-wrap" id="pathwrap"></div>
         <div class="cover-center">
           <div class="eyebrow" data-animate style="--d:0"><span class="dot"></span>SEP 2026 &rarr; MAY 2028</div>
           <div class="badge" data-animate style="--d:1"><svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.6"><path d="M3 12l6-8 6 8-6 8-6-8z" stroke-linejoin="round"/><path d="M15 12l4-5 2 3-2 5-4-3z" stroke-linejoin="round"/></svg></div>
           <h1 data-animate style="--d:2">Our Next<br>Chapter</h1>
-          <p class="sub" data-animate style="--d:3">A trip together, a baby, real cushion, and a bigger home in South Jersey — all from one monthly plan.</p>
+          <p class="sub" data-animate style="--d:3">A trip together, Baby Fam, real cushion, and a bigger home in South Jersey — all from one monthly plan.</p>
         </div>
         <div class="note swipe-hint" data-animate style="--d:4">Swipe or tap the arrows →</div>
       </section>
 
-      <!-- 2: Income & Sources -->
+      <!-- 2: Timeline overview -->
+      <section class="slide" style="--accent: var(--sky)">
+        <div class="eyebrow" data-animate style="--d:0"><span class="dot"></span>THE BIG PICTURE</div>
+        <div class="badge" data-animate style="--d:1"><svg viewBox="0 0 24 24" fill="none" stroke="var(--sky)" stroke-width="1.6"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h1 data-animate style="--d:2">The Whole<br>Roadmap</h1>
+        <p class="sub" data-animate style="--d:3">Twenty-one months, four big wins — here's the arc at a glance.</p>
+
+        <div class="timeline-rail" data-animate style="--d:4">
+          <div class="timeline-fill"></div>
+
+          <div class="tl-stop" style="--tl-color: var(--gold); --d:0">
+            <div class="tl-node">🚀</div>
+            <div class="tl-when">Sep 2026</div>
+            <div class="tl-what">Plan goes live <em>· $2,700/mo to goals</em></div>
+          </div>
+          <div class="tl-stop" style="--tl-color: var(--coral); --d:1">
+            <div class="tl-node">💰</div>
+            <div class="tl-when">Sep – Dec '26</div>
+            <div class="tl-what">Trip fund sprint <em>· Europe &amp; St. Martin up next</em></div>
+          </div>
+          <div class="tl-stop" style="--tl-color: var(--coral); --d:2">
+            <div class="tl-node">✈️</div>
+            <div class="tl-when">Late May – Early Jun '27</div>
+            <div class="tl-what"><strong>Europe, then St. Martin</strong> <em>· we go!</em></div>
+          </div>
+          <div class="tl-stop" style="--tl-color: var(--sage); --d:3">
+            <div class="tl-node">🫙</div>
+            <div class="tl-when">Jan – Aug '27</div>
+            <div class="tl-what">Emergency + Baby Fam <em>· $1,350/mo each</em></div>
+          </div>
+          <div class="tl-stop" style="--tl-color: var(--sage); --d:4">
+            <div class="tl-node">👶</div>
+            <div class="tl-when">Sep – Oct '27</div>
+            <div class="tl-what">Baby Fam home · funds fully closed</div>
+          </div>
+          <div class="tl-stop" style="--tl-color: var(--gold); --d:5">
+            <div class="tl-node">🏠</div>
+            <div class="tl-when">Nov – Dec '27</div>
+            <div class="tl-what">House fund sprint <em>· down payment ready</em></div>
+          </div>
+          <div class="tl-stop" style="--tl-color: var(--sky); --d:6">
+            <div class="tl-node">🌊</div>
+            <div class="tl-when">Jan – May '28</div>
+            <div class="tl-what">Breathing room <em>· every goal already met</em></div>
+          </div>
+          <div class="tl-stop" style="--tl-color: var(--coral); --d:7">
+            <div class="tl-node">📍</div>
+            <div class="tl-when">May 2028</div>
+            <div class="tl-what">Moving day <em>· South Jersey, from strength</em></div>
+          </div>
+        </div>
+
+        <div class="tl-banner" data-animate style="--d:5">
+          <span>🗓️</span>
+          Fund the trip first · travel late May into early June · Baby Fam follows right after
+        </div>
+        <div class="note" data-animate style="--d:6">The slides ahead unpack each phase — income, budget, and the what-if on Judson St.</div>
+      </section>
+
+      <!-- 3: Income & Sources -->
       <section class="slide" style="--accent: var(--sage)">
         <div class="eyebrow" data-animate style="--d:0"><span class="dot"></span>WHERE IT COMES FROM</div>
         <div class="badge" data-animate style="--d:1"><svg viewBox="0 0 24 24" fill="none" stroke="var(--sage)" stroke-width="1.6"><path d="M12 2v20M17 6.5c0-2-2-3.5-5-3.5s-5 1.5-5 3.5 2 3 5 3.5 5 1.5 5 3.5-2 3.5-5 3.5-5-1.5-5-3.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
@@ -637,24 +1036,25 @@
         <div class="eyebrow" data-animate style="--d:0"><span class="dot"></span>PHASE 1 · SEP – DEC 2026</div>
         <div class="badge" data-animate style="--d:1"><svg viewBox="0 0 24 24" fill="none" stroke="var(--coral)" stroke-width="1.6"><path d="M3 12l7-8 3 3-7 8-3-3z" stroke-linejoin="round"/><path d="M13 7l4-4 4 4-4 4" stroke-linejoin="round"/></svg></div>
         <h1 data-animate style="--d:2">Trip Fund First</h1>
-        <p class="sub" data-animate style="--d:3">The whole $2,700/mo goes to Europe &amp; St. Martin — done in four months.</p>
+        <p class="sub" data-animate style="--d:3">Fund Sep–Dec '26 — then Europe, then St. Martin, late May into early June.</p>
         <div class="stats">
           <div class="stat" data-animate style="--d:4"><span class="label">Starting balance</span><span class="value">$1,000</span></div>
           <div class="stat highlight" data-animate style="--d:5"><span class="label">Sep–Nov, full send</span><span class="value">$2,700/mo</span></div>
           <div class="stat done" data-animate style="--d:6"><span class="label">Vacation fund by Dec '26</span><span class="value">$10,000</span></div>
+          <div class="stat" data-animate style="--d:7"><span class="label">We travel</span><span class="value">Late May '27</span></div>
         </div>
-        <div class="note" data-animate style="--d:7">December splits three ways — $900 finishes the trip fund, $900 each starts Emergency and Baby.</div>
+        <div class="note" data-animate style="--d:8">December splits three ways — $900 finishes the trip fund, $900 each starts Emergency and Baby Fam.</div>
       </section>
 
-      <!-- 5: Phase 2 EF+Baby build -->
+      <!-- 5: Phase 2 EF+Baby Fam build -->
       <section class="slide" style="--accent: var(--sage)">
         <div class="eyebrow" data-animate style="--d:0"><span class="dot"></span>PHASE 2 · JAN – AUG 2027</div>
         <div class="badge" data-animate style="--d:1"><svg viewBox="0 0 24 24" fill="none" stroke="var(--sage)" stroke-width="1.6"><path d="M12 21c4-3.5 8-8 8-13a8 8 0 10-16 0c0 5 4 9.5 8 13z" stroke-linejoin="round"/><circle cx="12" cy="8" r="2.4"/></svg></div>
         <h1 data-animate style="--d:2">Two Jars, Evenly</h1>
-        <p class="sub" data-animate style="--d:3">$1,350/mo to Emergency, $1,350/mo to Baby, eight months straight.</p>
+        <p class="sub" data-animate style="--d:3">$1,350/mo to Emergency, $1,350/mo to Baby Fam, eight months straight.</p>
         <div class="stats">
           <div class="stat" data-animate style="--d:4"><span class="label">Emergency, Aug '27</span><span class="value">$32,700</span></div>
-          <div class="stat" data-animate style="--d:5"><span class="label">Baby fund, Aug '27</span><span class="value">$11,700</span></div>
+          <div class="stat" data-animate style="--d:5"><span class="label">Baby Fam fund, Aug '27</span><span class="value">$11,700</span></div>
         </div>
         <div class="note" data-animate style="--d:6">Both close to target — $2,300 short each. Two more months clears it.</div>
       </section>
@@ -664,12 +1064,12 @@
         <div class="eyebrow" data-animate style="--d:0"><span class="dot"></span>PHASE 3 · SEP – OCT 2027</div>
         <div class="badge" data-animate style="--d:1"><svg viewBox="0 0 24 24" fill="none" stroke="var(--sage)" stroke-width="1.6"><path d="M5 12l4 4 10-10" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
         <h1 data-animate style="--d:2">Closing the Gaps</h1>
-        <p class="sub" data-animate style="--d:3">Baby likely home by now. Two more months finishes both funds.</p>
+        <p class="sub" data-animate style="--d:3">Baby Fam likely home by now. Two more months finishes both funds.</p>
         <div class="stats">
           <div class="stat done" data-animate style="--d:4"><span class="label">Emergency fund, Oct '27</span><span class="value">$35,000</span></div>
-          <div class="stat done" data-animate style="--d:5"><span class="label">Baby fund, Oct '27</span><span class="value">$14,000</span></div>
+          <div class="stat done" data-animate style="--d:5"><span class="label">Baby Fam fund, Oct '27</span><span class="value">$14,000</span></div>
         </div>
-        <div class="note" data-animate style="--d:6">Emergency and Baby fund both fully funded — a small $400 leftover starts the House fund early.</div>
+        <div class="note" data-animate style="--d:6">Emergency and Baby Fam fund both fully funded — a small $400 leftover starts the House fund early.</div>
       </section>
 
       <!-- 7: Phase 4 House sprint -->
@@ -710,7 +1110,7 @@
           <div class="stat" data-animate style="--d:5"><span class="label">Max all-in housing</span><span class="value">$4,500/mo</span></div>
           <div class="stat" data-animate style="--d:6"><span class="label">Emergency fund stays intact</span><span class="value">$35,000</span></div>
         </div>
-        <div class="note" data-animate style="--d:7">Vacation taken, baby settled, reserves full, house cash ready. We buy because we're ready — not because a bank says yes.</div>
+        <div class="note" data-animate style="--d:7">Vacation taken — Europe then St. Martin — Baby Fam settled, reserves full, house cash ready. We buy because we're ready — not because a bank says yes.</div>
       </section>
 
       <!-- 10: The Fork -->
@@ -723,7 +1123,7 @@
           <div class="stat" data-animate style="--d:4"><span class="label">Assumed sale timing</span><span class="value">May 2027</span></div>
           <div class="stat highlight" data-animate style="--d:5"><span class="label">Net proceeds (taxes, commission, closing)</span><span class="value">$50,000</span></div>
         </div>
-        <div class="note" data-animate style="--d:6">May 2027 is where we'd be mid-way through funding Emergency and Baby — that's why it's the interesting moment to check.</div>
+        <div class="note" data-animate style="--d:6">May 2027 is where we'd be mid-way through funding Emergency and Baby Fam — that's why it's the interesting moment to check.</div>
       </section>
 
       <!-- 11: Scenario 2 Result -->
@@ -734,7 +1134,7 @@
         <p class="sub" data-animate style="--d:3">At the May '27 mark, here's what's still owed — and what the sale covers.</p>
         <div class="stats">
           <div class="stat" data-animate style="--d:4"><span class="label">Still needed: Emergency</span><span class="value">$6,350</span></div>
-          <div class="stat" data-animate style="--d:5"><span class="label">Still needed: Baby fund</span><span class="value">$6,350</span></div>
+          <div class="stat" data-animate style="--d:5"><span class="label">Still needed: Baby Fam fund</span><span class="value">$6,350</span></div>
           <div class="stat" data-animate style="--d:6"><span class="label">Still needed: House fund</span><span class="value">$6,000</span></div>
           <div class="stat done" data-animate style="--d:7"><span class="label">All three, fully covered</span><span class="value">$18,700</span></div>
           <div class="stat highlight" data-animate style="--d:8"><span class="label">Left over as pure buffer</span><span class="value">$31,300</span></div>
@@ -750,9 +1150,15 @@
     <div class="dots" id="dots"></div>
     <button class="navbtn" id="next" aria-label="Next slide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></button>
   </div>
+  <p class="keyboard-hint">← → arrow keys · swipe on touch</p>
+  </div>
+
+  <button class="navbtn navbtn-outer" id="next-outer" aria-label="Next slide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></button>
   </div>
 </div>
 </div>
+
+<div id="confetti-layer" aria-hidden="true"></div>
 
 <script>
   const CF_KEY = 'cf-unlocked';
@@ -799,11 +1205,30 @@
 
   function updateViewport(){
     const controls = document.querySelector('.controls');
+    const deckHeader = document.querySelector('.deck-header');
+    const keyboardHint = document.querySelector('.keyboard-hint');
     const appH = window.visualViewport ? window.visualViewport.height : window.innerHeight;
     document.documentElement.style.setProperty('--app-h', appH + 'px');
-    if (controls) {
-      document.documentElement.style.setProperty('--controls-h', controls.offsetHeight + 'px');
-    }
+    let extra = 0;
+    if (controls) extra += controls.offsetHeight;
+    if (deckHeader && window.innerWidth >= 768) extra += deckHeader.offsetHeight + 8;
+    if (keyboardHint && window.innerWidth >= 768) extra += keyboardHint.offsetHeight + 4;
+    document.documentElement.style.setProperty('--controls-h', extra + 'px');
+    updateCarouselLayout();
+  }
+
+  function updateCarouselLayout(){
+    const track = document.getElementById('track');
+    if (!track) return;
+    const wide = window.innerWidth >= 768;
+    const trackW = track.clientWidth || window.innerWidth;
+    const slideW = wide
+      ? Math.min(640, Math.max(420, trackW * (window.innerWidth >= 1024 ? 0.78 : 0.84)))
+      : trackW;
+    const pad = wide ? Math.max(0, (trackW - slideW) / 2) : 0;
+    document.documentElement.style.setProperty('--slide-w', slideW + 'px');
+    document.documentElement.style.setProperty('--carousel-pad', pad + 'px');
+    document.documentElement.style.setProperty('--slide-gap', wide ? 'clamp(16px, 2vw, 24px)' : 'clamp(8px, 2vw, 14px)');
   }
 
   function wrapSlideContent(slide){
@@ -820,23 +1245,79 @@
 
   function initDeck(){
     if (deckReady) return;
-    deckReady = true;
+
+  const SLIDE_META = [
+    { label: 'Cover', emoji: '🗺️', confetti: false },
+    { label: 'Roadmap', emoji: '🛤️', confetti: false },
+    { label: 'Income', emoji: '💵', confetti: false },
+    { label: 'Budget', emoji: '📊', confetti: false },
+    { label: 'Trip Fund', emoji: '✈️', confetti: true },
+    { label: 'Two Jars', emoji: '🫙', confetti: false },
+    { label: 'Gaps Closed', emoji: '✅', confetti: true },
+    { label: 'House Sprint', emoji: '🏠', confetti: true },
+    { label: 'Breathing Room', emoji: '🌊', confetti: false },
+    { label: 'Moving Day', emoji: '📍', confetti: true },
+    { label: 'What If', emoji: '🔀', confetti: false },
+    { label: 'Everything Early', emoji: '🎉', confetti: true }
+  ];
 
   const track = document.getElementById('track');
   const slides = Array.from(track.children);
-  slides.forEach(wrapSlideContent);
-  updateViewport();
-
   const dotsWrap = document.getElementById('dots');
   const prevBtn = document.getElementById('prev');
   const nextBtn = document.getElementById('next');
+  const prevOuter = document.getElementById('prev-outer');
+  const nextOuter = document.getElementById('next-outer');
   const pathWrap = document.getElementById('pathwrap');
+  const stageShell = document.getElementById('stage-shell');
+  const deckEmoji = document.getElementById('deck-emoji');
+  const deckLabel = document.getElementById('deck-label');
+  const slideNumEl = document.getElementById('slide-num');
+  const slideTotalEl = document.getElementById('slide-total');
+
+  slides.forEach(slide => {
+    wrapSlideContent(slide);
+    if (!slide.querySelector('.slide-card-glow')) {
+      const glow = document.createElement('div');
+      glow.className = 'slide-card-glow';
+      slide.prepend(glow);
+    }
+  });
+  updateViewport();
+
+  if (slideTotalEl) slideTotalEl.textContent = String(slides.length);
+
+  const confettiLayer = document.getElementById('confetti-layer');
+  const floaties = document.getElementById('floaties');
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const confettiSeen = new Set();
+  let lastIndex = 0;
+
+  if (floaties && window.innerWidth >= 768 && !reducedMotion) {
+    const bits = ['✦', '◦', '·', '♦', '▴'];
+    const colors = ['var(--gold)', 'var(--coral)', 'var(--sage)', 'var(--sky)'];
+    for (let i = 0; i < 14; i++) {
+      const el = document.createElement('span');
+      el.className = 'floater';
+      el.textContent = bits[i % bits.length];
+      el.style.left = (Math.random() * 100) + '%';
+      el.style.top = (55 + Math.random() * 40) + '%';
+      el.style.color = colors[i % colors.length];
+      el.style.setProperty('--dur', (10 + Math.random() * 10) + 's');
+      el.style.setProperty('--delay', (-Math.random() * 12) + 's');
+      el.style.setProperty('--dx', ((Math.random() - 0.5) * 80) + 'px');
+      el.style.setProperty('--dy', (-60 - Math.random() * 100) + 'px');
+      el.style.setProperty('--rot', ((Math.random() - 0.5) * 60) + 'deg');
+      el.style.setProperty('--peak', (0.15 + Math.random() * 0.25).toString());
+      floaties.appendChild(el);
+    }
+  }
 
   slides.forEach((_, i) => {
     const b = document.createElement('button');
     if (i === 0) b.classList.add('active');
-    b.setAttribute('aria-label', 'Go to slide ' + (i + 1));
+    b.setAttribute('aria-label', SLIDE_META[i].label + ', slide ' + (i + 1));
+    b.title = SLIDE_META[i].label;
     b.addEventListener('click', () => goTo(i));
     dotsWrap.appendChild(b);
 
@@ -848,10 +1329,74 @@
   const dots = Array.from(dotsWrap.children);
   const fills = Array.from(pathWrap.querySelectorAll('.fill'));
 
-  function current(){ return Math.round(track.scrollLeft / track.clientWidth); }
+  function current(){
+    const trackCenter = track.scrollLeft + track.clientWidth / 2;
+    let closest = 0;
+    let minDist = Infinity;
+    slides.forEach((slide, i) => {
+      const slideCenter = slide.offsetLeft + slide.offsetWidth / 2;
+      const dist = Math.abs(trackCenter - slideCenter);
+      if (dist < minDist) { minDist = dist; closest = i; }
+    });
+    return closest;
+  }
+
+  function updateSlideProximity(activeIdx){
+    slides.forEach((slide, i) => {
+      slide.classList.remove('is-active', 'is-near', 'is-far');
+      const diff = Math.abs(i - activeIdx);
+      if (i === activeIdx) slide.classList.add('is-active');
+      else if (diff === 1) slide.classList.add('is-near');
+      else slide.classList.add('is-far');
+    });
+  }
+
+  function spawnConfetti(accent){
+    if (reducedMotion || !confettiLayer) return;
+    const colors = ['#D9A455', '#EA9276', '#93B08E', '#7FA8C2', '#F6EFE3'];
+    const originX = window.innerWidth / 2;
+    const originY = window.innerHeight * 0.38;
+    for (let i = 0; i < 36; i++) {
+      const bit = document.createElement('span');
+      bit.className = 'confetti-bit';
+      bit.style.left = originX + 'px';
+      bit.style.top = originY + 'px';
+      bit.style.background = colors[i % colors.length];
+      bit.style.setProperty('--dx', ((Math.random() - 0.5) * 280) + 'px');
+      bit.style.setProperty('--dy', (120 + Math.random() * 320) + 'px');
+      bit.style.setProperty('--rot', ((Math.random() - 0.5) * 720) + 'deg');
+      bit.style.setProperty('--fall', (1.2 + Math.random() * 1.2) + 's');
+      bit.style.setProperty('--delay', (Math.random() * 0.25) + 's');
+      if (Math.random() > 0.5) bit.style.borderRadius = '50%';
+      confettiLayer.appendChild(bit);
+      setTimeout(() => bit.remove(), 2800);
+    }
+  }
+
+  function updateDeckHeader(idx){
+    const meta = SLIDE_META[idx];
+    if (!meta) return;
+    if (deckEmoji) {
+      deckEmoji.textContent = meta.emoji;
+      deckEmoji.classList.remove('pop');
+      void deckEmoji.offsetWidth;
+      deckEmoji.classList.add('pop');
+    }
+    if (deckLabel) deckLabel.innerHTML = '<b>' + meta.label + '</b> · Our Next Chapter';
+    if (slideNumEl) {
+      slideNumEl.textContent = String(idx + 1);
+      slideNumEl.classList.remove('bump');
+      void slideNumEl.offsetWidth;
+      slideNumEl.classList.add('bump');
+    }
+    const activeSlide = slides[idx];
+    if (activeSlide) {
+      const accent = getComputedStyle(activeSlide).getPropertyValue('--accent').trim() || 'var(--gold)';
+      document.documentElement.style.setProperty('--deck-accent', accent);
+    }
+  }
 
   function resetSlideAnimations(slide){
-    slide.classList.remove('is-active');
     slide.querySelectorAll('[data-animate]').forEach(el => {
       el.style.animation = 'none';
       void el.offsetWidth;
@@ -863,7 +1408,6 @@
   }
 
   function playSlideAnimations(slide){
-    slide.classList.add('is-active');
     const delay = reducedMotion ? 0 : 350;
     slide.querySelectorAll('.track-fill').forEach((bar, i) => {
       setTimeout(() => {
@@ -876,31 +1420,52 @@
     const idx = current();
     dots.forEach((d,i) => d.classList.toggle('active', i === idx));
     fills.forEach((f,i) => f.style.width = (i <= idx ? '100%' : '0%'));
-    prevBtn.style.opacity = idx === 0 ? '0.35' : '1';
-    nextBtn.style.opacity = idx === slides.length - 1 ? '0.35' : '1';
+    const atStart = idx === 0;
+    const atEnd = idx === slides.length - 1;
+    [prevBtn, prevOuter].forEach(b => { if (b) b.style.opacity = atStart ? '0.35' : '1'; });
+    [nextBtn, nextOuter].forEach(b => { if (b) b.style.opacity = atEnd ? '0.35' : '1'; });
 
-    slides.forEach((slide, i) => {
-      if (i === idx) {
-        if (!slide.classList.contains('is-active')) {
-          slides.forEach(s => { if (s !== slide) resetSlideAnimations(s); });
-          playSlideAnimations(slide);
-        }
+    updateSlideProximity(idx);
+    updateDeckHeader(idx);
+
+    if (idx !== lastIndex) {
+      slides.forEach((s, i) => { if (i !== idx) resetSlideAnimations(s); });
+      resetSlideAnimations(slides[idx]);
+      playSlideAnimations(slides[idx]);
+      if (SLIDE_META[idx]?.confetti && !confettiSeen.has(idx)) {
+        confettiSeen.add(idx);
+        spawnConfetti();
       }
-    });
+      lastIndex = idx;
+    }
   }
 
   function goTo(i){
     i = Math.max(0, Math.min(slides.length - 1, i));
-    track.scrollTo({ left: i * track.clientWidth, behavior: 'smooth' });
+    const slide = slides[i];
+    const left = slide.offsetLeft - (track.clientWidth - slide.offsetWidth) / 2;
+    track.scrollTo({ left: Math.max(0, left), behavior: 'smooth' });
   }
 
-  prevBtn.addEventListener('click', () => goTo(current() - 1));
-  nextBtn.addEventListener('click', () => goTo(current() + 1));
+  function bindNav(btn, dir){
+    if (!btn) return;
+    btn.addEventListener('click', () => goTo(current() + dir));
+  }
+  bindNav(prevBtn, -1);
+  bindNav(nextBtn, 1);
+  bindNav(prevOuter, -1);
+  bindNav(nextOuter, 1);
+
   track.addEventListener('scroll', () => { requestAnimationFrame(updateUI); });
 
   function onViewportChange(){
     updateViewport();
-    track.scrollLeft = current() * track.clientWidth;
+    const idx = current();
+    const slide = slides[idx];
+    if (slide) {
+      const left = slide.offsetLeft - (track.clientWidth - slide.offsetWidth) / 2;
+      track.scrollLeft = Math.max(0, left);
+    }
     updateUI();
   }
   window.addEventListener('resize', onViewportChange);
@@ -909,12 +1474,21 @@
     window.visualViewport.addEventListener('resize', onViewportChange);
   }
 
+  if (stageShell && window.matchMedia('(min-width: 1024px) and (hover: hover)').matches && !reducedMotion) {
+    stageShell.addEventListener('mousemove', (e) => {
+      const rect = stageShell.getBoundingClientRect();
+      const x = (e.clientX - rect.left) / rect.width - 0.5;
+      const y = (e.clientY - rect.top) / rect.height - 0.5;
+      stageShell.style.transform = 'perspective(1000px) rotateY(' + (x * 5) + 'deg) rotateX(' + (-y * 5) + 'deg)';
+    });
+    stageShell.addEventListener('mouseleave', () => { stageShell.style.transform = ''; });
+  }
+
   document.addEventListener('keydown', (e) => {
     if (e.key === 'ArrowRight') goTo(current() + 1);
     if (e.key === 'ArrowLeft') goTo(current() - 1);
   });
 
-  // Touch swipe hint on first visit
   let touchStartX = 0;
   track.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
   track.addEventListener('touchend', e => {
@@ -922,8 +1496,10 @@
     if (Math.abs(dx) > 40) goTo(current() + (dx < 0 ? 1 : -1));
   }, { passive: true });
 
-  playSlideAnimations(slides[0]);
+  lastIndex = -1;
   updateUI();
+  track.classList.add('deck-ready');
+  deckReady = true;
   }
 
   if (sessionStorage.getItem(CF_KEY) === '1') {
