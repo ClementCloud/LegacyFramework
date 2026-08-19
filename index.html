@@ -471,6 +471,14 @@
             <div class="card-arrow">Open guide <span>→</span></div>
           </a>
 
+          <a class="card card-1" href="./our-next-chapter.html">
+            <span class="card-icon">🗺️</span>
+            <span class="card-tag tag-amber">Savings Roadmap</span>
+            <div class="card-title">Our Next Chapter</div>
+            <div class="card-desc">Sep 2026 – May 2028: one $11K/mo plan funding the trip, baby, emergency fund, and South Jersey down payment — plus a what-if on selling Judson St.</div>
+            <div class="card-arrow">Open guide <span>→</span></div>
+          </a>
+
         </div>
       </div>
     </div>
@@ -487,7 +495,8 @@
       var badge   = document.getElementById('cf-lock-badge');
       var btn     = document.getElementById('cf-btn');
 
-      if (input.value.toLowerCase() === 'affluence') {
+      if (input.value.toLowerCase() === 'team fam') {
+        sessionStorage.setItem('cf-unlocked', '1');
         // Animate button before revealing
         btn.textContent = '✓ Unlocked';
         btn.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
@@ -516,6 +525,13 @@
       this.classList.remove('error');
       document.getElementById('cf-error').style.display = 'none';
     });
+
+    if (sessionStorage.getItem('cf-unlocked') === '1') {
+      document.getElementById('cf-gate').style.display = 'none';
+      document.getElementById('cf-content').style.display = 'block';
+      document.getElementById('cf-lock-badge').textContent = '🔓 Unlocked';
+      document.getElementById('cf-lock-badge').classList.add('unlocked');
+    }
 
     // Subtle tilt effect on cards
     document.querySelectorAll('a.card').forEach(function(card) {

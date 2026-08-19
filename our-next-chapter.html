@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Our Next Chapter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Karla:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #16262B;
+    --panel: #1E3540;
+    --panel-edge: #2A4750;
+    --coral: #EA9276;
+    --gold: #D9A455;
+    --sage: #93B08E;
+    --sky: #7FA8C2;
+    --cream: #F6EFE3;
+    --muted: #A9BAB8;
+  }
+  *{ box-sizing: border-box; }
+  html,body{ margin:0; padding:0; height:100%; background: var(--bg); overflow:hidden; }
+  body{ font-family:'Karla', sans-serif; color: var(--cream); -webkit-font-smoothing: antialiased; }
+
+  /* ── Ambient background ── */
+  .app{
+    position: relative; height: 100dvh; width: 100%;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    background: var(--bg);
+    overflow: hidden;
+  }
+  .app::before,
+  .app::after{
+    content: '';
+    position: absolute;
+    border-radius: 50%;
+    pointer-events: none;
+    filter: blur(60px);
+    animation: drift 18s ease-in-out infinite alternate;
+  }
+  .app::before{
+    width: 420px; height: 420px;
+    top: -8%; left: -5%;
+    background: rgba(217,164,85,0.14);
+  }
+  .app::after{
+    width: 380px; height: 380px;
+    bottom: -10%; right: -5%;
+    background: rgba(234,146,118,0.12);
+    animation-delay: -9s;
+    animation-direction: alternate-reverse;
+  }
+  @keyframes drift{
+    0%   { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(40px, 30px) scale(1.08); }
+  }
+
+  .home-link{
+    position: fixed; top: 18px; right: 18px; z-index: 100;
+    display: inline-flex; align-items: center; gap: 7px;
+    font-family: 'Karla', sans-serif; font-size: 13px; font-weight: 600;
+    color: rgba(246,239,227,0.65);
+    background: rgba(246,239,227,0.06);
+    border: 1px solid rgba(246,239,227,0.12);
+    border-radius: 100px; padding: 8px 16px; text-decoration: none;
+    backdrop-filter: blur(10px);
+    transition: background 0.2s, color 0.2s, transform 0.2s;
+  }
+  .home-link:hover{
+    background: rgba(246,239,227,0.12); color: var(--cream);
+    transform: translateY(-1px);
+  }
+
+  .stage{ width: min(440px, 92vw); height: min(760px, 88dvh); position: relative; z-index: 1; }
+  .track{
+    display:flex; height:100%; overflow-x:auto; scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch; border-radius: 26px; scrollbar-width:none;
+  }
+  .track::-webkit-scrollbar{ display:none; }
+  .slide{
+    flex: 0 0 100%; scroll-snap-align: start; height:100%;
+    background: linear-gradient(165deg, var(--panel) 0%, #17282D 100%);
+    border: 1px solid var(--panel-edge); border-radius: 26px;
+    padding: 34px 28px 24px; display:flex; flex-direction:column; position:relative; overflow:hidden;
+  }
+  .slide + .slide{ margin-left: 14px; }
+
+  /* shimmer on active slide */
+  .slide::after{
+    content: '';
+    position: absolute; inset: 0; border-radius: 26px;
+    background: linear-gradient(105deg, transparent 40%, rgba(246,239,227,0.03) 50%, transparent 60%);
+    transform: translateX(-120%);
+    pointer-events: none;
+  }
+  .slide.is-active::after{
+    animation: shimmer 0.9s ease 0.15s both;
+  }
+  @keyframes shimmer{
+    to { transform: translateX(120%); }
+  }
+
+  /* staggered entrance */
+  .slide [data-animate]{
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  .slide.is-active [data-animate]{
+    animation: riseIn 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+    animation-delay: calc(var(--d, 0) * 70ms + 80ms);
+  }
+  @keyframes riseIn{
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace; font-size: 11.5px; letter-spacing: 0.12em;
+    text-transform: uppercase; color: var(--accent, var(--sage));
+    display:flex; align-items:center; gap:8px; margin-bottom: 16px;
+  }
+  .eyebrow .dot{
+    width:6px; height:6px; border-radius:50%; background: var(--accent, var(--sage));
+    animation: dotPulse 2.4s ease-in-out infinite;
+  }
+  @keyframes dotPulse{
+    0%, 100% { opacity: 1; box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent, var(--sage)) 50%, transparent); }
+    50% { opacity: 0.7; box-shadow: 0 0 0 5px transparent; }
+  }
+
+  .badge{
+    width: 52px; height:52px; border-radius: 15px;
+    background: color-mix(in srgb, var(--accent, var(--sage)) 18%, transparent);
+    border: 1px solid color-mix(in srgb, var(--accent, var(--sage)) 45%, transparent);
+    display:flex; align-items:center; justify-content:center; margin-bottom: 16px;
+  }
+  .slide.is-active .badge{
+    animation: badgePop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    animation-delay: 0.12s;
+  }
+  @keyframes badgePop{
+    from { transform: scale(0.6) rotate(-8deg); opacity: 0; }
+    to   { transform: scale(1) rotate(0); opacity: 1; }
+  }
+  .badge svg{ width:26px; height:26px; }
+  .slide.is-active .badge svg{
+    animation: iconDraw 0.8s ease both;
+    animation-delay: 0.25s;
+  }
+  @keyframes iconDraw{
+    from { opacity: 0; transform: scale(0.8); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+
+  h1{
+    font-family:'Fredoka', sans-serif; font-weight:600; font-size: 27px; line-height:1.14;
+    margin: 0 0 8px; color: var(--cream);
+  }
+  .sub{ font-size:14px; line-height:1.5; color: var(--muted); margin: 0 0 16px; }
+
+  .stats{ display:flex; flex-direction:column; gap:8px; margin-bottom: 14px; }
+  .stat{
+    display:flex; align-items:baseline; justify-content:space-between;
+    padding: 10px 13px; background: rgba(246,239,227,0.04);
+    border: 1px solid rgba(246,239,227,0.07); border-radius: 11px;
+    transition: border-color 0.3s, background 0.3s;
+  }
+  .stat .label{ font-size:12.5px; color: var(--muted); }
+  .stat .value{
+    font-family:'JetBrains Mono', monospace; font-weight:600; font-size:15px;
+    color: var(--accent, var(--gold));
+  }
+  .stat.highlight{
+    border-color: color-mix(in srgb, var(--accent, var(--gold)) 45%, transparent);
+    background: color-mix(in srgb, var(--accent, var(--gold)) 8%, transparent);
+  }
+  .stat.done .value{ color: var(--sage); }
+  .stat.done .label::after{
+    content:" ✓"; color: var(--sage);
+    display: inline-block;
+    animation: checkPop 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+    animation-delay: 0.5s;
+  }
+  @keyframes checkPop{
+    from { transform: scale(0); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+  }
+
+  .note{
+    margin-top:auto; font-size: 12.5px; line-height:1.5; color: var(--muted);
+    padding-top: 12px; border-top: 1px dashed rgba(246,239,227,0.15); font-style: italic;
+  }
+  .slide.is-active .note[data-animate]{
+    animation-delay: calc(var(--d, 0) * 70ms + 420ms);
+  }
+
+  .budget-cat{ display:flex; flex-direction:column; gap:3px; margin-bottom:10px; }
+  .budget-cat .toprow{ display:flex; justify-content:space-between; font-size:12.5px; color:var(--muted); }
+  .budget-cat .toprow b{ color: var(--cream); font-family:'JetBrains Mono',monospace; }
+  .track-outer{ height:6px; border-radius:3px; background: rgba(246,239,227,0.08); overflow:hidden; }
+  .track-fill{
+    height:100%; border-radius:3px; width: 0;
+    transition: width 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .path-wrap{ position:absolute; top: 14px; left: 28px; right: 28px; display:flex; align-items:center; gap:5px; }
+  .seg{ flex:1; height: 3px; border-radius: 3px; background: rgba(246,239,227,0.14); overflow:hidden; }
+  .seg .fill{ height:100%; width:0%; background: var(--gold); transition: width 0.45s ease; }
+
+  .controls{ display:flex; align-items:center; justify-content:center; gap:16px; margin-top: 16px; z-index: 1; }
+  .navbtn{
+    width:40px; height:40px; border-radius:50%; background: var(--panel); border: 1px solid var(--panel-edge);
+    color: var(--cream); display:flex; align-items:center; justify-content:center; cursor:pointer;
+    transition: transform 0.15s ease, background 0.15s ease, opacity 0.2s ease;
+  }
+  .navbtn:hover{ background: var(--panel-edge); }
+  .navbtn:active{ transform: scale(0.92); }
+  .navbtn svg{ width:17px; height:17px; }
+  .dots{ display:flex; gap:6px; }
+  .dots button{
+    width:6px; height:6px; border-radius:50%; background: rgba(246,239,227,0.25);
+    border:none; padding:0; cursor:pointer;
+    transition: background 0.25s ease, width 0.25s ease, border-radius 0.25s ease;
+  }
+  .dots button.active{ background: var(--gold); width: 16px; border-radius: 4px; }
+
+  /* cover slide extras */
+  .cover-center{ flex:1; display:flex; flex-direction:column; justify-content:center; }
+  .swipe-hint{
+    animation: hintBounce 2.2s ease-in-out infinite;
+  }
+  @keyframes hintBounce{
+    0%, 100% { transform: translateX(0); opacity: 0.7; }
+    50% { transform: translateX(4px); opacity: 1; }
+  }
+
+  /* phase label tint on slide border when active */
+  .slide.is-active{
+    border-color: color-mix(in srgb, var(--accent, var(--sage)) 35%, var(--panel-edge));
+    box-shadow: 0 0 40px -12px color-mix(in srgb, var(--accent, var(--sage)) 25%, transparent);
+    transition: border-color 0.4s, box-shadow 0.4s;
+  }
+
+  @media (max-height: 720px){ h1{ font-size:22px; } .slide{ padding: 24px 22px 18px; } }
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+    .slide [data-animate]{ opacity: 1; transform: none; }
+    .track-fill{ width: var(--target-w, 0) !important; }
+  }
+
+  /* ── Password gate ── */
+  #gate{
+    position: fixed; inset: 0; z-index: 200;
+    display: flex; align-items: center; justify-content: center;
+    background:
+      radial-gradient(circle at 15% 8%, rgba(217,164,85,0.12), transparent 45%),
+      radial-gradient(circle at 85% 92%, rgba(234,146,118,0.10), transparent 45%),
+      var(--bg);
+    padding: 24px;
+  }
+  #gate.hidden{ display: none; }
+  .gate-card{
+    width: min(380px, 92vw);
+    background: linear-gradient(165deg, var(--panel) 0%, #17282D 100%);
+    border: 1px solid var(--panel-edge);
+    border-radius: 22px;
+    padding: 32px 28px 28px;
+    box-shadow: 0 24px 60px -20px rgba(0,0,0,0.55);
+    animation: gateIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  @keyframes gateIn{
+    from { opacity: 0; transform: translateY(18px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .gate-icon{
+    width: 48px; height: 48px; border-radius: 14px;
+    background: color-mix(in srgb, var(--gold) 18%, transparent);
+    border: 1px solid color-mix(in srgb, var(--gold) 45%, transparent);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; margin-bottom: 18px;
+  }
+  .gate-title{
+    font-family: 'Fredoka', sans-serif; font-size: 22px; font-weight: 600;
+    color: var(--cream); margin-bottom: 8px;
+  }
+  .gate-sub{
+    font-size: 14px; line-height: 1.55; color: var(--muted); margin-bottom: 22px;
+  }
+  .gate-row{ display: flex; gap: 8px; }
+  #gate-input{
+    flex: 1;
+    background: rgba(246,239,227,0.06);
+    border: 1px solid rgba(246,239,227,0.12);
+    border-radius: 12px;
+    color: var(--cream);
+    font-size: 15px;
+    font-family: 'Karla', sans-serif;
+    padding: 12px 14px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  #gate-input::placeholder{ color: rgba(169,186,184,0.55); }
+  #gate-input:focus{
+    border-color: color-mix(in srgb, var(--gold) 55%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--gold) 15%, transparent);
+  }
+  #gate-input.error{
+    border-color: var(--coral);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--coral) 18%, transparent);
+    animation: shake 0.35s ease;
+  }
+  @keyframes shake{
+    0%,100% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-3px); }
+    80% { transform: translateX(3px); }
+  }
+  #gate-btn{
+    background: linear-gradient(135deg, var(--gold) 0%, #c4893a 100%);
+    color: #1a1208;
+    border: none;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    font-family: 'Karla', sans-serif;
+    padding: 12px 20px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    box-shadow: 0 4px 18px rgba(217,164,85,0.35);
+  }
+  #gate-btn:hover{ transform: translateY(-1px); box-shadow: 0 6px 24px rgba(217,164,85,0.45); }
+  #gate-btn:active{ transform: translateY(0); }
+  #gate-error{
+    display: none;
+    font-size: 13px;
+    color: var(--coral);
+    margin-top: 10px;
+  }
+  .gate-back{
+    display: inline-block;
+    margin-top: 20px;
+    font-size: 13px;
+    color: var(--muted);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .gate-back:hover{ color: var(--cream); }
+
+  #main-content{
+    opacity: 0;
+    pointer-events: none;
+    height: 100%;
+    width: 100%;
+  }
+  #main-content.unlocked{
+    opacity: 1;
+    pointer-events: auto;
+    animation: contentIn 0.45s ease both;
+  }
+  @keyframes contentIn{
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <div class="gate-card">
+    <div class="gate-icon">🔐</div>
+    <div class="gate-title">Private Access</div>
+    <p class="gate-sub">This savings roadmap is password protected. Enter the same CF password to continue.</p>
+    <div class="gate-row">
+      <input id="gate-input" type="password" placeholder="Enter password…" autocomplete="off" />
+      <button id="gate-btn" type="button">Unlock →</button>
+    </div>
+    <div id="gate-error">Incorrect password. Try again.</div>
+    <a class="gate-back" href="./index.html">← Back to home</a>
+  </div>
+</div>
+
+<div id="main-content">
+<a class="home-link" href="./index.html">Home →</a>
+
+<div class="app">
+  <div class="stage">
+    <div class="track" id="track">
+
+      <!-- 1: Cover -->
+      <section class="slide" style="--accent: var(--gold)">
+        <div class="path-wrap" id="pathwrap"></div>
+        <div class="cover-center">
+          <div class="eyebrow" data-animate style="--d:0"><span class="dot"></span>SEP 2026 &rarr; MAY 2028</div>
+          <div class="badge" data-animate style="--d:1"><svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.6"><path d="M3 12l6-8 6 8-6 8-6-8z" stroke-linejoin="round"/><path d="M15 12l4-5 2 3-2 5-4-3z" stroke-linejoin="round"/></svg></div>
+          <h1 data-animate style="--d:2">Our Next<br>Chapter</h1>
+          <p class="sub" data-animate style="--d:3">A trip together, a baby, real cushion, and a bigger home in South Jersey — all from one monthly plan.</p>
+        </div>
+        <div class="note swipe-hint" data-animate style="--d:4">Swipe or tap the arrows →</div>
+      </section>
+
+      <!-- 2: Income & Sources -->
+      <section class="slide" style="--accent: var(--sage)">
+        <div class="eyebrow" data-animate style="--d:0"><span class="dot"></span>WHERE IT COMES FROM</div>
+        <div class="badge" data-animate style="--d:1"><svg viewBox="0 0 24 24" fill="none" stroke="var(--sage)" stroke-width="1.6"><path d="M12 2v20M17 6.5c0-2-2-3.5-5-3.5s-5 1.5-5 3.5 2 3 5 3.5 5 1.5 5 3.5-2 3.5-5 3.5-5-1.5-5-3.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h1 data-animate style="--d:2">$11,000/mo</h1>
+        <p class="sub" data-animate style="--d:3">Three income streams, all landing in the same household pot.</p>
+        <div class="budget-cat" data-animate style="--d:4">
+          <div class="toprow"><span>CJ</span><b>$6,400</b></div>
+          <div class="track-outer"><div class="track-fill" data-fill="58" style="--target-w:58%; background:var(--coral)"></div></div>
+        </div>
+        <div class="budget-cat" data-animate style="--d:5">
+          <div class="toprow"><span>Kay</span><b>$3,600</b></div>
+          <div class="track-outer"><div class="track-fill" data-fill="33" style="--target-w:33%; background:var(--sky)"></div></div>
+        </div>
+        <div class="budget-cat" data-animate style="--d:6">
+          <div class="toprow"><span>Linden Ave rental</span><b>$1,000</b></div>
+          <div class="track-outer"><div class="track-fill" data-fill="9" style="--target-w:9%; background:var(--gold)"></div></div>
+        </div>
+        <div class="note" data-animate style="--d:7">Up from $9,500/mo not long ago — Kay's raise and the Linden rental both showing up here now.</div>
+      </section>
+
+      <!-- 3: The new budget -->
+      <section class="slide" style="--accent: var(--sky)">
+        <div class="eyebrow" data-animate style="--d:0"><span class="dot"></span>THE MONTHLY PLAN</div>
+        <div class="badge" data-animate style="--d:1"><svg viewBox="0 0 24 24" fill="none" stroke="var(--sky)" stroke-width="1.6"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18" stroke-linecap="round"/></svg></div>
+        <h1 data-animate style="--d:2">$11,000/mo</h1>
+        <p class="sub" data-animate style="--d:3">CJ, Kay, and the Linden rental, all in.</p>
+        <div class="budget-cat" data-animate style="--d:4">
+          <div class="toprow"><span>Fixed costs</span><b>$7,300</b></div>
+          <div class="track-outer"><div class="track-fill" data-fill="66" style="--target-w:66%; background:var(--coral)"></div></div>
+        </div>
+        <div class="budget-cat" data-animate style="--d:5">
+          <div class="toprow"><span>Flex (RNS dues, house cleaners)</span><b>$700</b></div>
+          <div class="track-outer"><div class="track-fill" data-fill="6" style="--target-w:6%; background:var(--sky)"></div></div>
+        </div>
+        <div class="budget-cat" data-animate style="--d:6">
+          <div class="toprow"><span>Savings &amp; investing</span><b>$3,000</b></div>
+          <div class="track-outer"><div class="track-fill" data-fill="27" style="--target-w:27%; background:var(--gold)"></div></div>
+        </div>
+        <div class="note" data-animate style="--d:7">$2,700/mo rotates through our goals below. $300/mo keeps funding paid-up additions on the life policy.</div>
+      </section>
+
+      <!-- 4: Phase 1 Vacation -->
+      <section class="slide" style="--accent: var(--coral)">
+        <div class="eyebrow" data-animate style="--d:0"><span class="dot"></span>PHASE 1 · SEP – DEC 2026</div>
+        <div class="badge" data-animate style="--d:1"><svg viewBox="0 0 24 24" fill="none" stroke="var(--coral)" stroke-width="1.6"><path d="M3 12l7-8 3 3-7 8-3-3z" stroke-linejoin="round"/><path d="M13 7l4-4 4 4-4 4" stroke-linejoin="round"/></svg></div>
+        <h1 data-animate style="--d:2">Trip Fund First</h1>
+        <p class="sub" data-animate style="--d:3">The whole $2,700/mo goes to Europe &amp; St. Martin — done in four months.</p>
+        <div class="stats">
+          <div class="stat" data-animate style="--d:4"><span class="label">Starting balance</span><span class="value">$1,000</span></div>
+          <div class="stat highlight" data-animate style="--d:5"><span class="label">Sep–Nov, full send</span><span class="value">$2,700/mo</span></div>
+          <div class="stat done" data-animate style="--d:6"><span class="label">Vacation fund by Dec '26</span><span class="value">$10,000</span></div>
+        </div>
+        <div class="note" data-animate style="--d:7">December splits three ways — $900 finishes the trip fund, $900 each starts Emergency and Baby.</div>
+      </section>
+
+      <!-- 5: Phase 2 EF+Baby build -->
+      <section class="slide" style="--accent: var(--sage)">
+        <div class="eyebrow" data-animate style="--d:0"><span class="dot"></span>PHASE 2 · JAN – AUG 2027</div>
+        <div class="badge" data-animate style="--d:1"><svg viewBox="0 0 24 24" fill="none" stroke="var(--sage)" stroke-width="1.6"><path d="M12 21c4-3.5 8-8 8-13a8 8 0 10-16 0c0 5 4 9.5 8 13z" stroke-linejoin="round"/><circle cx="12" cy="8" r="2.4"/></svg></div>
+        <h1 data-animate style="--d:2">Two Jars, Evenly</h1>
+        <p class="sub" data-animate style="--d:3">$1,350/mo to Emergency, $1,350/mo to Baby, eight months straight.</p>
+        <div class="stats">
+          <div class="stat" data-animate style="--d:4"><span class="label">Emergency, Aug '27</span><span class="value">$32,700</span></div>
+          <div class="stat" data-animate style="--d:5"><span class="label">Baby fund, Aug '27</span><span class="value">$11,700</span></div>
+        </div>
+        <div class="note" data-animate style="--d:6">Both close to target — $2,300 short each. Two more months clears it.</div>
+      </section>
+
+      <!-- 6: Phase 3 Close the gaps -->
+      <section class="slide" style="--accent: var(--sage)">
+        <div class="eyebrow" data-animate style="--d:0"><span class="dot"></span>PHASE 3 · SEP – OCT 2027</div>
+        <div class="badge" data-animate style="--d:1"><svg viewBox="0 0 24 24" fill="none" stroke="var(--sage)" stroke-width="1.6"><path d="M5 12l4 4 10-10" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h1 data-animate style="--d:2">Closing the Gaps</h1>
+        <p class="sub" data-animate style="--d:3">Baby likely home by now. Two more months finishes both funds.</p>
+        <div class="stats">
+          <div class="stat done" data-animate style="--d:4"><span class="label">Emergency fund, Oct '27</span><span class="value">$35,000</span></div>
+          <div class="stat done" data-animate style="--d:5"><span class="label">Baby fund, Oct '27</span><span class="value">$14,000</span></div>
+        </div>
+        <div class="note" data-animate style="--d:6">Emergency and Baby fund both fully funded — a small $400 leftover starts the House fund early.</div>
+      </section>
+
+      <!-- 7: Phase 4 House sprint -->
+      <section class="slide" style="--accent: var(--gold)">
+        <div class="eyebrow" data-animate style="--d:0"><span class="dot"></span>PHASE 4 · NOV – DEC 2027</div>
+        <div class="badge" data-animate style="--d:1"><svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.6"><rect x="4" y="9" width="16" height="11" rx="1.2"/><path d="M4 9l8-6 8 6" stroke-linejoin="round"/></svg></div>
+        <h1 data-animate style="--d:2">House Fund Sprint</h1>
+        <p class="sub" data-animate style="--d:3">Full $2,700/mo, two months, and the down-payment gap is closed.</p>
+        <div class="stats">
+          <div class="stat done" data-animate style="--d:4"><span class="label">Saved by Dec '27</span><span class="value">$6,000</span></div>
+          <div class="stat" data-animate style="--d:5"><span class="label">+ Expected home sale proceeds</span><span class="value">$115,000</span></div>
+          <div class="stat highlight" data-animate style="--d:6"><span class="label">Ready for down payment + closing</span><span class="value">$121,000</span></div>
+        </div>
+        <div class="note" data-animate style="--d:7">Five months faster than we thought — all four goals funded by December 2027.</div>
+      </section>
+
+      <!-- 8: Breathing room -->
+      <section class="slide" style="--accent: var(--sky)">
+        <div class="eyebrow" data-animate style="--d:0"><span class="dot"></span>JAN – MAY 2028</div>
+        <div class="badge" data-animate style="--d:1"><svg viewBox="0 0 24 24" fill="none" stroke="var(--sky)" stroke-width="1.6"><path d="M12 3c3 3 5 6.5 5 10a5 5 0 01-10 0c0-3.5 2-7 5-10z" stroke-linejoin="round"/></svg></div>
+        <h1 data-animate style="--d:2">Breathing Room</h1>
+        <p class="sub" data-animate style="--d:3">Every goal's funded early — the last five months are ours.</p>
+        <div class="stats">
+          <div class="stat highlight" data-animate style="--d:4"><span class="label">Free monthly cash, Jan–May '28</span><span class="value">$2,700/mo</span></div>
+          <div class="stat" data-animate style="--d:5"><span class="label">Total extra buffer</span><span class="value">$13,500</span></div>
+        </div>
+        <div class="note" data-animate style="--d:6">Extra investing, a bigger cushion, another trip — our call once every goal is already met.</div>
+      </section>
+
+      <!-- 9: Moving day -->
+      <section class="slide" style="--accent: var(--coral)">
+        <div class="eyebrow" data-animate style="--d:0"><span class="dot"></span>MAY 2028</div>
+        <div class="badge" data-animate style="--d:1"><svg viewBox="0 0 24 24" fill="none" stroke="var(--coral)" stroke-width="1.6"><circle cx="12" cy="8" r="3.5"/><path d="M12 11.5V16M9 20h6" stroke-linecap="round"/></svg></div>
+        <h1 data-animate style="--d:2">Moving Day</h1>
+        <p class="sub" data-animate style="--d:3">Sell here, buy in South Jersey — from a position of strength.</p>
+        <div class="stats">
+          <div class="stat" data-animate style="--d:4"><span class="label">Target purchase price</span><span class="value">~$550,000</span></div>
+          <div class="stat" data-animate style="--d:5"><span class="label">Max all-in housing</span><span class="value">$4,500/mo</span></div>
+          <div class="stat" data-animate style="--d:6"><span class="label">Emergency fund stays intact</span><span class="value">$35,000</span></div>
+        </div>
+        <div class="note" data-animate style="--d:7">Vacation taken, baby settled, reserves full, house cash ready. We buy because we're ready — not because a bank says yes.</div>
+      </section>
+
+      <!-- 10: The Fork -->
+      <section class="slide" style="--accent: var(--gold)">
+        <div class="eyebrow" data-animate style="--d:0"><span class="dot"></span>BONUS · WHAT IF</div>
+        <div class="badge" data-animate style="--d:1"><svg viewBox="0 0 24 24" fill="none" stroke="var(--gold)" stroke-width="1.6"><path d="M12 3v7M12 10l-6 11M12 10l6 11" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h1 data-animate style="--d:2">What If We<br>Sell Judson St?</h1>
+        <p class="sub" data-animate style="--d:3">The base plan above already works without it. This is what changes if we sell anyway.</p>
+        <div class="stats">
+          <div class="stat" data-animate style="--d:4"><span class="label">Assumed sale timing</span><span class="value">May 2027</span></div>
+          <div class="stat highlight" data-animate style="--d:5"><span class="label">Net proceeds (taxes, commission, closing)</span><span class="value">$50,000</span></div>
+        </div>
+        <div class="note" data-animate style="--d:6">May 2027 is where we'd be mid-way through funding Emergency and Baby — that's why it's the interesting moment to check.</div>
+      </section>
+
+      <!-- 11: Scenario 2 Result -->
+      <section class="slide" style="--accent: var(--sage)">
+        <div class="eyebrow" data-animate style="--d:0"><span class="dot"></span>SCENARIO 2 · SELL JUDSON ST</div>
+        <div class="badge" data-animate style="--d:1"><svg viewBox="0 0 24 24" fill="none" stroke="var(--sage)" stroke-width="1.6"><path d="M5 12l4 4 10-10" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h1 data-animate style="--d:2">Everything, Early</h1>
+        <p class="sub" data-animate style="--d:3">At the May '27 mark, here's what's still owed — and what the sale covers.</p>
+        <div class="stats">
+          <div class="stat" data-animate style="--d:4"><span class="label">Still needed: Emergency</span><span class="value">$6,350</span></div>
+          <div class="stat" data-animate style="--d:5"><span class="label">Still needed: Baby fund</span><span class="value">$6,350</span></div>
+          <div class="stat" data-animate style="--d:6"><span class="label">Still needed: House fund</span><span class="value">$6,000</span></div>
+          <div class="stat done" data-animate style="--d:7"><span class="label">All three, fully covered</span><span class="value">$18,700</span></div>
+          <div class="stat highlight" data-animate style="--d:8"><span class="label">Left over as pure buffer</span><span class="value">$31,300</span></div>
+        </div>
+        <div class="note" data-animate style="--d:9">Every goal complete by June 2027 — 18 months early. The $2,700/mo we'd been saving is free for a full year after that, roughly $32,400 more toward investing or extra cushion before the May 2028 move.</div>
+      </section>
+
+    </div>
+
+    <div class="controls">
+      <button class="navbtn" id="prev" aria-label="Previous slide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 6l-6 6 6 6"/></svg></button>
+      <div class="dots" id="dots"></div>
+      <button class="navbtn" id="next" aria-label="Next slide"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 6l6 6-6 6"/></svg></button>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+  const CF_KEY = 'cf-unlocked';
+  const gate = document.getElementById('gate');
+  const main = document.getElementById('main-content');
+  const gateInput = document.getElementById('gate-input');
+  const gateBtn = document.getElementById('gate-btn');
+  const gateError = document.getElementById('gate-error');
+
+  function unlockPage(){
+    sessionStorage.setItem(CF_KEY, '1');
+    gate.classList.add('hidden');
+    main.classList.add('unlocked');
+    initDeck();
+  }
+
+  function checkGatePassword(){
+    if (gateInput.value.toLowerCase() === 'team fam') {
+      gateBtn.textContent = '✓ Unlocked';
+      gateBtn.style.background = 'linear-gradient(135deg, var(--sage) 0%, #6a9465 100%)';
+      gateBtn.style.color = '#fff';
+      setTimeout(unlockPage, 380);
+    } else {
+      gateError.style.display = 'block';
+      gateInput.classList.remove('error');
+      void gateInput.offsetWidth;
+      gateInput.classList.add('error');
+      gateInput.value = '';
+      gateInput.focus();
+    }
+  }
+
+  gateBtn.addEventListener('click', checkGatePassword);
+  gateInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') checkGatePassword();
+    gateInput.classList.remove('error');
+    gateError.style.display = 'none';
+  });
+
+  let deckReady = false;
+
+  function initDeck(){
+    if (deckReady) return;
+    deckReady = true;
+
+  const track = document.getElementById('track');
+  const slides = Array.from(track.children);
+  const dotsWrap = document.getElementById('dots');
+  const prevBtn = document.getElementById('prev');
+  const nextBtn = document.getElementById('next');
+  const pathWrap = document.getElementById('pathwrap');
+  const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  slides.forEach((_, i) => {
+    const b = document.createElement('button');
+    if (i === 0) b.classList.add('active');
+    b.setAttribute('aria-label', 'Go to slide ' + (i + 1));
+    b.addEventListener('click', () => goTo(i));
+    dotsWrap.appendChild(b);
+
+    const seg = document.createElement('div');
+    seg.className = 'seg';
+    seg.innerHTML = '<div class="fill" data-idx="'+i+'"></div>';
+    pathWrap.appendChild(seg);
+  });
+  const dots = Array.from(dotsWrap.children);
+  const fills = Array.from(pathWrap.querySelectorAll('.fill'));
+
+  function current(){ return Math.round(track.scrollLeft / track.clientWidth); }
+
+  function resetSlideAnimations(slide){
+    slide.classList.remove('is-active');
+    slide.querySelectorAll('[data-animate]').forEach(el => {
+      el.style.animation = 'none';
+      void el.offsetWidth;
+      el.style.animation = '';
+    });
+    slide.querySelectorAll('.track-fill').forEach(bar => {
+      bar.style.width = reducedMotion ? (bar.dataset.fill + '%') : '0';
+    });
+  }
+
+  function playSlideAnimations(slide){
+    slide.classList.add('is-active');
+    const delay = reducedMotion ? 0 : 350;
+    slide.querySelectorAll('.track-fill').forEach((bar, i) => {
+      setTimeout(() => {
+        bar.style.width = bar.dataset.fill + '%';
+      }, delay + i * 120);
+    });
+  }
+
+  function updateUI(){
+    const idx = current();
+    dots.forEach((d,i) => d.classList.toggle('active', i === idx));
+    fills.forEach((f,i) => f.style.width = (i <= idx ? '100%' : '0%'));
+    prevBtn.style.opacity = idx === 0 ? '0.35' : '1';
+    nextBtn.style.opacity = idx === slides.length - 1 ? '0.35' : '1';
+
+    slides.forEach((slide, i) => {
+      if (i === idx) {
+        if (!slide.classList.contains('is-active')) {
+          slides.forEach(s => { if (s !== slide) resetSlideAnimations(s); });
+          playSlideAnimations(slide);
+        }
+      }
+    });
+  }
+
+  function goTo(i){
+    i = Math.max(0, Math.min(slides.length - 1, i));
+    track.scrollTo({ left: i * track.clientWidth, behavior: 'smooth' });
+  }
+
+  prevBtn.addEventListener('click', () => goTo(current() - 1));
+  nextBtn.addEventListener('click', () => goTo(current() + 1));
+  track.addEventListener('scroll', () => { requestAnimationFrame(updateUI); });
+  window.addEventListener('resize', () => {
+    track.scrollLeft = current() * track.clientWidth;
+    updateUI();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight') goTo(current() + 1);
+    if (e.key === 'ArrowLeft') goTo(current() - 1);
+  });
+
+  // Touch swipe hint on first visit
+  let touchStartX = 0;
+  track.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive: true });
+  track.addEventListener('touchend', e => {
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    if (Math.abs(dx) > 40) goTo(current() + (dx < 0 ? 1 : -1));
+  }, { passive: true });
+
+  playSlideAnimations(slides[0]);
+  updateUI();
+  }
+
+  if (sessionStorage.getItem(CF_KEY) === '1') {
+    gate.classList.add('hidden');
+    main.classList.add('unlocked');
+    initDeck();
+  } else {
+    gateInput.focus();
+  }
+</script>
+</body>
+</html>
