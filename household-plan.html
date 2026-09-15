@@ -1,0 +1,1367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Household Financial Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Karla:wght@400;500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #16262B;
+    --panel: #1E3540;
+    --panel-edge: #2A4750;
+    --coral: #EA9276;
+    --gold: #D9A455;
+    --sage: #93B08E;
+    --sky: #7FA8C2;
+    --cream: #F6EFE3;
+    --muted: #A9BAB8;
+    --positive: #93B08E;
+    --negative: #EA9276;
+    --radius: 18px;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-right: env(safe-area-inset-right, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  *{ box-sizing: border-box; }
+  html{ scroll-behavior: smooth; }
+  body{
+    margin:0; padding:0;
+    font-family:'Karla', sans-serif;
+    background: var(--bg);
+    color: var(--cream);
+    -webkit-font-smoothing: antialiased;
+    min-height: 100dvh;
+  }
+  body::before{
+    content:'';
+    position: fixed; inset:0; pointer-events:none; z-index:0;
+    background:
+      radial-gradient(circle at 12% 0%, rgba(217,164,85,0.12), transparent 42%),
+      radial-gradient(circle at 90% 100%, rgba(234,146,118,0.10), transparent 45%);
+  }
+
+  /* ── Gate ── */
+  #gate{
+    position: fixed; inset:0; z-index:200;
+    display:flex; align-items:center; justify-content:center;
+    background:
+      radial-gradient(circle at 15% 8%, rgba(217,164,85,0.12), transparent 45%),
+      radial-gradient(circle at 85% 92%, rgba(234,146,118,0.10), transparent 45%),
+      var(--bg);
+    padding: 24px;
+  }
+  #gate.hidden{ display:none; }
+  .gate-card{
+    width: min(380px, 92vw);
+    background: linear-gradient(165deg, var(--panel) 0%, #17282D 100%);
+    border: 1px solid var(--panel-edge);
+    border-radius: 22px;
+    padding: 32px 28px 28px;
+    box-shadow: 0 24px 60px -20px rgba(0,0,0,0.55);
+    animation: gateIn 0.5s cubic-bezier(0.22,1,0.36,1) both;
+  }
+  @keyframes gateIn{
+    from{ opacity:0; transform:translateY(18px) scale(0.97); }
+    to{ opacity:1; transform:none; }
+  }
+  .gate-icon{
+    width:48px; height:48px; border-radius:14px;
+    background: color-mix(in srgb, var(--gold) 18%, transparent);
+    border: 1px solid color-mix(in srgb, var(--gold) 45%, transparent);
+    display:flex; align-items:center; justify-content:center;
+    font-size:22px; margin-bottom:18px;
+  }
+  .gate-title{ font-family:'Fredoka',sans-serif; font-size:22px; font-weight:600; margin-bottom:8px; }
+  .gate-sub{ font-size:14px; line-height:1.55; color:var(--muted); margin-bottom:22px; }
+  .gate-row{ display:flex; gap:8px; }
+  @media (max-width:420px){ .gate-row{ flex-direction:column; } }
+  #gate-input{
+    flex:1; background: rgba(246,239,227,0.06);
+    border:1px solid rgba(246,239,227,0.12); border-radius:12px;
+    color:var(--cream); font-size:15px; font-family:'Karla',sans-serif;
+    padding:12px 14px; outline:none;
+  }
+  #gate-input:focus{
+    border-color: color-mix(in srgb, var(--gold) 55%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--gold) 15%, transparent);
+  }
+  #gate-input.error{
+    border-color: var(--coral);
+    animation: shake 0.35s ease;
+  }
+  @keyframes shake{
+    0%,100%{ transform:translateX(0); }
+    20%{ transform:translateX(-6px); }
+    40%{ transform:translateX(6px); }
+    60%{ transform:translateX(-3px); }
+    80%{ transform:translateX(3px); }
+  }
+  #gate-btn{
+    background: linear-gradient(135deg, var(--gold) 0%, #c4893a 100%);
+    color:#1a1208; border:none; border-radius:12px;
+    font-size:14px; font-weight:700; font-family:'Karla',sans-serif;
+    padding:12px 20px; cursor:pointer; white-space:nowrap;
+    box-shadow: 0 4px 18px rgba(217,164,85,0.35);
+  }
+  #gate-error{ display:none; font-size:13px; color:var(--coral); margin-top:10px; }
+  .gate-back{ display:inline-block; margin-top:20px; font-size:13px; color:var(--muted); text-decoration:none; }
+  .gate-back:hover{ color:var(--cream); }
+
+  #main-content{
+    opacity:0; pointer-events:none;
+    position:relative; z-index:1;
+  }
+  #main-content.unlocked{
+    opacity:1; pointer-events:auto;
+    animation: contentIn 0.45s ease both;
+  }
+  @keyframes contentIn{
+    from{ opacity:0; transform:translateY(8px); }
+    to{ opacity:1; transform:none; }
+  }
+
+  .home-link{
+    position: fixed;
+    top: calc(var(--safe-top) + 14px);
+    right: calc(var(--safe-right) + 14px);
+    z-index: 100;
+    display:inline-flex; align-items:center; gap:7px;
+    font-size:13px; font-weight:600;
+    color: rgba(246,239,227,0.65);
+    background: rgba(246,239,227,0.06);
+    border:1px solid rgba(246,239,227,0.12);
+    border-radius:100px; padding:8px 16px; text-decoration:none;
+    backdrop-filter: blur(10px);
+  }
+  .home-link:hover{ background:rgba(246,239,227,0.12); color:var(--cream); }
+
+  .app{
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: calc(var(--safe-top) + 64px) 20px calc(var(--safe-bottom) + 48px);
+  }
+
+  .hero{
+    margin-bottom: 28px;
+  }
+  .eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11.5px; letter-spacing:0.12em; text-transform:uppercase;
+    color: var(--gold);
+    display:flex; align-items:center; gap:8px; margin-bottom:14px;
+  }
+  .eyebrow .dot{
+    width:6px; height:6px; border-radius:50%; background:var(--gold);
+    box-shadow: 0 0 0 4px rgba(217,164,85,0.15);
+  }
+  h1{
+    font-family:'Fredoka', sans-serif;
+    font-weight:600; font-size: clamp(28px, 5vw, 40px);
+    line-height:1.12; margin:0 0 10px; color:var(--cream);
+  }
+  .hero-sub{
+    margin:0; max-width:560px;
+    font-size:15px; line-height:1.55; color:var(--muted);
+  }
+
+  .toolbar{
+    display:flex; flex-wrap:wrap; gap:10px;
+    align-items:center; justify-content:space-between;
+    margin-bottom: 18px;
+  }
+  .toolbar-hint{
+    font-size:13px; color:var(--muted);
+  }
+  .btn{
+    border:1px solid var(--panel-edge);
+    background: var(--panel);
+    color: var(--cream);
+    border-radius: 100px;
+    padding: 10px 16px;
+    font-family:'Karla',sans-serif;
+    font-size:13px; font-weight:700;
+    cursor:pointer;
+    transition: background 0.15s, transform 0.15s;
+  }
+  .btn:hover{ background: var(--panel-edge); }
+  .btn:active{ transform: scale(0.97); }
+  .btn-gold{
+    background: linear-gradient(135deg, var(--gold), #c4893a);
+    color:#1a1208; border:none;
+    box-shadow: 0 4px 16px rgba(217,164,85,0.3);
+  }
+
+  .summary-grid{
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap:12px;
+    margin-bottom: 18px;
+  }
+  .summary-card{
+    background: linear-gradient(165deg, var(--panel) 0%, #17282D 100%);
+    border:1px solid var(--panel-edge);
+    border-radius: var(--radius);
+    padding: 16px 14px;
+    position:relative; overflow:hidden;
+  }
+  .summary-card::before{
+    content:'';
+    position:absolute; inset:0 0 auto 0; height:2px;
+    background: var(--accent, var(--gold));
+    opacity:0.85;
+  }
+  .summary-label{
+    font-size:11.5px; color:var(--muted);
+    letter-spacing:0.04em; text-transform:uppercase;
+    margin-bottom:8px;
+  }
+  .summary-value{
+    font-family:'JetBrains Mono', monospace;
+    font-size: clamp(18px, 2.4vw, 22px);
+    font-weight:600; color:var(--cream);
+  }
+  .summary-value.positive{ color: var(--sage); }
+  .summary-value.negative{ color: var(--coral); }
+
+  .card{
+    background: linear-gradient(165deg, var(--panel) 0%, #17282D 100%);
+    border:1px solid var(--panel-edge);
+    border-radius: 22px;
+    padding: 22px 20px 20px;
+    margin-bottom: 16px;
+  }
+  .section-head{
+    display:flex; align-items:flex-start; gap:14px;
+    margin-bottom: 8px;
+  }
+  .section-badge{
+    width:44px; height:44px; border-radius:13px; flex-shrink:0;
+    display:flex; align-items:center; justify-content:center;
+    background: color-mix(in srgb, var(--accent, var(--gold)) 16%, transparent);
+    border:1px solid color-mix(in srgb, var(--accent, var(--gold)) 40%, transparent);
+    font-size:20px;
+  }
+  .section-title{
+    font-family:'Fredoka',sans-serif;
+    font-size:20px; font-weight:600; margin:0 0 4px;
+  }
+  .section-description{
+    margin:0; font-size:13.5px; line-height:1.5; color:var(--muted);
+  }
+
+  .input-grid{
+    display:grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px 18px;
+    margin-top: 18px;
+  }
+  .stat-grid, .budget-grid{
+    display:grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-top: 16px;
+  }
+
+  .field{
+    display:flex; flex-direction:column; gap:8px;
+    padding: 12px 12px 14px;
+    background: rgba(246,239,227,0.03);
+    border:1px solid rgba(246,239,227,0.07);
+    border-radius: 14px;
+  }
+  .field-top{
+    display:flex; align-items:baseline; justify-content:space-between; gap:10px;
+  }
+  .field label{
+    font-size:12.5px; color:var(--muted); font-weight:500;
+  }
+  .field-value{
+    font-family:'JetBrains Mono', monospace;
+    font-size:14px; font-weight:600;
+    color: var(--accent, var(--gold));
+    white-space:nowrap;
+  }
+
+  /* Slider */
+  input[type="range"]{
+    -webkit-appearance: none;
+    appearance: none;
+    width:100%;
+    height: 8px;
+    border-radius: 99px;
+    background: rgba(246,239,227,0.1);
+    outline: none;
+    cursor: pointer;
+    margin: 2px 0 0;
+  }
+  input[type="range"]::-webkit-slider-thumb{
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--accent, var(--gold));
+    border: 3px solid #1a2a2f;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent, var(--gold)) 25%, transparent);
+    cursor: grab;
+    transition: transform 0.15s ease;
+  }
+  input[type="range"]::-webkit-slider-thumb:active{
+    transform: scale(1.12);
+    cursor: grabbing;
+  }
+  input[type="range"]::-moz-range-thumb{
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--accent, var(--gold));
+    border: 3px solid #1a2a2f;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent, var(--gold)) 25%, transparent);
+    cursor: grab;
+  }
+  input[type="range"]::-moz-range-track{
+    height:8px; border-radius:99px; background: rgba(246,239,227,0.1);
+  }
+  .field-meta{
+    display:flex; justify-content:space-between;
+    font-family:'JetBrains Mono', monospace;
+    font-size:10px; color: rgba(169,186,184,0.55);
+  }
+
+  .fine-input{
+    width:100%;
+    background: rgba(246,239,227,0.05);
+    border:1px solid rgba(246,239,227,0.1);
+    border-radius:10px;
+    color: var(--cream);
+    font-family:'JetBrains Mono', monospace;
+    font-size:14px; font-weight:600;
+    padding: 10px 12px;
+    outline:none;
+  }
+  .fine-input:focus{
+    border-color: color-mix(in srgb, var(--accent, var(--gold)) 50%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent, var(--gold)) 12%, transparent);
+  }
+
+  .stat-card, .budget-card{
+    background: rgba(246,239,227,0.035);
+    border:1px solid rgba(246,239,227,0.08);
+    border-radius: 14px;
+    padding: 12px 13px;
+  }
+  .stat-label, .budget-label{
+    font-size:11.5px; color:var(--muted); margin-bottom:6px;
+  }
+  .stat-value, .budget-value{
+    font-family:'JetBrains Mono', monospace;
+    font-size:16px; font-weight:600; color:var(--cream);
+  }
+  .stat-card.highlight{
+    border-color: color-mix(in srgb, var(--gold) 40%, transparent);
+    background: color-mix(in srgb, var(--gold) 8%, transparent);
+  }
+  .stat-card.highlight .stat-value{ color: var(--gold); }
+
+  .panel{
+    margin-top: 16px;
+    background: rgba(0,0,0,0.18);
+    border:1px solid rgba(246,239,227,0.07);
+    border-radius: 14px;
+    padding: 6px 14px;
+  }
+  .waterfall-row, .insurance-row{
+    display:flex; align-items:center; justify-content:space-between; gap:14px;
+    padding: 11px 0; font-size:13.5px; color: var(--muted);
+  }
+  .waterfall-row + .waterfall-row,
+  .insurance-row + .insurance-row{
+    border-top: 1px solid rgba(246,239,227,0.07);
+  }
+  .waterfall-row strong, .insurance-row strong{
+    font-family:'JetBrains Mono', monospace;
+    font-weight:600; color: var(--cream); white-space:nowrap;
+  }
+  .waterfall-row.total{
+    color: var(--cream);
+  }
+  .waterfall-row.total strong{ color: var(--gold); }
+  .waterfall-step{
+    display:inline-flex; align-items:center; gap:8px;
+  }
+  .step-num{
+    width:20px; height:20px; border-radius:50%;
+    display:inline-flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono', monospace;
+    font-size:10px; font-weight:600;
+    background: color-mix(in srgb, var(--sky) 20%, transparent);
+    color: var(--sky);
+  }
+
+  .budget-card.locked .budget-value{ color: var(--sky); }
+  .budget-card .budget-input{
+    width:100%;
+    border:none; background:transparent; padding:0;
+    font-family:'JetBrains Mono', monospace;
+    font-size:16px; font-weight:600; color:var(--cream);
+    outline:none;
+  }
+  .budget-slider-wrap{ margin-top: 8px; }
+
+  .budget-meter{ margin-top: 18px; }
+  .budget-meter-header{
+    display:flex; justify-content:space-between; gap:12px;
+    font-size:13px; font-weight:600; margin-bottom:8px;
+  }
+  .meter-track{
+    height:10px; border-radius:99px;
+    background: rgba(246,239,227,0.08); overflow:hidden;
+  }
+  .meter-bar{
+    height:100%; width:0; border-radius:99px;
+    background: linear-gradient(90deg, var(--sage), var(--gold));
+    transition: width 0.25s ease, background 0.25s ease;
+  }
+  .meter-bar.over{
+    background: linear-gradient(90deg, var(--coral), #d96a4e);
+  }
+  .budget-status{
+    margin-top:8px; font-size:13px; color:var(--muted);
+  }
+  .budget-status.positive{ color: var(--sage); }
+  .budget-status.negative{ color: var(--coral); }
+
+  .note{
+    margin-top:14px; font-size:12.5px; line-height:1.5;
+    color: var(--muted); font-style:italic;
+    padding-top:12px; border-top:1px dashed rgba(246,239,227,0.12);
+  }
+
+  .toc{
+    display:flex; flex-wrap:wrap; gap:8px;
+    margin-bottom: 20px;
+  }
+  .toc a{
+    text-decoration:none;
+    font-size:12px; font-weight:600;
+    color: var(--muted);
+    background: rgba(246,239,227,0.04);
+    border:1px solid rgba(246,239,227,0.08);
+    border-radius:100px;
+    padding: 7px 12px;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .toc a:hover{ color:var(--cream); border-color: rgba(246,239,227,0.2); }
+
+  @media (max-width: 900px){
+    .summary-grid, .stat-grid, .budget-grid{ grid-template-columns: repeat(2, 1fr); }
+  }
+  @media (max-width: 640px){
+    .app{ padding-left:14px; padding-right:14px; }
+    .input-grid{ grid-template-columns: 1fr; }
+    .summary-grid{ grid-template-columns: repeat(2, 1fr); }
+    .stat-grid, .budget-grid{ grid-template-columns: 1fr 1fr; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    *, *::before, *::after{
+      animation-duration:0.01ms !important;
+      transition-duration:0.01ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <div class="gate-card">
+    <div class="gate-icon">🔐</div>
+    <div class="gate-title">Private Access</div>
+    <p class="gate-sub">This household plan is password protected. Enter the CF password to continue.</p>
+    <div class="gate-row">
+      <input id="gate-input" type="password" placeholder="Enter password…" autocomplete="off" />
+      <button id="gate-btn" type="button">Unlock →</button>
+    </div>
+    <div id="gate-error">Incorrect password. Try again.</div>
+    <a class="gate-back" href="./index.html">← Back to home</a>
+  </div>
+</div>
+
+<div id="main-content">
+  <a class="home-link" href="./index.html">Home →</a>
+
+  <main class="app" id="familyPlanApp">
+    <header class="hero">
+      <div class="eyebrow"><span class="dot"></span>INTERACTIVE MODEL</div>
+      <h1>Household<br>Financial Plan</h1>
+      <p class="hero-sub">Home purchase, Fleetwood sale waterfall, policy loan, and monthly budget — drag any slider and watch the whole plan update live.</p>
+    </header>
+
+    <nav class="toc" aria-label="Sections">
+      <a href="#sec-purchase">1 · Home</a>
+      <a href="#sec-sale">2 · Sale</a>
+      <a href="#sec-policy">3 · Policy</a>
+      <a href="#sec-budget">4 · Budget</a>
+    </nav>
+
+    <div class="toolbar">
+      <p class="toolbar-hint">Drag the bars · fine-tune with the number fields</p>
+      <button type="button" class="btn btn-gold" id="resetButton">Reset assumptions</button>
+    </div>
+
+    <section class="summary-grid">
+      <div class="summary-card" style="--accent: var(--sage)">
+        <div class="summary-label">Monthly net income</div>
+        <div id="summaryIncome" class="summary-value">$11,000</div>
+      </div>
+      <div class="summary-card" style="--accent: var(--sky)">
+        <div class="summary-label">Monthly budget</div>
+        <div id="summaryBudget" class="summary-value">$9,620</div>
+      </div>
+      <div class="summary-card" style="--accent: var(--gold)">
+        <div class="summary-label">Monthly cushion</div>
+        <div id="summaryCushion" class="summary-value positive">+$1,380</div>
+      </div>
+      <div class="summary-card" style="--accent: var(--coral)">
+        <div class="summary-label">Policy loan after sale</div>
+        <div id="summaryPolicyBalance" class="summary-value">—</div>
+      </div>
+    </section>
+
+    <!-- 1. Home Purchase -->
+    <section class="card" id="sec-purchase" style="--accent: var(--coral)">
+      <div class="section-head">
+        <div class="section-badge">🏠</div>
+        <div>
+          <h2 class="section-title">1. Home Purchase</h2>
+          <p class="section-description">Purchase price and financing assumptions update housing costs, cash-to-close, and the monthly budget.</p>
+        </div>
+      </div>
+
+      <div class="input-grid">
+        <div class="field" style="--accent: var(--coral)">
+          <div class="field-top">
+            <label for="purchasePrice">Purchase price</label>
+            <span class="field-value" data-display="purchasePrice">$460,000</span>
+          </div>
+          <input id="purchasePrice" type="range" min="250000" max="750000" step="5000" value="460000" />
+          <div class="field-meta"><span>$250k</span><span>$750k</span></div>
+          <input class="fine-input" type="number" data-sync="purchasePrice" min="100000" step="5000" value="460000" />
+        </div>
+
+        <div class="field" style="--accent: var(--gold)">
+          <div class="field-top">
+            <label for="downPct">Down payment</label>
+            <span class="field-value" data-display="downPct">10%</span>
+          </div>
+          <input id="downPct" type="range" min="0" max="40" step="1" value="10" />
+          <div class="field-meta"><span>0%</span><span>40%</span></div>
+          <input class="fine-input" type="number" data-sync="downPct" min="0" max="100" step="1" value="10" />
+        </div>
+
+        <div class="field" style="--accent: var(--sky)">
+          <div class="field-top">
+            <label for="mortgageRate">Mortgage rate</label>
+            <span class="field-value" data-display="mortgageRate">7.00%</span>
+          </div>
+          <input id="mortgageRate" type="range" min="3" max="12" step="0.125" value="7" />
+          <div class="field-meta"><span>3%</span><span>12%</span></div>
+          <input class="fine-input" type="number" data-sync="mortgageRate" min="0" max="20" step="0.125" value="7" />
+        </div>
+
+        <div class="field" style="--accent: var(--sage)">
+          <div class="field-top">
+            <label for="closingPct">Buyer closing costs</label>
+            <span class="field-value" data-display="closingPct">3.04%</span>
+          </div>
+          <input id="closingPct" type="range" min="0" max="8" step="0.01" value="3.04" />
+          <div class="field-meta"><span>0%</span><span>8%</span></div>
+          <input class="fine-input" type="number" data-sync="closingPct" min="0" max="15" step="0.01" value="3.04" />
+        </div>
+
+        <div class="field" style="--accent: var(--coral)">
+          <div class="field-top">
+            <label for="taxMonthly">Property taxes / mo</label>
+            <span class="field-value" data-display="taxMonthly">$854</span>
+          </div>
+          <input id="taxMonthly" type="range" min="200" max="2000" step="25" value="854" />
+          <div class="field-meta"><span>$200</span><span>$2,000</span></div>
+          <input class="fine-input" type="number" data-sync="taxMonthly" min="0" step="25" value="854" />
+        </div>
+
+        <div class="field" style="--accent: var(--sky)">
+          <div class="field-top">
+            <label for="homeInsurance">Home insurance / mo</label>
+            <span class="field-value" data-display="homeInsurance">$150</span>
+          </div>
+          <input id="homeInsurance" type="range" min="50" max="500" step="10" value="150" />
+          <div class="field-meta"><span>$50</span><span>$500</span></div>
+          <input class="fine-input" type="number" data-sync="homeInsurance" min="0" step="10" value="150" />
+        </div>
+
+        <div class="field" style="--accent: var(--gold)">
+          <div class="field-top">
+            <label for="pmiMonthly">PMI / mo</label>
+            <span class="field-value" data-display="pmiMonthly">$125</span>
+          </div>
+          <input id="pmiMonthly" type="range" min="0" max="400" step="5" value="125" />
+          <div class="field-meta"><span>$0</span><span>$400</span></div>
+          <input class="fine-input" type="number" data-sync="pmiMonthly" min="0" step="5" value="125" />
+        </div>
+
+        <div class="field" style="--accent: var(--sage)">
+          <div class="field-top">
+            <label for="utilities">Utilities / mo</label>
+            <span class="field-value" data-display="utilities">$590</span>
+          </div>
+          <input id="utilities" type="range" min="100" max="1200" step="10" value="590" />
+          <div class="field-meta"><span>$100</span><span>$1,200</span></div>
+          <input class="fine-input" type="number" data-sync="utilities" min="0" step="10" value="590" />
+        </div>
+
+        <div class="field" style="--accent: var(--coral)">
+          <div class="field-top">
+            <label for="housingBuffer">Housing buffer</label>
+            <span class="field-value" data-display="housingBuffer">$27</span>
+          </div>
+          <input id="housingBuffer" type="range" min="0" max="300" step="1" value="27" />
+          <div class="field-meta"><span>$0</span><span>$300</span></div>
+          <input class="fine-input" type="number" data-sync="housingBuffer" min="0" step="1" value="27" />
+        </div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-label">Mortgage amount</div>
+          <div id="mortgageAmount" class="stat-value">$414,000</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Principal &amp; interest</div>
+          <div id="piMonthly" class="stat-value">$2,754/mo</div>
+        </div>
+        <div class="stat-card highlight">
+          <div class="stat-label">Cash to close</div>
+          <div id="cashToClose" class="stat-value">$60,000</div>
+        </div>
+        <div class="stat-card highlight">
+          <div class="stat-label">Housing budget</div>
+          <div id="housingTotal" class="stat-value">$4,500/mo</div>
+        </div>
+      </div>
+      <p class="note">PMI auto-drops to $0 once down payment hits 20%.</p>
+    </section>
+
+    <!-- 2. Fleetwood Sale -->
+    <section class="card" id="sec-sale" style="--accent: var(--gold)">
+      <div class="section-head">
+        <div class="section-badge">🏡</div>
+        <div>
+          <h2 class="section-title">2. Fleetwood Sale &amp; Cash Waterfall</h2>
+          <p class="section-description">Sale proceeds flow in order: new-home cash to close → emergency fund → Baby Fam fund → policy loan.</p>
+        </div>
+      </div>
+
+      <div class="input-grid">
+        <div class="field" style="--accent: var(--gold)">
+          <div class="field-top">
+            <label for="salePrice">Fleetwood sale price</label>
+            <span class="field-value" data-display="salePrice">$395,000</span>
+          </div>
+          <input id="salePrice" type="range" min="250000" max="550000" step="5000" value="395000" />
+          <div class="field-meta"><span>$250k</span><span>$550k</span></div>
+          <input class="fine-input" type="number" data-sync="salePrice" min="0" step="5000" value="395000" />
+        </div>
+
+        <div class="field" style="--accent: var(--coral)">
+          <div class="field-top">
+            <label for="saleMortgage">Mortgage payoff</label>
+            <span class="field-value" data-display="saleMortgage">$273,000</span>
+          </div>
+          <input id="saleMortgage" type="range" min="100000" max="400000" step="1000" value="273000" />
+          <div class="field-meta"><span>$100k</span><span>$400k</span></div>
+          <input class="fine-input" type="number" data-sync="saleMortgage" min="0" step="1000" value="273000" />
+        </div>
+
+        <div class="field" style="--accent: var(--sky)">
+          <div class="field-top">
+            <label for="sellingPct">Selling costs</label>
+            <span class="field-value" data-display="sellingPct">6.5%</span>
+          </div>
+          <input id="sellingPct" type="range" min="0" max="12" step="0.1" value="6.5" />
+          <div class="field-meta"><span>0%</span><span>12%</span></div>
+          <input class="fine-input" type="number" data-sync="sellingPct" min="0" max="20" step="0.1" value="6.5" />
+        </div>
+
+        <div class="field" style="--accent: var(--sage)">
+          <div class="field-top">
+            <label for="otherProceeds">Other sale proceeds</label>
+            <span class="field-value" data-display="otherProceeds">$0</span>
+          </div>
+          <input id="otherProceeds" type="range" min="0" max="50000" step="1000" value="0" />
+          <div class="field-meta"><span>$0</span><span>$50k</span></div>
+          <input class="fine-input" type="number" data-sync="otherProceeds" min="0" step="1000" value="0" />
+        </div>
+
+        <div class="field" style="--accent: var(--sage)">
+          <div class="field-top">
+            <label for="efCurrent">Current emergency fund</label>
+            <span class="field-value" data-display="efCurrent">$12,000</span>
+          </div>
+          <input id="efCurrent" type="range" min="0" max="50000" step="500" value="12000" />
+          <div class="field-meta"><span>$0</span><span>$50k</span></div>
+          <input class="fine-input" type="number" data-sync="efCurrent" min="0" step="500" value="12000" />
+        </div>
+
+        <div class="field" style="--accent: var(--gold)">
+          <div class="field-top">
+            <label for="efTarget">Emergency fund target</label>
+            <span class="field-value" data-display="efTarget">$30,000</span>
+          </div>
+          <input id="efTarget" type="range" min="10000" max="60000" step="1000" value="30000" />
+          <div class="field-meta"><span>$10k</span><span>$60k</span></div>
+          <input class="fine-input" type="number" data-sync="efTarget" min="0" step="1000" value="30000" />
+        </div>
+
+        <div class="field" style="--accent: var(--coral)">
+          <div class="field-top">
+            <label for="babyFundTarget">Baby Fam fund target</label>
+            <span class="field-value" data-display="babyFundTarget">$10,000</span>
+          </div>
+          <input id="babyFundTarget" type="range" min="0" max="25000" step="500" value="10000" />
+          <div class="field-meta"><span>$0</span><span>$25k</span></div>
+          <input class="fine-input" type="number" data-sync="babyFundTarget" min="0" step="500" value="10000" />
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="waterfall-row total">
+          <span>Net Fleetwood proceeds</span>
+          <strong id="saleNet">$96,325</strong>
+        </div>
+        <div class="waterfall-row">
+          <span class="waterfall-step"><span class="step-num">1</span> New-home cash to close</span>
+          <strong id="waterfallClose">$60,000</strong>
+        </div>
+        <div class="waterfall-row">
+          <span class="waterfall-step"><span class="step-num">2</span> Emergency-fund top-up</span>
+          <strong id="waterfallEf">$18,000</strong>
+        </div>
+        <div class="waterfall-row">
+          <span class="waterfall-step"><span class="step-num">3</span> Baby Fam fund</span>
+          <strong id="waterfallBaby">$10,000</strong>
+        </div>
+        <div class="waterfall-row">
+          <span class="waterfall-step"><span class="step-num">4</span> Policy-loan payoff</span>
+          <strong id="waterfallPolicy">$8,325</strong>
+        </div>
+        <div class="waterfall-row total">
+          <span>Cash remaining after waterfall</span>
+          <strong id="waterfallRemaining">$0</strong>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Policy Loan -->
+    <section class="card" id="sec-policy" style="--accent: var(--sage)">
+      <div class="section-head">
+        <div class="section-badge">🌳</div>
+        <div>
+          <h2 class="section-title">3. Policy Loan &amp; Debt Restructuring</h2>
+          <p class="section-description">Tesla and the private student loan are paid off with the policy loan. The public student loan remains.</p>
+        </div>
+      </div>
+
+      <div class="input-grid">
+        <div class="field" style="--accent: var(--sage)">
+          <div class="field-top">
+            <label for="policyLoan">Policy loan requested</label>
+            <span class="field-value" data-display="policyLoan">$27,000</span>
+          </div>
+          <input id="policyLoan" type="range" min="0" max="60000" step="100" value="27000" />
+          <div class="field-meta"><span>$0</span><span>$60k</span></div>
+          <input class="fine-input" type="number" data-sync="policyLoan" min="0" step="100" value="27000" />
+        </div>
+
+        <div class="field" style="--accent: var(--gold)">
+          <div class="field-top">
+            <label for="policyRate">Policy-loan rate</label>
+            <span class="field-value" data-display="policyRate">5.0%</span>
+          </div>
+          <input id="policyRate" type="range" min="0" max="10" step="0.1" value="5" />
+          <div class="field-meta"><span>0%</span><span>10%</span></div>
+          <input class="fine-input" type="number" data-sync="policyRate" min="0" max="20" step="0.1" value="5" />
+        </div>
+
+        <div class="field" style="--accent: var(--coral)">
+          <div class="field-top">
+            <label for="teslaPayoff">Tesla payoff</label>
+            <span class="field-value" data-display="teslaPayoff">$13,900</span>
+          </div>
+          <input id="teslaPayoff" type="range" min="0" max="40000" step="100" value="13900" />
+          <div class="field-meta"><span>$0</span><span>$40k</span></div>
+          <input class="fine-input" type="number" data-sync="teslaPayoff" min="0" step="100" value="13900" />
+        </div>
+
+        <div class="field" style="--accent: var(--sky)">
+          <div class="field-top">
+            <label for="privatePayoff">Private student-loan payoff</label>
+            <span class="field-value" data-display="privatePayoff">$13,300</span>
+          </div>
+          <input id="privatePayoff" type="range" min="0" max="40000" step="100" value="13300" />
+          <div class="field-meta"><span>$0</span><span>$40k</span></div>
+          <input class="fine-input" type="number" data-sync="privatePayoff" min="0" step="100" value="13300" />
+        </div>
+
+        <div class="field" style="--accent: var(--coral)">
+          <div class="field-top">
+            <label for="publicLoanMonthly">Public student loan / mo</label>
+            <span class="field-value" data-display="publicLoanMonthly">$251</span>
+          </div>
+          <input id="publicLoanMonthly" type="range" min="0" max="800" step="1" value="251" />
+          <div class="field-meta"><span>$0</span><span>$800</span></div>
+          <input class="fine-input" type="number" data-sync="publicLoanMonthly" min="0" step="1" value="251" />
+        </div>
+
+        <div class="field" style="--accent: var(--sage)">
+          <div class="field-top">
+            <label for="policyPayment">Policy-loan payment / mo</label>
+            <span class="field-value" data-display="policyPayment">$149</span>
+          </div>
+          <input id="policyPayment" type="range" min="0" max="800" step="10" value="149" />
+          <div class="field-meta"><span>$0</span><span>$800</span></div>
+          <input class="fine-input" type="number" data-sync="policyPayment" min="0" step="10" value="149" />
+        </div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-label">Debt payoff total</div>
+          <div id="payoffTotal" class="stat-value">$27,200</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Initial funding gap</div>
+          <div id="policyFundingGap" class="stat-value">$200</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Policy interest / mo after sale</div>
+          <div id="policyInterest" class="stat-value">—</div>
+        </div>
+        <div class="stat-card highlight">
+          <div class="stat-label">Estimated payoff time</div>
+          <div id="policyPayoffTime" class="stat-value">—</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Monthly Budget -->
+    <section class="card" id="sec-budget" style="--accent: var(--sky)">
+      <div class="section-head">
+        <div class="section-badge">📊</div>
+        <div>
+          <h2 class="section-title">4. Monthly Household Budget</h2>
+          <p class="section-description">Housing and debt service stay linked to the math above. Everything else is adjustable with sliders.</p>
+        </div>
+      </div>
+
+      <div class="input-grid" style="grid-template-columns: 1fr;">
+        <div class="field" style="--accent: var(--sage)">
+          <div class="field-top">
+            <label for="monthlyIncome">Household monthly net income</label>
+            <span class="field-value" data-display="monthlyIncome">$11,000</span>
+          </div>
+          <input id="monthlyIncome" type="range" min="6000" max="20000" step="100" value="11000" />
+          <div class="field-meta"><span>$6k</span><span>$20k</span></div>
+          <input class="fine-input" type="number" data-sync="monthlyIncome" min="0" step="100" value="11000" />
+        </div>
+      </div>
+
+      <div class="budget-grid">
+        <div class="budget-card locked">
+          <div class="budget-label">🏠 Housing</div>
+          <div id="budgetHousing" class="budget-value">$4,500</div>
+        </div>
+        <div class="budget-card locked">
+          <div class="budget-label">💳 Debt service</div>
+          <div id="budgetDebt" class="budget-value">$400</div>
+        </div>
+        <div class="budget-card locked">
+          <div class="budget-label">🛡️ Insurance</div>
+          <div class="budget-value">$1,450</div>
+        </div>
+
+        <div class="budget-card" style="--accent: var(--coral)">
+          <div class="field-top">
+            <label class="budget-label" for="budgetBaby">👶 Baby Fam</label>
+            <span class="field-value" data-display="budgetBaby">$600</span>
+          </div>
+          <div class="budget-slider-wrap">
+            <input id="budgetBaby" type="range" min="0" max="2000" step="25" value="600" />
+          </div>
+        </div>
+
+        <div class="budget-card" style="--accent: var(--sage)">
+          <div class="field-top">
+            <label class="budget-label" for="budgetFood">🥗 Food</label>
+            <span class="field-value" data-display="budgetFood">$500</span>
+          </div>
+          <div class="budget-slider-wrap">
+            <input id="budgetFood" type="range" min="0" max="1500" step="25" value="500" />
+          </div>
+        </div>
+
+        <div class="budget-card" style="--accent: var(--sky)">
+          <div class="field-top">
+            <label class="budget-label" for="budgetPersonal">💇 Personal care</label>
+            <span class="field-value" data-display="budgetPersonal">$450</span>
+          </div>
+          <div class="budget-slider-wrap">
+            <input id="budgetPersonal" type="range" min="0" max="1200" step="25" value="450" />
+          </div>
+        </div>
+
+        <div class="budget-card" style="--accent: var(--gold)">
+          <div class="field-top">
+            <label class="budget-label" for="budgetRns">📈 RNS investment</label>
+            <span class="field-value" data-display="budgetRns">$400</span>
+          </div>
+          <div class="budget-slider-wrap">
+            <input id="budgetRns" type="range" min="0" max="1500" step="25" value="400" />
+          </div>
+        </div>
+
+        <div class="budget-card" style="--accent: var(--sky)">
+          <div class="field-top">
+            <label class="budget-label" for="budgetPhones">📱 Phones</label>
+            <span class="field-value" data-display="budgetPhones">$320</span>
+          </div>
+          <div class="budget-slider-wrap">
+            <input id="budgetPhones" type="range" min="0" max="600" step="10" value="320" />
+          </div>
+        </div>
+
+        <div class="budget-card" style="--accent: var(--coral)">
+          <div class="field-top">
+            <label class="budget-label" for="budgetVacation">✈️ Vacation</label>
+            <span class="field-value" data-display="budgetVacation">$500</span>
+          </div>
+          <div class="budget-slider-wrap">
+            <input id="budgetVacation" type="range" min="0" max="1500" step="25" value="500" />
+          </div>
+        </div>
+
+        <div class="budget-card" style="--accent: var(--sage)">
+          <div class="field-top">
+            <label class="budget-label" for="budgetDogs">🐕 Dogs</label>
+            <span class="field-value" data-display="budgetDogs">$300</span>
+          </div>
+          <div class="budget-slider-wrap">
+            <input id="budgetDogs" type="range" min="0" max="800" step="25" value="300" />
+          </div>
+        </div>
+
+        <div class="budget-card" style="--accent: var(--gold)">
+          <div class="field-top">
+            <label class="budget-label" for="budgetReserve">🏦 Reserve / EF</label>
+            <span class="field-value" data-display="budgetReserve">$200</span>
+          </div>
+          <div class="budget-slider-wrap">
+            <input id="budgetReserve" type="range" min="0" max="1500" step="25" value="200" />
+          </div>
+        </div>
+
+        <div class="budget-card" style="--accent: var(--coral)">
+          <div class="field-top">
+            <label class="budget-label" for="budgetTransportation">🚗 Transportation</label>
+            <span class="field-value" data-display="budgetTransportation">$0</span>
+          </div>
+          <div class="budget-slider-wrap">
+            <input id="budgetTransportation" type="range" min="0" max="800" step="25" value="0" />
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="insurance-row">
+          <span>Whole-life base premium #1</span>
+          <strong>$1,125</strong>
+        </div>
+        <div class="insurance-row">
+          <span>Whole-life base premium #2</span>
+          <strong>$231</strong>
+        </div>
+        <div class="insurance-row">
+          <span>Term life</span>
+          <strong>$50</strong>
+        </div>
+        <div class="insurance-row">
+          <span>Insurance buffer</span>
+          <strong>$44</strong>
+        </div>
+        <div class="insurance-row">
+          <strong>Total insurance allocation</strong>
+          <strong>$1,450</strong>
+        </div>
+      </div>
+
+      <div class="budget-meter">
+        <div class="budget-meter-header">
+          <span>Budget utilization</span>
+          <span id="budgetPercentage">87.5%</span>
+        </div>
+        <div class="meter-track">
+          <div id="budgetMeterBar" class="meter-bar"></div>
+        </div>
+        <div id="budgetStatus" class="budget-status positive">
+          $1,380 remains unallocated each month.
+        </div>
+      </div>
+
+      <p class="note">Transportation defaults to $0 because the current $9,620 plan did not separately include gas or tolls. Drag it up if you want transportation counted on its own.</p>
+    </section>
+  </main>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  var CF_KEY = "cf-unlocked";
+  var gate = document.getElementById("gate");
+  var main = document.getElementById("main-content");
+  var gateInput = document.getElementById("gate-input");
+  var gateBtn = document.getElementById("gate-btn");
+  var gateError = document.getElementById("gate-error");
+  var planReady = false;
+
+  function unlockPage() {
+    sessionStorage.setItem(CF_KEY, "1");
+    gate.classList.add("hidden");
+    main.classList.add("unlocked");
+    initPlan();
+  }
+
+  function checkGatePassword() {
+    if (gateInput.value.toLowerCase() === "team fam") {
+      gateBtn.textContent = "✓ Unlocked";
+      gateBtn.style.background = "linear-gradient(135deg, var(--sage) 0%, #6a9465 100%)";
+      gateBtn.style.color = "#fff";
+      setTimeout(unlockPage, 380);
+    } else {
+      gateError.style.display = "block";
+      gateInput.classList.remove("error");
+      void gateInput.offsetWidth;
+      gateInput.classList.add("error");
+      gateInput.value = "";
+      gateInput.focus();
+    }
+  }
+
+  gateBtn.addEventListener("click", checkGatePassword);
+  gateInput.addEventListener("keydown", function (e) {
+    if (e.key === "Enter") checkGatePassword();
+    gateInput.classList.remove("error");
+    gateError.style.display = "none";
+  });
+
+  var defaults = {
+    purchasePrice: 460000,
+    downPct: 10,
+    mortgageRate: 7,
+    closingPct: 3.04,
+    taxMonthly: 854,
+    homeInsurance: 150,
+    pmiMonthly: 125,
+    utilities: 590,
+    housingBuffer: 27,
+    salePrice: 395000,
+    saleMortgage: 273000,
+    sellingPct: 6.5,
+    otherProceeds: 0,
+    efCurrent: 12000,
+    efTarget: 30000,
+    babyFundTarget: 10000,
+    policyLoan: 27000,
+    policyRate: 5,
+    teslaPayoff: 13900,
+    privatePayoff: 13300,
+    publicLoanMonthly: 251,
+    policyPayment: 149,
+    monthlyIncome: 11000,
+    budgetBaby: 600,
+    budgetFood: 500,
+    budgetPersonal: 450,
+    budgetRns: 400,
+    budgetPhones: 320,
+    budgetVacation: 500,
+    budgetDogs: 300,
+    budgetReserve: 200,
+    budgetTransportation: 0
+  };
+
+  var PERCENT_IDS = {
+    downPct: true,
+    mortgageRate: true,
+    closingPct: true,
+    sellingPct: true,
+    policyRate: true
+  };
+
+  var MONTHLY_INSURANCE = 1450;
+  var MORTGAGE_TERM_YEARS = 30;
+
+  function el(id) {
+    return document.getElementById(id);
+  }
+
+  function value(id) {
+    var node = el(id);
+    if (!node) return 0;
+    var parsed = parseFloat(node.value);
+    if (!isFinite(parsed) || parsed < 0) return 0;
+    return parsed;
+  }
+
+  function money(amount) {
+    if (!isFinite(amount)) amount = 0;
+    return "$" + Math.round(amount).toLocaleString("en-US");
+  }
+
+  function signedMoney(amount) {
+    if (amount >= 0) return "+" + money(amount);
+    return "−" + money(Math.abs(amount));
+  }
+
+  function formatDisplay(id, amount) {
+    if (PERCENT_IDS[id]) {
+      var decimals = (id === "closingPct" || id === "mortgageRate") ? 2 : (id === "sellingPct" || id === "policyRate") ? 1 : 0;
+      return Number(amount).toFixed(decimals) + "%";
+    }
+    return money(amount);
+  }
+
+  function updateDisplays() {
+    Object.keys(defaults).forEach(function (id) {
+      var display = document.querySelector('[data-display="' + id + '"]');
+      if (display) display.textContent = formatDisplay(id, value(id));
+    });
+  }
+
+  function syncFineInputs(sourceId) {
+    document.querySelectorAll('[data-sync="' + sourceId + '"]').forEach(function (node) {
+      if (document.activeElement === node) return;
+      node.value = el(sourceId).value;
+    });
+  }
+
+  function mortgagePayment(principal, annualRate, years) {
+    if (principal <= 0) return 0;
+    var monthlyRate = annualRate / 100 / 12;
+    var paymentCount = years * 12;
+    if (monthlyRate === 0) return principal / paymentCount;
+    var compound = Math.pow(1 + monthlyRate, paymentCount);
+    return principal * monthlyRate * compound / (compound - 1);
+  }
+
+  function payoffMonths(balance, annualRate, monthlyPayment) {
+    if (balance <= 0) return 0;
+    if (monthlyPayment <= 0) return Infinity;
+    var monthlyRate = annualRate / 100 / 12;
+    var remaining = balance;
+    var maxMonths = 1200;
+    for (var month = 1; month <= maxMonths; month++) {
+      var interest = remaining * monthlyRate;
+      if (month === 1 && monthlyPayment <= interest) return Infinity;
+      remaining += interest;
+      remaining -= Math.min(monthlyPayment, remaining);
+      if (remaining <= 0.01) return month;
+    }
+    return Infinity;
+  }
+
+  function paintRange(node) {
+    var min = parseFloat(node.min) || 0;
+    var max = parseFloat(node.max) || 100;
+    var val = parseFloat(node.value) || 0;
+    var pct = max === min ? 0 : ((val - min) / (max - min)) * 100;
+    var accent = getComputedStyle(node.closest(".field, .budget-card") || document.documentElement)
+      .getPropertyValue("--accent").trim() || "var(--gold)";
+    node.style.background =
+      "linear-gradient(90deg, " + accent + " 0%, " + accent + " " + pct + "%, rgba(246,239,227,0.1) " + pct + "%, rgba(246,239,227,0.1) 100%)";
+  }
+
+  function paintAllRanges() {
+    document.querySelectorAll('input[type="range"]').forEach(paintRange);
+  }
+
+  function recalculate() {
+    updateDisplays();
+    paintAllRanges();
+
+    var purchasePrice = value("purchasePrice");
+    var downPct = Math.min(100, value("downPct"));
+    var downPayment = purchasePrice * downPct / 100;
+    var mortgageAmount = Math.max(0, purchasePrice - downPayment);
+    var piMonthly = mortgagePayment(mortgageAmount, value("mortgageRate"), MORTGAGE_TERM_YEARS);
+    var monthlyPMI = downPct >= 20 ? 0 : value("pmiMonthly");
+    var monthlyHousing = Math.round(
+      piMonthly +
+      value("taxMonthly") +
+      value("homeInsurance") +
+      monthlyPMI +
+      value("utilities") +
+      value("housingBuffer")
+    );
+    var buyerClosingCosts = purchasePrice * value("closingPct") / 100;
+    var cashToClose = downPayment + buyerClosingCosts;
+
+    el("mortgageAmount").textContent = money(mortgageAmount);
+    el("piMonthly").textContent = money(piMonthly) + "/mo";
+    el("cashToClose").textContent = money(cashToClose);
+    el("housingTotal").textContent = money(monthlyHousing) + "/mo";
+    el("budgetHousing").textContent = money(monthlyHousing);
+
+    var salePrice = value("salePrice");
+    var sellingCosts = salePrice * value("sellingPct") / 100;
+    var saleNet = Math.max(0, salePrice - sellingCosts - value("saleMortgage") + value("otherProceeds"));
+    el("saleNet").textContent = money(saleNet);
+
+    var availableCash = saleNet;
+    var amountToClosing = Math.min(availableCash, cashToClose);
+    availableCash -= amountToClosing;
+
+    var emergencyFundGap = Math.max(0, value("efTarget") - value("efCurrent"));
+    var amountToEmergencyFund = Math.min(availableCash, emergencyFundGap);
+    availableCash -= amountToEmergencyFund;
+
+    var amountToBabyFund = Math.min(availableCash, value("babyFundTarget"));
+    availableCash -= amountToBabyFund;
+
+    var initialPolicyLoan = value("policyLoan");
+    var amountToPolicyLoan = Math.min(availableCash, initialPolicyLoan);
+    availableCash -= amountToPolicyLoan;
+
+    var remainingPolicyBalance = Math.max(0, initialPolicyLoan - amountToPolicyLoan);
+
+    el("waterfallClose").textContent = money(amountToClosing);
+    el("waterfallEf").textContent = money(amountToEmergencyFund);
+    el("waterfallBaby").textContent = money(amountToBabyFund);
+    el("waterfallPolicy").textContent = money(amountToPolicyLoan);
+    el("waterfallRemaining").textContent = money(availableCash);
+    el("summaryPolicyBalance").textContent = money(remainingPolicyBalance);
+
+    var payoffTotal = value("teslaPayoff") + value("privatePayoff");
+    var policyFundingGap = Math.max(0, payoffTotal - initialPolicyLoan);
+    el("payoffTotal").textContent = money(payoffTotal);
+    el("policyFundingGap").textContent = money(policyFundingGap);
+
+    var policyMonthlyInterest = remainingPolicyBalance * value("policyRate") / 100 / 12;
+    el("policyInterest").textContent = money(policyMonthlyInterest) + "/mo";
+
+    var effectivePolicyPayment = remainingPolicyBalance > 0 ? value("policyPayment") : 0;
+    var policyMonths = payoffMonths(remainingPolicyBalance, value("policyRate"), effectivePolicyPayment);
+    var payoffTimeText;
+    if (remainingPolicyBalance <= 0) payoffTimeText = "Paid off";
+    else if (!isFinite(policyMonths)) payoffTimeText = "Not amortizing";
+    else if (policyMonths < 24) payoffTimeText = policyMonths + " mo";
+    else payoffTimeText = (policyMonths / 12).toFixed(1) + " yrs";
+    el("policyPayoffTime").textContent = payoffTimeText;
+
+    var monthlyDebtService = value("publicLoanMonthly") + effectivePolicyPayment;
+    el("budgetDebt").textContent = money(monthlyDebtService);
+
+    var monthlyIncome = value("monthlyIncome");
+    var totalBudget =
+      monthlyHousing +
+      monthlyDebtService +
+      MONTHLY_INSURANCE +
+      value("budgetBaby") +
+      value("budgetFood") +
+      value("budgetPersonal") +
+      value("budgetRns") +
+      value("budgetPhones") +
+      value("budgetVacation") +
+      value("budgetDogs") +
+      value("budgetReserve") +
+      value("budgetTransportation");
+
+    var monthlyCushion = monthlyIncome - totalBudget;
+    var budgetPercentage = monthlyIncome > 0 ? totalBudget / monthlyIncome * 100 : 0;
+
+    el("summaryIncome").textContent = money(monthlyIncome);
+    el("summaryBudget").textContent = money(totalBudget);
+    el("summaryCushion").textContent = signedMoney(monthlyCushion);
+    el("summaryCushion").classList.remove("positive", "negative");
+    el("summaryCushion").classList.add(monthlyCushion >= 0 ? "positive" : "negative");
+
+    el("budgetPercentage").textContent = budgetPercentage.toFixed(1) + "%";
+    var bar = el("budgetMeterBar");
+    bar.style.width = Math.max(0, Math.min(100, budgetPercentage)) + "%";
+    bar.classList.toggle("over", budgetPercentage > 100);
+
+    var status = el("budgetStatus");
+    if (monthlyCushion >= 0) {
+      status.textContent = money(monthlyCushion) + " remains unallocated each month.";
+      status.classList.remove("negative");
+      status.classList.add("positive");
+    } else {
+      status.textContent = money(Math.abs(monthlyCushion)) + " monthly shortfall.";
+      status.classList.remove("positive");
+      status.classList.add("negative");
+    }
+  }
+
+  function wireInput(id) {
+    var range = el(id);
+    if (!range) return;
+
+    range.addEventListener("input", function () {
+      syncFineInputs(id);
+      recalculate();
+    });
+
+    document.querySelectorAll('[data-sync="' + id + '"]').forEach(function (fine) {
+      fine.addEventListener("input", function () {
+        var parsed = parseFloat(fine.value);
+        if (!isFinite(parsed)) return;
+        var min = parseFloat(range.min);
+        var max = parseFloat(range.max);
+        if (isFinite(min) && parsed < min) {
+          range.min = parsed;
+        }
+        if (isFinite(max) && parsed > max) {
+          range.max = parsed;
+        }
+        range.value = parsed;
+        recalculate();
+      });
+    });
+  }
+
+  function initPlan() {
+    if (planReady) return;
+    planReady = true;
+
+    Object.keys(defaults).forEach(wireInput);
+
+    el("resetButton").addEventListener("click", function () {
+      Object.keys(defaults).forEach(function (key) {
+        var node = el(key);
+        if (node) node.value = defaults[key];
+        syncFineInputs(key);
+      });
+      recalculate();
+    });
+
+    recalculate();
+  }
+
+  if (sessionStorage.getItem(CF_KEY) === "1") {
+    gate.classList.add("hidden");
+    main.classList.add("unlocked");
+    initPlan();
+  } else {
+    gateInput.focus();
+  }
+})();
+</script>
+</body>
+</html>
