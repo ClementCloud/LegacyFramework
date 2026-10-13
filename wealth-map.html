@@ -1,0 +1,1795 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Wealth Map · The Full Financial Picture</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<script>try{var t=localStorage.getItem('wealth-map/theme');if(t==='light'||t==='dark')document.documentElement.dataset.theme=t;}catch(e){}</script>
+<style>
+:root{
+  --f-display:"Bricolage Grotesque","Inter",system-ui,sans-serif;
+  --f-body:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,Consolas,monospace;
+  --insw:440px; --sheet-h:min(60dvh,600px);
+}
+:root,[data-theme="dark"]{
+  --bg:#090c11; --bg-2:#0d1118; --surface:#11161e; --surface-2:#171e28; --surface-3:#1e2733;
+  --ink:#edf1f6; --ink-2:#aeb9c6; --muted:#768294; --line:#1f2834; --line-strong:#2f3b4a; --grid:rgba(237,241,246,.035);
+  --accent:#f6b44b; --accent-2:#ff8f5a; --on-accent:#1b1205;
+  --o-p1:#4f9dff; --o-p2:#ff7a59; --o-joint:#22c39a; --o-biz:#e9b949;
+  --c-housing:#8b7cf6; --c-living:#38bdf8; --c-transport:#f59e0b; --c-insurance:#2dd4bf; --c-giving:#f9a8d4; --c-lifestyle:#a3e635; --c-other:#94a3b8; --c-kids:#fb7185; --c-debt:#7c8aa0; --c-once:#d6d3d1;
+  --k-cash:#22c39a; --k-invest:#4f9dff; --k-retire:#8b7cf6; --k-re:#e9b949; --k-other:#94a3b8; --k-debt:#f87171;
+  --good:#22c55e; --good-t:#4ade80; --warn:#f5b301; --warn-t:#fcd34d; --crit:#ef4444; --crit-t:#fca5a5;
+  --ghost:#e879f9; --shadow:rgba(0,0,0,.55); color-scheme:dark;
+}
+[data-theme="light"]{
+  --bg:#f3f4f6; --bg-2:#eceef2; --surface:#ffffff; --surface-2:#f3f5f8; --surface-3:#e7ebf0;
+  --ink:#0e1621; --ink-2:#425062; --muted:#697585; --line:#e0e5eb; --line-strong:#c8d0da; --grid:rgba(14,22,33,.045);
+  --accent:#d98a0b; --accent-2:#e3622f; --on-accent:#fff;
+  --o-p1:#2a78d6; --o-p2:#e5602e; --o-joint:#119a6c; --o-biz:#c98a00;
+  --c-housing:#6d5ce8; --c-living:#0ea5e9; --c-transport:#d97706; --c-insurance:#0d9488; --c-giving:#db2777; --c-lifestyle:#65a30d; --c-other:#64748b; --c-kids:#e11d48; --c-debt:#475569; --c-once:#a8a29e;
+  --k-cash:#119a6c; --k-invest:#2a78d6; --k-retire:#6d5ce8; --k-re:#c98a00; --k-other:#94a3b8; --k-debt:#dc2626;
+  --good:#16a34a; --good-t:#15803d; --warn:#d97706; --warn-t:#a16207; --crit:#dc2626; --crit-t:#b91c1c;
+  --ghost:#c026d3; --shadow:rgba(15,23,42,.14); color-scheme:light;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font:400 14.5px/1.5 var(--f-body);-webkit-font-smoothing:antialiased;overflow:hidden}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1,h2,h3,p{margin:0}
+.eyebrow{font:500 10.5px/1.3 var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+h2{font:700 clamp(20px,2.2vw,26px)/1.1 var(--f-display);letter-spacing:-.018em;margin-top:6px;text-wrap:balance}
+.lede{color:var(--ink-2);max-width:64ch;margin-top:6px;font-size:14px}
+.good-t{color:var(--good-t)} .crit-t{color:var(--crit-t)} .warn-t{color:var(--warn-t)}
+
+/* ── Gate ── */
+#gate{position:fixed;inset:0;z-index:200;display:flex;align-items:center;justify-content:center;padding:24px;
+  background:radial-gradient(circle at 15% 8%,color-mix(in srgb,var(--accent) 14%,transparent),transparent 45%),radial-gradient(circle at 85% 92%,color-mix(in srgb,var(--o-p1) 12%,transparent),transparent 45%),var(--bg)}
+#gate.hidden{display:none}
+.gate-card{width:min(390px,92vw);background:var(--surface);border:1px solid var(--line-strong);border-radius:22px;padding:32px 28px 28px;box-shadow:0 24px 60px -20px var(--shadow);animation:gateIn .5s cubic-bezier(.22,1,.36,1) both}
+@keyframes gateIn{from{opacity:0;transform:translateY(18px) scale(.97)}to{opacity:1;transform:none}}
+.gate-icon{width:48px;height:48px;border-radius:14px;display:grid;place-items:center;font-size:22px;margin-bottom:18px;background:color-mix(in srgb,var(--accent) 16%,transparent);border:1px solid color-mix(in srgb,var(--accent) 45%,transparent)}
+.gate-title{font:700 22px/1.2 var(--f-display);margin-bottom:8px}
+.gate-sub{font-size:14px;line-height:1.55;color:var(--ink-2);margin-bottom:22px}
+.gate-row{display:flex;gap:8px}
+@media (max-width:420px){.gate-row{flex-direction:column}}
+#gate-input{flex:1;background:var(--surface-2);border:1px solid var(--line-strong);border-radius:12px;font-size:15px;padding:12px 14px;outline:none}
+#gate-input:focus{border-color:color-mix(in srgb,var(--accent) 60%,transparent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 16%,transparent)}
+#gate-input.error{border-color:var(--crit);animation:shake .35s ease}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
+#gate-btn{background:linear-gradient(135deg,var(--accent),var(--accent-2));color:var(--on-accent);border:0;border-radius:12px;font-weight:700;font-size:14px;padding:12px 20px;cursor:pointer;white-space:nowrap}
+#gate-btn.ok{background:linear-gradient(135deg,var(--good),#15803d);color:#fff}
+#gate-error{display:none;font-size:13px;color:var(--crit-t);margin-top:10px}
+.gate-back{display:inline-block;margin-top:20px;font-size:13px;color:var(--muted);text-decoration:none}
+.gate-back:hover{color:var(--ink)}
+#main-content{opacity:0;pointer-events:none}
+#main-content.unlocked{opacity:1;pointer-events:auto;animation:contentIn .45s ease both}
+@keyframes contentIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ── Studio layout: canvas | inspector ── */
+.app{display:grid;grid-template-columns:minmax(0,1fr) var(--insw);height:100dvh;transition:grid-template-columns .3s cubic-bezier(.22,1,.36,1)}
+.app.focus{--insw:0px}
+.canvas{height:100dvh;overflow-y:auto;overflow-x:hidden;container:canvas/inline-size;position:relative;scroll-padding-top:190px}
+.canvas::before{content:'';position:absolute;inset:0 0 auto 0;height:520px;pointer-events:none;z-index:0;
+  background:radial-gradient(ellipse 60% 70% at 8% 0%,color-mix(in srgb,var(--accent) 13%,transparent),transparent 70%),radial-gradient(ellipse 50% 60% at 92% 0%,color-mix(in srgb,var(--o-p1) 12%,transparent),transparent 70%)}
+.cw{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding-inline:clamp(16px,3vw,36px)}
+.inspector{height:100dvh;overflow-y:auto;overflow-x:hidden;border-left:1px solid var(--line);background:var(--bg-2);min-width:0;overscroll-behavior:contain}
+.app.focus .inspector{visibility:hidden}
+
+/* top bar + hero */
+.topbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;padding-top:16px}
+.tb-right{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.chip-btn{display:inline-flex;align-items:center;gap:7px;font:500 12.5px/1 var(--f-body);color:var(--ink-2);padding:8px 13px;border:1px solid var(--line-strong);border-radius:999px;background:color-mix(in srgb,var(--surface) 70%,transparent);text-decoration:none;cursor:pointer;backdrop-filter:blur(8px)}
+.chip-btn:hover{color:var(--ink);background:var(--surface-2)}
+.save{display:inline-flex;align-items:center;gap:8px;font:500 11.5px/1.3 var(--f-mono);color:var(--ink-2);padding:7px 12px;border:1px solid var(--line);border-radius:999px;background:var(--surface)}
+.save i{flex:none;width:7px;height:7px;border-radius:50%;background:var(--muted)}
+.save[data-s="local"] i{background:var(--good)} .save[data-s="dirty"] i{background:var(--warn)} .save[data-s="error"] i{background:var(--crit)}
+.hero{padding:34px 0 26px;display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap}
+.hero h1{font:800 clamp(38px,5.6vw,64px)/.95 var(--f-display);letter-spacing:-.035em;margin-top:10px}
+.hero h1 span{background:linear-gradient(100deg,var(--accent),var(--accent-2) 55%,var(--o-p2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.hero .lede{font-size:15px;margin-top:12px}
+.jump{display:flex;gap:6px;flex-wrap:wrap}
+.jump a{font:500 12px/1 var(--f-body);color:var(--ink-2);text-decoration:none;padding:7px 11px;border-radius:8px;border:1px solid var(--line);background:var(--surface)}
+.jump a:hover{color:var(--ink);border-color:var(--line-strong)}
+.banner{display:flex;gap:12px;align-items:flex-start;padding:11px 14px;border:1px dashed var(--line-strong);border-radius:12px;background:var(--surface);font-size:13.5px;color:var(--ink-2);margin-bottom:20px}
+.banner b{color:var(--ink)}
+.banner.stale{border-style:solid;border-color:var(--accent);align-items:center;flex-wrap:wrap}
+.banner.stale>div{flex:1;min-width:240px}
+.banner.stale .acts{display:flex;gap:8px;flex:none}
+.banner .clock{flex:none;width:18px;height:18px;margin-top:1px;color:var(--accent)}
+.exmark{flex:none;font:500 9.5px/1.4 var(--f-mono);text-transform:uppercase;letter-spacing:.06em;color:var(--warn-t);border:1px dashed currentColor;border-radius:4px;padding:0 5px}
+
+/* ── Sticky deck: time + headline numbers ── */
+.deck{position:sticky;top:0;z-index:30;background:color-mix(in srgb,var(--bg) 82%,transparent);backdrop-filter:saturate(1.4) blur(16px);-webkit-backdrop-filter:saturate(1.4) blur(16px);border-block:1px solid var(--line)}
+.deck .cw{padding-block:12px 12px;display:grid;gap:12px}
+.dk-row{display:flex;align-items:center;gap:20px}
+.dk-when{min-width:182px}
+.dk-month{font:700 25px/1.05 var(--f-display);letter-spacing:-.02em;margin-top:3px;font-variant-numeric:tabular-nums}
+.dk-rel{font-size:12.5px;color:var(--ink-2);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:260px}
+.dk-rel b{color:var(--accent);font-weight:600}
+.track{flex:1;min-width:0;position:relative;padding-top:18px}
+.pins{position:absolute;left:0;right:0;top:0;height:18px}
+.pin{position:absolute;top:2px;width:12px;height:12px;margin-left:-6px;border-radius:50%;background:var(--accent);border:2px solid var(--bg);box-shadow:0 0 0 1px var(--accent);cursor:pointer;padding:0;transition:transform .15s}
+.pin:hover{transform:scale(1.3)}
+.pin.now{top:-1px;width:2px;height:22px;margin-left:-1px;border:0;border-radius:1px;background:var(--ink);box-shadow:0 0 0 2px var(--bg);z-index:1;opacity:.85}
+.pin.now::before{content:'';position:absolute;left:-7px;right:-7px;top:-2px;bottom:-2px}
+.pin.now:hover{transform:none;opacity:1}
+input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:22px;background:transparent;margin:0;cursor:pointer;display:block}
+input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:3px;background:linear-gradient(90deg,var(--accent) 0 var(--p,0%),var(--surface-3) var(--p,0%));border:1px solid var(--line)}
+input[type=range]::-moz-range-track{height:6px;border-radius:3px;background:linear-gradient(90deg,var(--accent) 0 var(--p,0%),var(--surface-3) var(--p,0%));border:1px solid var(--line)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;margin-top:-7px;border-radius:50%;background:var(--ink);border:3px solid var(--bg);box-shadow:0 0 0 1px var(--ink)}
+input[type=range]::-moz-range-thumb{width:12px;height:12px;border-radius:50%;background:var(--ink);border:3px solid var(--bg);box-shadow:0 0 0 1px var(--ink)}
+.years{position:relative;height:14px;font:10.5px/14px var(--f-mono);color:var(--muted)}
+.years span{position:absolute;transform:translateX(-50%);white-space:nowrap}
+.dk-btns{display:flex;gap:6px}
+.btn{font:500 13px/1 var(--f-body);padding:9px 13px;border-radius:9px;border:1px solid var(--line-strong);background:var(--surface);color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
+.btn:hover{background:var(--surface-2)}
+.btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn.primary:hover{opacity:.9;background:var(--ink)}
+.btn.on{border-color:var(--ghost);color:var(--ghost)}
+.btn svg{width:12px;height:12px;fill:currentColor;flex:none}
+.kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.kpi{position:relative;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:9px 12px 10px;min-width:0;display:grid;gap:1px;transition:border-color .3s}
+.kpi .k{font:500 10px/1.3 var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi .v{font:700 clamp(17px,1.9vw,22px)/1.15 var(--f-display);letter-spacing:-.015em;font-variant-numeric:tabular-nums;white-space:nowrap}
+.kpi .s{font-size:11.5px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.kpi .vrow{display:flex;align-items:center;gap:6px;min-width:0}
+.kpi .dl{flex:none;font:600 10.5px/1.5 var(--f-mono);padding:0 6px;border-radius:999px;white-space:nowrap;display:none}
+.kpi .dl.show{display:inline-block;animation:dlIn .2s ease}
+@keyframes dlIn{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}
+.kpi .dl.up{color:var(--good-t);background:color-mix(in srgb,var(--good) 16%,transparent)}
+.kpi .dl.down{color:var(--crit-t);background:color-mix(in srgb,var(--crit) 16%,transparent)}
+.kpi.good{border-color:color-mix(in srgb,var(--good) 40%,var(--line))}
+.kpi.warn{border-color:color-mix(in srgb,var(--warn) 50%,var(--line))}
+.kpi.crit{border-color:color-mix(in srgb,var(--crit) 55%,var(--line))}
+.kpi.pulse{animation:kpiPulse .6s ease}
+@keyframes kpiPulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--ghost) 45%,transparent)}100%{box-shadow:0 0 0 6px transparent}}
+.ghostbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-2)}
+.ghostbar .gl-key{display:inline-block;width:18px;border-top:2px dashed var(--ghost);vertical-align:middle;margin-right:6px}
+.ghostbar b{color:var(--ink);font-weight:600}
+.linkish{background:none;border:0;padding:0;color:var(--ink);text-decoration:underline;text-underline-offset:2px;cursor:pointer;font-size:12.5px}
+
+/* ── Sections ── */
+.body{display:flex;flex-direction:column;gap:34px;padding-top:22px;padding-bottom:90px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px}
+.sec-head{display:flex;justify-content:space-between;align-items:flex-end;gap:12px 20px;flex-wrap:wrap;margin-bottom:14px}
+.scen{padding:14px 16px;display:grid;gap:10px}
+.toggles{display:flex;flex-wrap:wrap;gap:8px}
+.tg{display:inline-flex;align-items:stretch;border:1px solid var(--line-strong);border-radius:999px;overflow:hidden;background:var(--surface);max-width:100%;transition:opacity .2s}
+.tg label{display:flex;align-items:center;gap:8px;padding:6px 11px;cursor:pointer;font-size:13px;min-width:0}
+.tg input{accent-color:var(--accent);margin:0;flex:none}
+.tg button{border:0;border-left:1px solid var(--line);background:var(--surface-2);font:500 11px var(--f-mono);color:var(--ink-2);padding:0 10px;cursor:pointer;white-space:nowrap}
+.tg button:hover{color:var(--ink)}
+.tg.off{opacity:.62} .tg.off label span{text-decoration:line-through}
+.owners{display:flex;flex-wrap:wrap;gap:6px 14px}
+.own{display:inline-flex;align-items:center;gap:6px;font:500 10.5px/1.2 var(--f-mono);letter-spacing:.05em;text-transform:uppercase;color:var(--ink-2)}
+.own i{flex:none;width:9px;height:9px;border-radius:2px;background:var(--oc)}
+
+/* flow map */
+.flowgrid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:14px;align-items:start}
+.flowcard{padding:16px 14px 12px;position:relative;background-color:var(--surface);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:26px 26px}
+#flow{position:relative;min-height:240px}
+#flow svg{display:block;width:100%;height:auto;overflow:visible}
+#flow .rib{transition:opacity .15s}
+#flow .lbl{font-family:var(--f-body)}
+#flow .ln{font-size:12px;fill:var(--ink-2)}
+#flow .la{font:600 13.5px var(--f-body);fill:var(--ink);font-variant-numeric:tabular-nums}
+#flow .ls{font:500 11px var(--f-body);fill:var(--muted);font-variant-numeric:tabular-nums}
+#flow .lc{font:500 10.5px var(--f-mono);fill:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+#flow .lct{font:700 15px var(--f-display);fill:var(--ink)}
+#flow svg.hovering .rib:not(.hl){opacity:.1}
+#flow svg.hovering .lbl:not(.hl){opacity:.4}
+.flowfoot{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:12px;color:var(--muted);padding:8px 4px 0;border-top:1px dashed var(--line);margin-top:6px}
+.spot{padding:16px;display:grid;gap:14px;position:sticky;top:200px}
+.people{display:flex;gap:6px;flex-wrap:wrap}
+.tok{display:inline-flex;align-items:center;gap:7px;padding:3px 10px 3px 3px;border-radius:999px;background:var(--surface-2);font-weight:500;font-size:12.5px}
+.tok b{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font:600 10.5px var(--f-body);background:color-mix(in srgb,var(--oc) 25%,var(--surface));border:1.5px solid var(--oc)}
+.tok.due{background:transparent;border:1px dashed var(--line-strong);color:var(--ink-2)}
+.tok.due b{background:transparent;border:1.5px dashed var(--muted)}
+.sp-title{font:700 19px/1.15 var(--f-display);letter-spacing:-.01em}
+.sp-where{font:11.5px/1.4 var(--f-mono);color:var(--ink-2);margin-top:4px}
+.pill{justify-self:start;display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:500;line-height:1.3;padding:5px 11px 5px 6px;border-radius:999px;border:1px solid var(--line-strong)}
+.pill .ic{flex:none;width:17px;height:17px;border-radius:50%;display:grid;place-items:center;font:700 10px/1 var(--f-body);color:#fff}
+.pill.good{color:var(--good-t);border-color:color-mix(in srgb,var(--good) 40%,transparent)} .pill.good .ic{background:var(--good)}
+.pill.warn{color:var(--warn-t);border-color:color-mix(in srgb,var(--warn) 55%,transparent)} .pill.warn .ic{background:var(--warn);color:#1b1205}
+.pill.crit{color:var(--crit-t);border-color:color-mix(in srgb,var(--crit) 50%,transparent)} .pill.crit .ic{background:var(--crit)}
+.notes{display:grid;gap:6px}
+.note{display:grid;gap:2px;font-size:12.5px;padding:8px 10px;border-radius:9px;background:var(--surface-2);border-left:3px solid var(--accent)}
+.note .nr{display:flex;justify-content:space-between;gap:12px;font-weight:600}
+.note .nr b{font-variant-numeric:tabular-nums;white-space:nowrap}
+.note .nd{font-size:11.5px;color:var(--ink-2)}
+.next{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:12.5px;padding:9px 10px;border:1px dashed var(--line-strong);border-radius:9px;color:var(--ink-2)}
+.next b{color:var(--ink);font-weight:600}
+.sp-foot{font-size:12px;color:var(--ink-2);border-top:1px solid var(--line);padding-top:10px}
+.sp-foot b{color:var(--ink);font-variant-numeric:tabular-nums}
+
+/* tooltip */
+.tip{position:absolute;top:0;pointer-events:none;background:var(--surface);border:1px solid var(--line-strong);border-radius:10px;padding:9px 11px;font-size:12.5px;box-shadow:0 10px 30px -8px var(--shadow);min-width:190px;max-width:280px;z-index:5}
+.tip .tm{font:500 10.5px var(--f-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
+.tip .tt{font-weight:600;font-size:13.5px;margin-bottom:2px}
+.tip .r{display:flex;justify-content:space-between;gap:16px;align-items:center}
+.tip .r span{display:inline-flex;align-items:center;gap:6px;color:var(--ink-2);min-width:0}
+.tip .r i{flex:none;width:9px;height:9px;border-radius:2px;background:var(--c)}
+.tip .r i.gh{width:12px;height:0;border-radius:0;background:none;border-top:2px dashed var(--ghost)}
+.tip .r b{font-variant-numeric:tabular-nums;font-weight:600;white-space:nowrap}
+.tip .r.tot{border-top:1px solid var(--line);margin-top:4px;padding-top:4px}
+.tip .sub{font-size:11.5px;color:var(--ink-2);margin-top:4px}
+
+/* charts */
+.cgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.chart{margin:0;padding:16px;min-width:0;display:grid;gap:10px;align-content:start}
+.chart.wide{grid-column:1/-1}
+.chart .ct{font-weight:600;font-size:14.5px}
+.chart .cs{font-size:12.5px;color:var(--ink-2);margin-top:2px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--ink-2)}
+.lg{display:inline-flex;align-items:center;gap:6px}
+.lg i{display:inline-block;width:11px;height:11px;border-radius:3px;background:var(--c)}
+.lg i.ln{width:16px;height:2px;border-radius:1px;background:var(--c,var(--ink))}
+.lg i.dash{width:16px;height:0;border-radius:0;background:none;border-top:2px dashed var(--muted)}
+.lg i.gh{width:16px;height:0;border-radius:0;background:none;border-top:2px dashed var(--ghost)}
+.lg.ghost{color:var(--ghost)}
+.plot{position:relative;min-height:190px}
+.plot svg{display:block;width:100%;height:auto;overflow:visible;touch-action:pan-y}
+.plot .gl{stroke:var(--line);stroke-width:1}
+.plot .base{stroke:var(--line-strong);stroke-width:1}
+.plot .ax{fill:var(--muted);font:10.5px var(--f-mono)}
+.plot .evl{stroke:var(--accent);stroke-dasharray:2 3;stroke-width:1;opacity:.55}
+.plot .sel{stroke:var(--ink);stroke-width:1.5}
+.plot .hov{stroke:var(--ink-2);stroke-width:1;stroke-dasharray:3 3}
+.plot .ghl{fill:none;stroke:var(--ghost);stroke-width:1.75;stroke-dasharray:5 4;stroke-linejoin:round}
+.plot .seldot{fill:var(--ink);stroke:var(--surface);stroke-width:2}
+
+/* balance sheet */
+.nw-row{display:flex;flex-wrap:wrap;gap:10px 28px;align-items:flex-end}
+.nw-row .k{display:block;font:500 10px/1.3 var(--f-mono);text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.nw-row .v{display:block;font:700 20px/1.1 var(--f-display);font-variant-numeric:tabular-nums;margin-top:3px}
+.nw-row .big .v{font-size:28px;letter-spacing:-.02em}
+.nw-row .vs{font-size:12px;color:var(--ink-2);margin-top:2px}
+.groups{display:grid;gap:22px}
+.grp-h{display:flex;justify-content:space-between;align-items:baseline;gap:12px;border-bottom:1px solid var(--line);padding-bottom:6px;margin-bottom:10px}
+.grp-h b{font:600 13.5px var(--f-body);font-variant-numeric:tabular-nums}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,224px),1fr));gap:10px}
+.pc{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;display:grid;gap:4px;align-content:start;min-width:0;position:relative;overflow:hidden}
+.pc::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--oc)}
+.pc.sold,.pc.off{opacity:.55}
+.pc.upcoming{border-style:dashed;border-color:var(--line-strong)}
+.fc-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;min-height:18px}
+.badge{font:500 10px/1.5 var(--f-mono);text-transform:uppercase;letter-spacing:.06em;padding:1px 6px;border-radius:4px;background:var(--surface-2);color:var(--ink-2)}
+.ex{margin-left:auto;font:500 9.5px/1.4 var(--f-mono);text-transform:uppercase;letter-spacing:.06em;color:var(--warn-t);border:1px dashed currentColor;border-radius:4px;padding:0 5px}
+.pc h4{margin:2px 0 0;font-size:14.5px;font-weight:600;line-height:1.25}
+.place{font:11px/1.4 var(--f-mono);color:var(--muted)}
+.pc-val{font:700 21px/1.1 var(--f-display);font-variant-numeric:tabular-nums;margin-top:4px;letter-spacing:-.01em}
+.eq{height:7px;border-radius:4px;background:repeating-linear-gradient(135deg,var(--line-strong) 0 2px,transparent 2px 6px);border:1px solid var(--line);overflow:hidden;margin-top:4px}
+.eq span{display:block;height:100%;background:var(--oc);transition:width .35s ease}
+.pc-sub{font-size:12px;line-height:1.45;color:var(--ink-2)}
+
+/* table */
+.tbl-wrap{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13px;font-variant-numeric:tabular-nums}
+th,td{padding:8px 12px;text-align:right;white-space:nowrap;border-bottom:1px solid var(--line)}
+th:first-child,td:first-child{text-align:left}
+tbody tr:last-child td{border-bottom:0}
+tbody tr{cursor:pointer}
+tbody tr:hover td{background:var(--surface-2)}
+tbody tr.cur td{background:color-mix(in srgb,var(--accent) 10%,transparent)}
+thead th{font:500 10px var(--f-mono);text-transform:uppercase;letter-spacing:.07em;color:var(--muted);background:var(--surface-2)}
+.foot{font-size:12px;color:var(--muted);display:grid;gap:5px;border-top:1px solid var(--line);padding-top:16px}
+
+/* ── Inspector ── */
+.ins-head{position:sticky;top:0;z-index:5;background:color-mix(in srgb,var(--bg-2) 92%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);padding:16px 18px 0;border-bottom:1px solid var(--line)}
+.ins-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.ins-title{font:700 20px/1.1 var(--f-display);letter-spacing:-.015em;margin-top:4px}
+.ins-hint{font-size:12px;color:var(--ink-2);margin-top:6px;line-height:1.45}
+.ins-hint kbd{font:500 10.5px var(--f-mono);padding:1px 5px;border:1px solid var(--line-strong);border-bottom-width:2px;border-radius:4px;background:var(--surface)}
+.ins-close{display:none}
+.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;margin-top:10px}
+.tabs::-webkit-scrollbar{display:none}
+.tab{border:0;background:none;padding:9px 10px;font:500 13px var(--f-body);color:var(--ink-2);border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;display:inline-flex;gap:6px;align-items:center}
+.tab:hover{color:var(--ink)}
+.tab[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--accent)}
+.tab .n{font:500 10px/1 var(--f-mono);padding:3px 5px;border-radius:5px;background:var(--surface-3);color:var(--ink-2)}
+.panel{display:grid;gap:12px;padding:16px 18px 40px}
+.ptxt{font-size:12.5px;color:var(--ink-2);line-height:1.5}
+.ed-item{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px;display:grid;gap:12px;transition:border-color .2s}
+.ed-item:focus-within{border-color:var(--line-strong)}
+.ed-item.dim{opacity:.6}
+.ed-head{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.ed-name{flex:1 1 160px;min-width:0;font-weight:600;font-size:14.5px;border:1px solid transparent;border-radius:7px;padding:6px 8px;background:var(--surface-2)}
+.ed-name:hover{border-color:var(--line-strong)}
+.ed-name:focus{outline:2px solid var(--accent);outline-offset:0}
+.fgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.fld{display:grid;gap:4px;min-width:0;align-content:start}
+.fld.full{grid-column:1/-1}
+.fl{font-size:11.5px;line-height:1.3;color:var(--ink-2);display:flex;gap:6px;align-items:center;flex-wrap:wrap;min-height:16px;user-select:none;-webkit-user-select:none}
+.fl[data-scrub]{cursor:ew-resize;touch-action:pan-y}
+.fl[data-scrub]::after{content:'⇆';font-size:11px;color:var(--muted);opacity:0;transition:opacity .15s}
+.fld:hover .fl[data-scrub]::after,.fl[data-scrub].active::after{opacity:1}
+.fl[data-scrub].active{color:var(--accent)}
+body.scrubbing,body.scrubbing *{cursor:ew-resize!important;user-select:none!important}
+.inp{display:flex;align-items:center;border:1px solid var(--line-strong);border-radius:8px;background:var(--bg-2);overflow:hidden;transition:border-color .15s}
+.inp i{font-style:normal;color:var(--muted);font-size:12.5px;padding-left:9px;white-space:nowrap}
+.inp i.s{padding:0 9px 0 0}
+.inp input,.inp select{flex:1;min-width:0;width:100%;border:0;background:transparent;font-size:13.5px;padding:7px 9px;font-variant-numeric:tabular-nums;outline:none}
+.inp select{cursor:pointer}
+.inp select option{background:var(--surface);color:var(--ink)}
+.inp:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 16%,transparent)}
+.fl.active+.inp{border-color:var(--accent)}
+.fh{font-size:11px;line-height:1.35;color:var(--muted)}
+.chk{display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer;min-height:32px}
+.chk input{accent-color:var(--accent);width:16px;height:16px;margin:0}
+.sub-h{grid-column:1/-1;font:500 10px var(--f-mono);text-transform:uppercase;letter-spacing:.09em;color:var(--muted);border-top:1px dashed var(--line);padding-top:10px;margin-top:2px}
+.addrow{display:flex;gap:8px;flex-wrap:wrap}
+.del{margin-left:auto;font-size:12px;color:var(--ink-2);background:none;border:1px solid var(--line);border-radius:7px;padding:5px 9px;cursor:pointer}
+.del:hover{border-color:var(--line-strong);color:var(--ink)}
+.del.armed{color:var(--crit-t);border-color:var(--crit-t)}
+.link-btn{background:none;border:0;padding:0;color:var(--ink);text-decoration:underline;text-underline-offset:2px;cursor:pointer;font-size:12.5px;text-align:left}
+textarea{width:100%;min-height:100px;border:1px solid var(--line-strong);border-radius:8px;background:var(--bg-2);padding:8px 10px;font:11.5px/1.45 var(--f-mono)}
+.msg{font-size:12.5px;color:var(--ink-2)}
+.fab{display:none}
+
+/* ── Tooltips ── */
+.gtip{position:fixed;left:0;top:0;z-index:400;max-width:min(300px,calc(100vw - 16px));padding:8px 11px;border-radius:9px;background:var(--ink);color:var(--bg);font:500 12.5px/1.45 var(--f-body);letter-spacing:0;text-transform:none;text-align:left;box-shadow:0 12px 32px -10px var(--shadow);pointer-events:none;animation:gtipIn .14s ease}
+.gtip::after{content:'';position:absolute;left:var(--ax,50%);bottom:-4px;width:8px;height:8px;margin-left:-4px;background:inherit;transform:rotate(45deg)}
+.gtip[data-pos="below"]::after{bottom:auto;top:-4px}
+@keyframes gtipIn{from{opacity:0;margin-top:3px}to{opacity:1;margin-top:0}}
+.u,.kpi .k,.nw-row [data-tip] .k,th[data-tip],.lg[data-tip],.grp-h [data-tip]{text-decoration:underline dotted color-mix(in srgb,var(--muted) 75%,transparent);text-decoration-thickness:1px;text-underline-offset:3px}
+[data-tip]:not(button):not(a):not(input):not(label):not(.fl):not(.tg *){cursor:help}
+.exmark,.ex{cursor:help}
+
+/* ── Responsive ── */
+@container canvas (max-width:940px){
+  .flowgrid{grid-template-columns:minmax(0,1fr)}
+  .spot{position:static}
+}
+@container canvas (max-width:780px){
+  .cgrid{grid-template-columns:minmax(0,1fr)}
+  .dk-row{flex-wrap:wrap;gap:10px 14px}
+  .dk-when{min-width:0;flex:1}
+  .track{order:3;flex-basis:100%}
+  .dk-month{font-size:21px}
+  .kpis{grid-template-columns:none;grid-auto-flow:column;grid-auto-columns:minmax(138px,1fr);overflow-x:auto;scrollbar-width:none;margin-inline:-4px;padding-inline:4px}
+  .kpis::-webkit-scrollbar{display:none}
+  .hero{padding-top:22px}
+}
+@media (max-width:1099px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .inspector{position:fixed;left:0;right:0;bottom:0;height:var(--sheet-h);z-index:60;border-left:0;border-top:1px solid var(--line-strong);border-radius:18px 18px 0 0;box-shadow:0 -20px 50px -20px var(--shadow);transform:translateY(105%);transition:transform .32s cubic-bezier(.22,1,.36,1);visibility:hidden}
+  .app.sheet .inspector{transform:none;visibility:visible}
+  .app.sheet .canvas{padding-bottom:var(--sheet-h)}
+  .ins-head{border-radius:18px 18px 0 0}
+  .ins-head::before{content:'';display:block;width:38px;height:4px;border-radius:2px;background:var(--line-strong);margin:-6px auto 10px}
+  .ins-close{display:inline-flex}
+  .tb-toggle{display:none}
+  .fab{display:inline-flex;position:fixed;right:max(16px,env(safe-area-inset-right));bottom:max(16px,env(safe-area-inset-bottom));z-index:55;align-items:center;gap:8px;padding:13px 18px;border-radius:999px;border:0;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:var(--on-accent);font-weight:700;font-size:14px;box-shadow:0 12px 30px -10px var(--shadow);cursor:pointer}
+  .app.sheet .fab{display:none}
+  .app.sheet .deck .track,.app.sheet .deck .dk-btns{display:none}
+}
+@media (max-width:480px){ .fgrid{grid-template-columns:minmax(0,1fr)} }
+@media (prefers-reduced-motion:reduce){ *{transition:none!important;animation:none!important} }
+</style>
+</head>
+<body>
+
+<div id="gate">
+  <div class="gate-card">
+    <div class="gate-icon">🧭</div>
+    <div class="gate-title">Private Access</div>
+    <p class="gate-sub">Wealth Map holds the full family financial picture. Enter the CF password to continue.</p>
+    <div class="gate-row">
+      <input id="gate-input" type="password" placeholder="Enter password…" autocomplete="off" aria-label="Password">
+      <button id="gate-btn" type="button">Unlock →</button>
+    </div>
+    <div id="gate-error" role="alert">Incorrect password. Try again.</div>
+    <a class="gate-back" href="./index.html">← Back to home</a>
+  </div>
+</div>
+
+<div id="main-content">
+<div class="app" id="app">
+
+  <main class="canvas" id="canvas">
+    <div class="cw">
+      <div class="topbar">
+        <a class="chip-btn" href="./index.html" data-tip="Back to the guides home page. Your plan stays saved in this browser.">← Home</a>
+        <div class="tb-right">
+          <div class="save" id="save" data-s="example" role="status" data-tip="The plan saves automatically, in this browser only. To back it up or move it to another device, use Copy plan under Settings."><i></i><span id="saveText">Example plan · edits save in this browser</span></div>
+          <button type="button" class="chip-btn" id="btnTheme" aria-label="Switch color theme" data-tip="Switch between the dark and light theme.">◐ <span>Light</span></button>
+          <button type="button" class="chip-btn tb-toggle" id="btnFocus" aria-pressed="false" data-tip="Hide or show the controls panel. Hiding it gives the charts the full width.">Hide controls →</button>
+        </div>
+      </div>
+      <header class="hero">
+        <div>
+          <div class="eyebrow">CF · The full financial picture</div>
+          <h1>Wealth <span>Map</span></h1>
+          <p class="lede">Everything we own, owe, earn and spend in one frame. Scrub through time, flip life events on and off, and change any number in the controls. The flow map and every chart redraw while you edit.</p>
+        </div>
+        <nav class="jump" aria-label="Sections">
+          <a href="#sec-flow" data-tip="Where this month's money comes from and goes.">Flow</a><a href="#sec-proj" data-tip="Charts of the whole plan over time.">Projections</a><a href="#sec-sheet" data-tip="Every account, property and debt in the shown month.">Own &amp; owe</a><a href="#sec-years" data-tip="Yearly averages and year-end balances.">Year by year</a>
+        </nav>
+      </header>
+      <div class="banner stale" id="stale" role="status" hidden></div>
+      <div class="banner" id="banner" hidden></div>
+    </div>
+
+    <section class="deck" aria-label="Timeline and headline numbers">
+      <div class="cw">
+        <div class="dk-row">
+          <div class="dk-when" data-tip="The month every number, card and the flow map is showing. Balances are as of the end of this month (the first month shows them as entered).">
+            <div class="eyebrow">Showing</div>
+            <div class="dk-month" id="tlMonth">—</div>
+            <div class="dk-rel" id="tlRel">Today</div>
+          </div>
+          <div class="track" id="track">
+            <div class="pins" id="pins"></div>
+            <input type="range" id="scrub" min="0" max="119" step="1" value="0" aria-label="Month to show" data-tip="Drag to move through time. Amber dots mark plan events and an upright line marks the current month; click either to jump there.">
+            <div class="years" id="years"></div>
+          </div>
+          <div class="dk-btns">
+            <button class="btn" id="btnToday" type="button" data-tip="Jump to the current month.">Today</button>
+            <button class="btn primary" id="btnPlay" type="button" aria-pressed="false" data-tip="Play through the plan month by month and watch everything change."><svg viewBox="0 0 12 12" aria-hidden="true"><path d="M2 1l9 5-9 5z"/></svg><span>Play</span></button>
+          </div>
+        </div>
+        <div class="kpis" id="kpis">
+          <div class="kpi" data-kpi="nw" data-tip="Everything owned minus everything owed in the shown month. The subtext compares it to a plan with none of the events (standing still)."><span class="k">Net worth</span><span class="vrow"><span class="v">—</span><span class="dl"></span></span><span class="s"></span></div>
+          <div class="kpi" data-kpi="left" data-tip="Take-home pay minus everything going out this month. A surplus lands in savings; a shortfall is covered from savings, and the subtext then shows the savings balance."><span class="k">Left over / mo</span><span class="vrow"><span class="v">—</span><span class="dl"></span></span><span class="s"></span></div>
+          <div class="kpi" data-kpi="runway" data-tip="How many months of regular spending the cash on hand could cover with no income. Green at or above the reserve target, amber below it, red under 2 months."><span class="k">Cash runway</span><span class="vrow"><span class="v">—</span><span class="dl"></span></span><span class="s"></span></div>
+          <div class="kpi" data-kpi="sav" data-tip="Share of income saved this month: what's left over plus 401(k) contributions and match, out of take-home pay plus those contributions."><span class="k">Savings rate</span><span class="vrow"><span class="v">—</span><span class="dl"></span></span><span class="s"></span></div>
+          <div class="kpi" data-kpi="end" data-tip="Projected net worth in the last month of the plan. The subtext compares it to a plan with none of the events."><span class="k">Net worth at the end</span><span class="vrow"><span class="v">—</span><span class="dl"></span></span><span class="s"></span></div>
+        </div>
+        <div class="ghostbar" id="ghostbar">
+          <span id="ghostText" data-tip="While you edit, the colored chips on the numbers above and the dashed magenta chart lines compare against the plan as it was before the edit. Keep comparing holds that snapshot while you try more changes."></span>
+          <span id="ghostActs"></span>
+        </div>
+      </div>
+    </section>
+
+    <div class="cw body">
+      <section class="card scen" aria-label="Scenarios">
+        <div class="eyebrow"><span class="u" data-tip="Every sale, purchase and life event in the plan. Untick one to see the whole picture without it; the dates jump the timeline to that month.">In this plan</span> · untick to see it without</div>
+        <div class="toggles" id="toggles"></div>
+      </section>
+
+      <section id="sec-flow" aria-label="Money flow">
+        <div class="sec-head">
+          <div><div class="eyebrow">Money flow · <span id="flowMonth">—</span> · after tax</div><h2>Where every dollar goes</h2></div>
+          <div class="owners" id="owners"></div>
+        </div>
+        <div class="flowgrid">
+          <div class="card flowcard">
+            <div id="flow"><div class="tip" hidden></div></div>
+            <div class="flowfoot"><span>Ribbon width is dollars per month. Hover any stream for details.</span><span id="flowScale" data-tip="Ribbons use the same scale in every month, so you can see the budget grow or shrink as you move through time."></span></div>
+          </div>
+          <aside class="card spot" id="spot" aria-label="This month"></aside>
+        </div>
+      </section>
+
+      <section id="sec-proj" aria-label="Projections">
+        <div class="sec-head"><div><div class="eyebrow">Projection</div><h2>Where it's headed</h2><p class="lede">Click any chart to jump to that month. Amber dotted lines mark plan events. While you edit, a dashed <span style="color:var(--ghost)">magenta</span> line shows the plan from before the edit.</p></div></div>
+        <div class="cgrid">
+          <figure class="card chart wide" id="chComp">
+            <figcaption><div class="ct"><span class="u" data-tip="Each colored layer is one kind of asset, stacked to show how net worth is built. Debts other than mortgages sit below zero; mortgages are already netted out of home equity.">Net worth, piece by piece</span></div><div class="cs" id="compCap">What we own stacked above zero, other debts below. The line is the net.</div></figcaption>
+            <div class="legend" id="lgComp"></div>
+            <div class="plot"></div>
+          </figure>
+          <figure class="card chart wide" id="chFlow">
+            <figcaption><div class="ct"><span class="u" data-tip="Colored areas are monthly take-home pay by earner. The dark line is everything going out. Where the line sits above the areas, savings cover the gap.">Money in vs. money out</span></div><div class="cs">Take-home pay stacked by who earns it, against everything going out.</div></figcaption>
+            <div class="legend" id="lgFlow"></div>
+            <div class="plot"></div>
+          </figure>
+          <figure class="card chart" id="chCash">
+            <figcaption><div class="ct"><span class="u" data-tip="Total in checking and savings at the end of each month. The dashed line is the reserve target from Settings; dips below it mean less of a cushion.">Cash on hand</span></div><div class="cs" id="cashCap">Checking and savings combined.</div></figcaption>
+            <div class="legend" id="lgCash"></div>
+            <div class="plot"></div>
+          </figure>
+          <figure class="card chart" id="chNW">
+            <figcaption><div class="ct"><span class="u" data-tip="Solid line: net worth with every event in the plan. Dashed grey: the same starting point with every event switched off, so the gap shows what the plan changes.">This plan vs. standing still</span></div><div class="cs" id="nwCap">Net worth with every event against none of them.</div></figcaption>
+            <div class="legend" id="lgNW"></div>
+            <div class="plot"></div>
+          </figure>
+        </div>
+      </section>
+
+      <section id="sec-sheet" aria-label="What we own and owe">
+        <div class="sec-head">
+          <div><div class="eyebrow">Balance sheet · <span id="sheetMonth">today</span></div><h2>What we own &amp; owe</h2></div>
+          <div class="nw-row" id="nwRow"></div>
+        </div>
+        <div class="groups" id="groups"></div>
+      </section>
+
+      <section id="sec-years" aria-label="Year by year">
+        <div class="sec-head"><div><div class="eyebrow">Summary</div><h2>Year by year</h2></div><p class="lede" style="margin:0">Click a row to jump to that year.</p></div>
+        <div class="card tbl-wrap"><table id="yearTable"></table></div>
+      </section>
+
+      <footer class="foot">
+        <div>How the math works: Today shows balances as entered, and each later month shows balances at the end of that month. Each income uses one combined effective tax rate. Pay and spending rise once a year by the rates you set. Mortgages amortize monthly. Cash above the reserve target moves to the investment account when that setting is on.</div>
+        <div>Savings rate counts what's left over plus 401(k) contributions and match, out of take-home pay plus those contributions. Leave pay uses the benefit rate and weekly cap set under Life events. The child tax credit default is the 2026 federal amount ($2,200 per child), spread across the year here, though it actually arrives with the tax refund.</div>
+        <div>This is a planning model, not tax or financial advice.</div>
+      </footer>
+    </div>
+  </main>
+
+  <aside class="inspector" id="inspector" aria-label="Your numbers">
+    <div class="ins-head">
+      <div class="ins-top">
+        <div>
+          <div class="eyebrow">Controls</div>
+          <div class="ins-title">Your numbers</div>
+        </div>
+        <button type="button" class="btn ins-close" id="btnSheetClose" data-tip="Close the controls. Everything you changed is already saved.">Done</button>
+      </div>
+      <p class="ins-hint">Type a number, nudge it with <kbd>↑</kbd> <kbd>↓</kbd> (<kbd>Shift</kbd> for 10×), or drag any label sideways to scrub it. The picture redraws as you go.</p>
+      <div class="tabs" role="tablist" id="tabs"></div>
+    </div>
+    <div class="panel" id="panel" role="tabpanel"></div>
+  </aside>
+
+  <button type="button" class="fab" id="fab" data-tip="Open the controls to change any number.">⚙︎ Adjust numbers</button>
+</div>
+</div>
+
+<script>
+(function(){
+'use strict';
+
+/* ---------- example plan (placeholders flagged in `ex`) ---------- */
+const START=(function(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); })();
+function M(n){ return idxYm(n,START); }
+const DEFAULT={
+  v:1,
+  people:{p1:'Alex', p2:'Jordan'},
+  settings:{start:START, years:10, inflation:3, reserveMonths:6, investExcess:true},
+  incomes:[
+    {id:'inc-p1', name:"Alex's paycheck", owner:'p1', kind:'w2', annual:95000, tax:25, growth:3, k401:5, match:3, start:null, end:null, ex:['annual','tax','growth','k401','match']},
+    {id:'inc-p2', name:"Jordan's paycheck", owner:'p2', kind:'w2', annual:75000, tax:24, growth:3, k401:5, match:4, start:null, end:null, ex:['annual','tax','growth','k401','match']}
+  ],
+  properties:[
+    {id:'p-current', name:'Current home', place:'', role:'home', owner:'joint', status:'owned', value:350000, appr:3, loanBal:220000, rate:4, payment:1200, taxYr:7200, insYr:1400, maintPct:1, utilMo:300, hoaMo:0, rentMo:0, vacancy:5, mgmt:0,
+      sell:{on:true, month:M(2), price:360000, commission:5, costs:1.5},
+      ex:['value','loanBal','rate','payment','taxYr','insYr','utilMo','sell.month','sell.price','sell.costs']},
+    {id:'p-new', name:'New home', place:'', role:'home', owner:'joint', status:'buying', value:0, appr:3, loanBal:0, rate:0, payment:0, taxYr:9000, insYr:1800, maintPct:1, utilMo:375, hoaMo:0, rentMo:0, vacancy:5, mgmt:0,
+      buy:{on:true, month:M(2), price:450000, downPct:10, closingPct:3, rate:6.5, term:30},
+      ex:['buy.month','buy.price','buy.downPct','buy.closingPct','buy.rate','taxYr','insYr','utilMo']}
+  ],
+  accounts:[
+    {id:'a-checking', name:'Checking', kind:'cash', owner:'joint', bal:8000, yield:0, ret:0, sweep:false, ex:['bal']},
+    {id:'a-savings', name:'Savings', kind:'cash', owner:'joint', bal:30000, yield:4, ret:0, sweep:true, ex:['bal','yield']},
+    {id:'a-401k-p1', name:"Alex's 401(k)", kind:'retire', owner:'p1', bal:60000, yield:0, ret:6, sweep:false, ex:['bal']},
+    {id:'a-401k-p2', name:"Jordan's 401(k)", kind:'retire', owner:'p2', bal:45000, yield:0, ret:6, sweep:false, ex:['bal']},
+    {id:'a-brokerage', name:'Brokerage', kind:'invest', owner:'joint', bal:15000, yield:0, ret:6, sweep:false, ex:['bal']},
+    {id:'a-car', name:'Car', kind:'vehicle', owner:'joint', bal:25000, yield:0, ret:-12, sweep:false, ex:['bal','ret']}
+  ],
+  debts:[
+    {id:'d-car', name:'Car loan', owner:'joint', bal:14000, rate:6, payment:450, ex:['bal','rate','payment']}
+  ],
+  spending:[
+    {id:'s-groc', name:'Groceries & household', cat:'living', monthly:900, infl:true, start:null, end:null, ex:['monthly']},
+    {id:'s-phone', name:'Phones & internet', cat:'living', monthly:180, infl:true, start:null, end:null, ex:['monthly']},
+    {id:'s-car', name:'Gas, car insurance & upkeep', cat:'transport', monthly:350, infl:true, start:null, end:null, ex:['monthly']},
+    {id:'s-health', name:'Health insurance', cat:'insurance', monthly:400, infl:true, start:null, end:null, ex:['monthly']},
+    {id:'s-fun', name:'Dining & fun', cat:'lifestyle', monthly:400, infl:true, start:null, end:null, ex:['monthly']},
+    {id:'s-travel', name:'Travel', cat:'lifestyle', monthly:200, infl:true, start:null, end:null, ex:['monthly']},
+    {id:'s-other', name:'Everything else', cat:'other', monthly:250, infl:true, start:null, end:null, ex:['monthly']}
+  ],
+  events:[
+    {id:'e-move', type:'oneTime', on:true, name:'Moving & furniture', month:M(2), amount:6000, ex:['month','amount']},
+    {id:'e-raise', type:'income', on:true, name:'Alex gets a raise', month:M(6), incomeId:'inc-p1', annual:102000, ex:['month','annual']},
+    {id:'e-baby', type:'baby', on:true, name:'Baby arrives', month:M(12), oneTime:3000, monthly:800, insurance:200, ctc:2200, leavePct:70, leaveCap:1000,
+      leave:[{incomeId:'inc-p2', weeks:12}],
+      childcare:{on:false, after:12, monthly:1400},
+      ex:['month','oneTime','monthly','insurance','leavePct','leaveCap','leave.0.weeks','childcare.monthly']},
+    {id:'e-parttime', type:'income', on:false, name:'Jordan goes part-time', month:M(15), incomeId:'inc-p2', annual:45000, ex:['month','annual']}
+  ]
+};
+
+const CATS={living:'Living',transport:'Getting around',insurance:'Insurance',giving:'Giving',lifestyle:'Fun & travel',other:'Other'};
+const CAT_ORDER=['living','transport','insurance','giving','lifestyle','other'];
+const KIND={w2:'Paycheck',self:'Self-employed',other:'Other income',rental:'Rental, net',credit:'Tax credit'};
+const ACC_GROUPS=[['cash','Cash & savings'],['retire','Retirement'],['invest','Investments'],['insurance','Life insurance cash value'],['crypto','Crypto'],['vehicle','Vehicles'],['business','Businesses']];
+const OWN=['p1','p2','joint','biz'];
+const COLLS=['incomes','properties','accounts','debts','spending','events'];
+const COMP=[['cash','Cash','--k-cash'],['invest','Investments','--k-invest'],['retire','Retirement','--k-retire'],['re','Home equity','--k-re'],['other','Vehicles & other','--k-other']];
+const WPM=52/12;
+const MN=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const MNL=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const REDUCE=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+let plan=clone(DEFAULT), sim=null, base=null, sel=0, tab='income', playing=null;
+let ghost=null, pinned=false, ghostTimer=0;
+
+/* ---------- helpers ---------- */
+function clone(o){return JSON.parse(JSON.stringify(o));}
+function num(v){ if(typeof v==='number') return isFinite(v)?v:0; const n=parseFloat(String(v==null?'':v).replace(/[^0-9.\-]/g,'')); return isFinite(n)?n:0; }
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+const nf=new Intl.NumberFormat('en-US',{maximumFractionDigits:0});
+function usd(v){ v=Math.round(v); return (v<0?'−':'')+'$'+nf.format(Math.abs(v)); }
+function susd(v){ return (Math.round(v)>0?'+':'')+usd(v); }
+function kusd(v){ const a=Math.abs(v), s=v<0?'−':''; if(a>=1e6) return s+'$'+(a/1e6).toFixed(a>=1e7?0:2).replace(/\.?0+$/,'')+'M'; if(a>=1e4) return s+'$'+Math.round(a/1e3)+'k'; if(a>=1e3) return s+'$'+(a/1e3).toFixed(1).replace(/\.0$/,'')+'k'; return s+'$'+Math.round(a); }
+function skusd(v){ return (v>0?'+':v<0?'−':'')+kusd(Math.abs(v)); }
+function q(s,r){return (r||document).querySelector(s);}
+function qa(s,r){return Array.from((r||document).querySelectorAll(s));}
+function uid(p){return p+'-'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+function ymIdx(ym,start){ if(!ym||!/^\d{4}-\d{2}$/.test(ym)) return null; const a=ym.split('-').map(Number), b=start.split('-').map(Number); return (a[0]-b[0])*12+(a[1]-b[1]); }
+function idxYm(t,start){ const b=start.split('-').map(Number); const tot=b[0]*12+(b[1]-1)+t; return Math.floor(tot/12)+'-'+String(tot%12+1).padStart(2,'0'); }
+function ymLabel(ym,long){ if(!ym||!/^\d{4}-\d{2}$/.test(ym)) return '—'; const a=ym.split('-').map(Number); return (long?MNL:MN)[a[1]-1]+' '+a[0]; }
+function tLabel(t,long){ return ymLabel(idxYm(t,plan.settings.start),long); }
+function amort(L,r,yrs){ const n=Math.max(1,Math.round((yrs||30)*12)), i=r/12; if(L<=0) return 0; if(i<=0) return L/n; return L*i/(1-Math.pow(1+i,-n)); }
+function ownerName(k){ return k==='p1'?(plan.people.p1||'Person 1'):k==='p2'?(plan.people.p2||'Person 2'):k==='joint'?'Joint':'Business'; }
+function ownKey(k){ return OWN.includes(k)?k:'joint'; }
+function shortName(s){ return String(s||'').replace(/\s+(Place|Pl\.?|Road|Rd\.?|Street|St\.?|Lane|Ln\.?|Drive|Dr\.?|Avenue|Ave\.?|Court|Ct\.?)$/i,'').replace(/^\d+\s+/,''); }
+function hasEx(it){ return !!(it&&it.ex&&it.ex.length); }
+function exTag(it){ return hasEx(it)?'<span class="ex">Example</span>':''; }
+function sum(a,f){ let s=0; for(const x of a) s+=f?f(x):x; return s; }
+function nowYm(){ const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0'); }
+function nowIdx(){ return ymIdx(nowYm(),plan.settings.start); }
+function todayT(){ return Math.max(0,Math.min(sim.N-1,nowIdx())); }
+function spanText(n){
+  const y=Math.floor(n/12), m=n%12, parts=[];
+  if(y) parts.push(y+(y===1?' year':' years')); if(m) parts.push(m+(m===1?' month':' months'));
+  return parts.join(', ');
+}
+function relText(t){
+  const d=t-nowIdx();
+  if(d===0) return 'This month';
+  return d>0?spanText(d)+' from now':spanText(-d)+' ago';
+}
+
+/* ---------- tooltips ---------- */
+const EX_TIP='Placeholder figure from the example plan. Change it in the controls and this tag disappears.';
+function tipAttr(t){ return t?' data-tip="'+esc(t)+'"':''; }
+function ownerTip(k){
+  if(k==='joint') return 'Joint income, such as the child tax credit or rentals owned together.';
+  if(k==='biz') return 'Business income, including rentals held by the business.';
+  return ownerName(k)+'\'s take-home pay after taxes and 401(k) contributions.';
+}
+const COMP_TIP={cash:'Checking and savings accounts.',invest:'Brokerage and other investment accounts, including cash swept in above the reserve.',retire:'401(k)s and IRAs, growing with contributions, employer match and returns.',re:'Property value minus what\'s still owed on the mortgage.',other:'Vehicles, businesses, life insurance cash value and crypto.'};
+const GRP_TIP={'Real estate':'Market value of the properties owned this month. Sold properties are faded; future purchases are dashed until they close.','Cash & savings':'Checking and savings. Monthly surpluses land here and shortfalls come out of here.','Retirement':'401(k)s and IRAs. Contributions and match are added monthly, then grow at the assumed return.','Investments':'Brokerage and similar accounts. With the Settings option on, cash above the reserve target moves here.','Life insurance cash value':'Cash value of permanent life insurance policies.','Crypto':'Crypto holdings at the assumed return.','Vehicles':'Current market value of vehicles, usually losing value each year.','Businesses':'Estimated value of business interests.','Debts':'Balances still owed on loans and cards, other than mortgages.'};
+function BADGE_TIP(b){
+  if(/^Sold/.test(b)) return 'Sold in the plan. The card shows the sale price; the proceeds went to cash.';
+  if(/^Closing/.test(b)) return 'A planned purchase that hasn\'t closed yet in the shown month.';
+  if(/^Selling/.test(b)) return 'A sale is planned for this month. Untick it under In this plan to compare without it.';
+  if(/^Bought/.test(b)) return 'Bought during the plan. Value and mortgage start from the purchase.';
+  if(/Not in this plan/.test(b)) return 'This purchase is switched off. Tick it under In this plan to include it.';
+  return 'Owned in the shown month.';
+}
+const YEAR_COLS=[['Year','Calendar year. A partial year shows how many months are included.'],['Avg. in / mo','Average monthly take-home pay across the year.'],['Avg. out / mo','Average monthly outflow, including housing, debt payments and one-time costs.'],['Avg. left / mo','Average monthly surplus, or shortfall if negative.'],['Savings rate','Left over plus 401(k) contributions and match, out of take-home pay plus those contributions.'],['Cash at year end','Checking and savings in the last month of the year.'],['Net worth at year end','Everything owned minus everything owed at the end of the year.'],['vs. standing still','Year-end net worth compared with the same plan with every event switched off.']];
+const TAB_TIP={income:'Paychecks and other income: taxes, raises and 401(k).',homes:'Homes and rentals: value, mortgage and running costs, plus planned sales and purchases.',accounts:'Cash, retirement, investments, vehicles and other assets.',debts:'Car loans, student loans and cards. Mortgages live under Homes.',spending:'Everyday monthly spending by category.',events:'Raises, one-time costs, a baby and other changes at a point in time.',settings:'Names, start month, horizon, inflation and cash reserve, plus backup and reset.'};
+const ADD_TIP={incomes:'Add a paycheck, side income or other income source.',properties:'Add a home or rental. Set Status to Planning to buy for a future purchase.',accounts:'Add a bank, retirement, investment, vehicle or other asset.',debts:'Add a loan or card balance.',spending:'Add a monthly spending line.','ev:income':'A raise, new job, switch to part-time or retirement, starting in a given month.','ev:oneTime':'A one-off cost or windfall in a given month.','ev:baby':'Adds baby costs, parental leave, optional childcare and the child tax credit.'};
+const HELP={
+  'incomes.owner':'Who earns it. Sets its color on the map and charts, and whose 401(k) gets the contributions.',
+  'incomes.kind':'Paychecks get 401(k) contributions, employer match and parental leave. Self-employed and other income are taxed at the rate you set, with no retirement contributions.',
+  'incomes.annual':'Gross pay per year, before taxes and 401(k). Yearly raises and income-change events build from here.',
+  'incomes.tax':'Every income tax combined as a share of gross pay: federal, Social Security, Medicare and state. Use the effective rate, not the bracket.',
+  'incomes.growth':'Yearly raise, applied every 12 months from the start of the plan or from the last income change.',
+  'incomes.k401':'Share of gross pay put into a 401(k) before tax. Lowers take-home pay and grows the retirement balance.',
+  'incomes.match':'What the employer adds, as a share of gross pay. Goes straight to retirement without touching take-home pay.',
+  'incomes.start':'First month this income pays. Leave blank if it already does.',
+  'incomes.end':'Last month this income pays, such as a planned retirement. Leave blank if ongoing.',
+  'properties.place':'Optional town or neighborhood, shown on the property card.',
+  'properties.role':'Our home: its costs show in Money out as Housing. Rental: rent minus every cost shows in Money in as net cash flow.',
+  'properties.owner':'Who holds title. Sets the color on the card and flow map.',
+  'properties.status':'Own it now uses today\'s value and mortgage. Planning to buy models a future purchase with a new mortgage.',
+  'properties.buy.on':'Untick to see the plan without this purchase. Same as the switch under In this plan.',
+  'properties.buy.month':'Month the purchase closes. The down payment and closing costs leave cash that month; mortgage payments start the next.',
+  'properties.buy.price':'Purchase price. Also the starting value, which then grows at the appreciation rate.',
+  'properties.buy.downPct':'Share of the price paid in cash at closing. The rest becomes the mortgage.',
+  'properties.buy.closingPct':'Lender fees, title, attorney and prepaid taxes and insurance, as a share of the price. Paid in cash at closing.',
+  'properties.buy.rate':'Interest rate on the new mortgage. Sets the monthly principal and interest payment.',
+  'properties.buy.term':'Length of the new mortgage. Shorter terms mean higher payments but less interest.',
+  'properties.value':'What the property would sell for today.',
+  'properties.loanBal':'What\'s still owed on the mortgage today.',
+  'properties.rate':'Current mortgage interest rate. Splits each payment into interest and principal.',
+  'properties.payment':'Monthly principal and interest only. Enter taxes and insurance below, even if they\'re escrowed.',
+  'properties.taxYr':'Annual property tax bill. Rises with inflation.',
+  'properties.insYr':'Annual homeowners or landlord insurance premium. Rises with inflation.',
+  'properties.maintPct':'Yearly repairs and upkeep as a share of the value. 1% is a common rule of thumb.',
+  'properties.hoaMo':'Monthly HOA or condo fee, if any. Rises with inflation.',
+  'properties.appr':'How fast the value grows each year. Builds equity and net worth.',
+  'properties.rentMo':'Total monthly rent across all units when fully occupied. Rises with inflation.',
+  'properties.vacancy':'Share of the year units sit empty. Reduces collected rent.',
+  'properties.mgmt':'Property manager fee as a share of collected rent. Use 0 if self-managed.',
+  'properties.utilMo':'Electric, gas, water, trash and the like. Rises with inflation.',
+  'properties.sell.on':'Untick to see the plan without this sale. Same as the switch under In this plan.',
+  'properties.sell.month':'Month the sale closes. Proceeds after fees and the mortgage payoff land in cash that month.',
+  'properties.sell.price':'Expected sale price.',
+  'properties.sell.commission':'Agent commissions as a share of the sale price.',
+  'properties.sell.costs':'Other seller costs as a share of the price: transfer taxes, attorney, concessions.',
+  'accounts.kind':'Cash covers spending. Retirement receives 401(k) money. Investments receive cash above the reserve. Everything else just grows or shrinks at its rate.',
+  'accounts.owner':'Whose account. Sets its color, and a retirement account receives that person\'s 401(k) contributions.',
+  'accounts.bal':'Balance today. For vehicles and businesses, the current market value.',
+  'accounts.yield':'Annual interest rate (APY) on this cash, paid monthly.',
+  'accounts.ret':'Assumed average yearly return. Use a negative number for things that lose value, like cars.',
+  'accounts.sweep':'The account that receives each month\'s surplus and covers any shortfall. Its balance shows under From savings on the flow map.',
+  'debts.owner':'Whose debt. Sets the color on the card.',
+  'debts.bal':'What\'s owed today.',
+  'debts.rate':'Annual interest rate. Interest is added each month before the payment.',
+  'debts.payment':'Monthly payment. It stops once the debt is paid off, freeing up cash.',
+  'spending.cat':'Groups this line on the flow map and in Money out.',
+  'spending.monthly':'Average monthly amount. For annual bills, divide by 12.',
+  'spending.start':'First month of this cost. Leave blank if it already applies.',
+  'spending.end':'Last month of this cost. Leave blank if ongoing.',
+  'spending.infl':'Raises this cost every year by the inflation rate in Settings. Untick for fixed costs.',
+  'events.on':'Untick to see the plan without this event. Same as the switch under In this plan.',
+  'events.month':'When it happens. It shows as an amber dot on the timeline.',
+  'events.oneTime':'Hospital bills, crib, car seat and other one-time costs in the birth month.',
+  'events.monthly':'Ongoing monthly costs for diapers, formula, clothes and gear. Rises with inflation.',
+  'events.insurance':'Extra monthly cost to add the baby to the health plan.',
+  'events.ctc':'Annual child tax credit, spread across the year as income here.',
+  'events.leave.*.incomeId':'Which paycheck pauses during the leave.',
+  'events.leave.*.weeks':'Weeks away from work. During these weeks leave pay replaces the paycheck.',
+  'events.leavePct':'Share of regular wages that leave pay replaces. Use 0 for unpaid leave.',
+  'events.leaveCap':'The most leave pay can be per week, from the state or employer plan.',
+  'events.childcare.on':'Adds a paid childcare cost starting some months after the birth.',
+  'events.childcare.after':'Months after the birth that childcare starts.',
+  'events.childcare.monthly':'Monthly childcare cost. Rises with inflation.',
+  'events.incomeId':'The income that changes.',
+  'events.annual':'New gross pay per year from this month on. Yearly raises continue from here.',
+  'events.amount':'Cost in that month. Use a negative number for a windfall like a bonus or gift.',
+  'people.p1':'Name shown on the map, cards and charts.',
+  'people.p2':'Name shown on the map, cards and charts.',
+  'settings.start':'The month the balances are as of. The plan starts here. When this falls behind the calendar, a banner offers to move it to the current month.',
+  'settings.years':'How far ahead the projection runs.',
+  'settings.inflation':'Yearly rise in spending, property taxes, insurance and rent, wherever they\'re set to rise with inflation.',
+  'settings.reserveMonths':'Months of regular spending to keep in cash. Sets the cash runway target and when extra cash moves to investments.',
+  'settings.investExcess':'Each month, cash above the reserve target moves into the investment account, where it earns the investment return.'
+};
+function helpFor(path){
+  const p=path.split('.');
+  const key=COLLS.includes(p[0])?p[0]+'.'+p.slice(2).map(x=>/^\d+$/.test(x)?'*':x).join('.'):path;
+  return HELP[key]||'';
+}
+const TT={el:null,tg:null,timer:0};
+function showTip(t){
+  if(!t.isConnected||document.body.classList.contains('scrubbing')) return;
+  const txt=t.dataset.tip||(t.matches('.exmark,.ex')?EX_TIP:''); if(!txt) return;
+  const el=TT.el; TT.tg=t; el.textContent=txt; el.hidden=false;
+  const r=t.getBoundingClientRect(), w=el.offsetWidth, h=el.offsetHeight, m=8;
+  const x=Math.max(m,Math.min(innerWidth-w-m,r.left+r.width/2-w/2));
+  let y=r.top-h-10, pos='above';
+  if(y<m){ y=r.bottom+10; pos='below'; }
+  el.style.left=Math.round(x)+'px'; el.style.top=Math.round(y)+'px'; el.dataset.pos=pos;
+  el.style.setProperty('--ax',Math.max(12,Math.min(w-12,r.left+r.width/2-x))+'px');
+  t.setAttribute('aria-describedby','gtip');
+}
+function hideTip(){ clearTimeout(TT.timer); if(TT.tg) TT.tg.removeAttribute('aria-describedby'); TT.tg=null; if(TT.el) TT.el.hidden=true; }
+function bindTips(){
+  const el=document.createElement('div'); el.id='gtip'; el.className='gtip'; el.setAttribute('role','tooltip'); el.hidden=true;
+  document.body.appendChild(el); TT.el=el;
+  const SEL='[data-tip],.exmark,.ex';
+  document.addEventListener('pointerover',e=>{
+    const t=e.target.closest(SEL);
+    if(t===TT.tg) return;
+    const warm=!!TT.tg;
+    clearTimeout(TT.timer);
+    if(!t){ hideTip(); return; }
+    if(e.pointerType==='touch'&&t.matches('button,a,input')) return;
+    TT.timer=setTimeout(()=>showTip(t),warm?40:e.pointerType==='touch'?0:350);
+  });
+  document.addEventListener('pointerout',e=>{ if(!e.relatedTarget&&e.pointerType!=='touch') hideTip(); });
+  document.addEventListener('pointerdown',e=>{ if(e.pointerType!=='touch') hideTip(); });
+  document.addEventListener('focusin',e=>{ const t=e.target; if(t.matches&&t.matches('[data-tip]')&&t.matches(':focus-visible')) showTip(t); });
+  document.addEventListener('focusout',hideTip);
+  document.addEventListener('scroll',hideTip,true);
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape') hideTip(); });
+}
+
+/* ---------- normalize ---------- */
+function normalize(p){
+  const d=DEFAULT;
+  p.people=Object.assign({p1:'Person 1',p2:'Person 2'},p.people||{});
+  p.settings=Object.assign({},d.settings,p.settings||{});
+  if(!/^\d{4}-\d{2}$/.test(p.settings.start||'')) p.settings.start=START;
+  for(const c of COLLS){ if(!Array.isArray(p[c])) p[c]=[]; for(const it of p[c]){ if(!it.id) it.id=uid(c); if(!Array.isArray(it.ex)) it.ex=[]; } }
+  for(const pr of p.properties){
+    if(pr.status==='buying'&&!pr.buy) pr.buy={on:true, month:idxYm(6,p.settings.start), price:num(pr.value)||400000, downPct:20, closingPct:3, rate:6.5, term:30};
+    if(pr.buy&&typeof pr.buy.on!=='boolean') pr.buy.on=true;
+    if(pr.sell&&typeof pr.sell.on!=='boolean') pr.sell.on=true;
+  }
+  for(const e of p.events){
+    if(typeof e.on!=='boolean') e.on=true;
+    if(e.type==='baby'){ if(!Array.isArray(e.leave)) e.leave=[]; if(!e.childcare) e.childcare={on:false,after:12,monthly:1500}; if(e.leavePct==null) e.leavePct=70; if(e.leaveCap==null) e.leaveCap=1000; }
+  }
+  const sweeps=p.accounts.filter(a=>a.kind==='cash'&&a.sweep);
+  if(sweeps.length>1) sweeps.slice(1).forEach(a=>a.sweep=false);
+  if(!sweeps.length){ const c=p.accounts.find(a=>a.kind==='cash'); if(c) c.sweep=true; }
+  return p;
+}
+
+/* ---------- simulation ---------- */
+function simulate(P,sq){
+  const S=P.settings, start=S.start, N=Math.max(12,Math.round(num(S.years)||10)*12);
+  const I=ym=>{ const v=ymIdx(ym,start); return v==null?null:Math.max(0,v); };
+  const infl=num(S.inflation)/100;
+  const on=o=>!!o&&!sq&&o.on!==false;
+  const acc=P.accounts.map(a=>({id:a.id,kind:a.kind,owner:a.owner,b:num(a.bal),y:num(a.kind==='cash'?a.yield:a.ret)/100,sweep:!!a.sweep}));
+  let cashAcc=acc.filter(a=>a.kind==='cash');
+  if(!cashAcc.length){ const v={id:'_cash',kind:'cash',owner:'joint',b:0,y:0,sweep:true}; acc.push(v); cashAcc=[v]; }
+  const sweep=cashAcc.find(a=>a.sweep)||cashAcc[0];
+  const investAcc=acc.find(a=>a.kind==='invest')||null;
+  const retireBy=o=>acc.find(a=>a.kind==='retire'&&a.owner===o)||null;
+  const props=P.properties.map(p=>{
+    const future=p.status==='buying';
+    return {p, owned:!future, sold:false, v:future?0:num(p.value), L:future?0:num(p.loanBal), rate:(future?num(p.buy&&p.buy.rate):num(p.rate))/100, pay:future?0:num(p.payment),
+      buyT: future&&on(p.buy)?I(p.buy.month):null, sellT: p.sell&&on(p.sell)?I(p.sell.month):null, soldT:null, boughtT:null, salePrice:0};
+  });
+  const debts=P.debts.map(d=>({id:d.id,name:d.name,b:num(d.bal),r:num(d.rate)/100,pay:num(d.payment),paidOff:null,ex:hasEx(d)}));
+  const baby=P.events.find(e=>e.type==='baby'&&on(e))||null;
+  const bt=baby?I(baby.month):null;
+  const incEv=P.events.filter(e=>e.type==='income'&&on(e)).map(e=>({e,t:I(e.month)})).filter(x=>x.t!=null);
+  const oneTimes=P.events.filter(e=>e.type==='oneTime'&&on(e)).map(e=>({e,t:I(e.month)}));
+  const months=[], ser={inBy:{p1:[],p2:[],joint:[],biz:[]},inTot:[],out:[],left:[],cash:[],target:[],nw:[],sav:[],comp:{cash:[],invest:[],retire:[],re:[],other:[],neg:[]}};
+  let flowMax=1;
+
+  for(let t=0;t<N;t++){
+    const live=t>0;
+    const iF=Math.pow(1+infl,Math.floor(t/12));
+    const notes=[]; let pretax=0, invested=0;
+    if(live){
+      for(const a of acc) if(a.b>0||a.kind==='cash') a.b*=1+a.y/12;
+      for(const s of props) if(s.owned) s.v*=Math.pow(1+num(s.p.appr)/100,1/12);
+    }
+
+    /* incomes */
+    const incomes=[];
+    for(const i of P.incomes){
+      const a=I(i.start), b=I(i.end);
+      if(a!=null&&t<a) continue; if(b!=null&&t>b) continue;
+      let baseAnnual=num(i.annual), from=0;
+      for(const x of incEv){ if(x.e.incomeId===i.id&&x.t<=t&&x.t>=from){ baseAnnual=num(x.e.annual); from=x.t; } }
+      const annual=baseAnnual*Math.pow(1+num(i.growth)/100,Math.floor((t-from)/12));
+      const gross=annual/12, tax=num(i.tax)/100;
+      let wage=gross, benefit=0, leave=null;
+      if(baby&&i.kind==='w2'){
+        for(const L of baby.leave||[]){
+          const wk=num(L.weeks); if(L.incomeId!==i.id||wk<=0) continue;
+          const s0=(t-bt)*WPM, s1=s0+WPM, ov=Math.max(0,Math.min(s1,wk)-Math.max(s0,0));
+          if(ov>0){ const weekly=annual/52, ben=Math.min(weekly*num(baby.leavePct)/100, num(baby.leaveCap)||Infinity);
+            wage=gross*(1-ov/WPM); benefit=ben*ov; leave={week:Math.max(1,Math.min(wk,Math.round(s1))), weeks:wk, ben}; }
+        }
+      }
+      let take, contrib=0, match=0;
+      if(i.kind==='w2'){ contrib=wage*num(i.k401)/100; match=wage*num(i.match)/100; take=(wage-contrib)*(1-tax)+benefit*(1-tax);
+        const r=retireBy(i.owner)||acc.find(x=>x.kind==='retire')||investAcc; if(r&&live) r.b+=contrib+match; pretax+=contrib+match; }
+      else take=gross*(1-tax);
+      incomes.push({id:i.id,name:i.name,owner:i.owner,kind:i.kind,take,gross:wage+benefit,contrib,match,leave,ex:hasEx(i),changed:from>0});
+    }
+    if(baby&&t>=bt&&num(baby.ctc)>0) incomes.push({id:'ctc',name:'Child tax credit',owner:'joint',kind:'credit',take:num(baby.ctc)/12,gross:num(baby.ctc)/12,ex:false});
+
+    /* properties: costs for anything owned at the start of the month */
+    const outs=[]; let housing=0; const hParts={'Mortgage':0,'Property tax':0,'Insurance':0,'Upkeep':0,'Utilities':0,'HOA':0}; const hNames=[]; let hEx=false;
+    for(const s of props){
+      if(!s.owned) continue; const p=s.p;
+      const interest=s.L*s.rate/12; let pi=0;
+      if(s.L>0.5){ pi=Math.min(s.pay,s.L+interest); if(live) s.L=Math.max(0,s.L+interest-pi); }
+      const tax=num(p.taxYr)/12*iF, ins=num(p.insYr)/12*iF, up=num(p.maintPct)/100*s.v/12, hoa=num(p.hoaMo)*iF;
+      if(p.role==='rental'){
+        const rent=num(p.rentMo)*iF, eff=rent*(1-num(p.vacancy)/100), mg=eff*num(p.mgmt)/100;
+        incomes.push({id:'prop-'+p.id,name:p.name,owner:p.owner,kind:'rental',take:eff-mg-pi-tax-ins-up-hoa,gross:eff,rent,pi,ex:hasEx(p)});
+      } else {
+        const util=num(p.utilMo)*iF;
+        housing+=pi+tax+ins+up+util+hoa;
+        hParts['Mortgage']+=pi; hParts['Property tax']+=tax; hParts['Insurance']+=ins; hParts['Upkeep']+=up; hParts['Utilities']+=util; hParts['HOA']+=hoa;
+        hNames.push(shortName(p.name)); if(hasEx(p)) hEx=true;
+      }
+    }
+    if(housing>0) outs.push({key:'housing',label:'Housing',sub:hNames.join(' + '),amount:housing,items:Object.entries(hParts).filter(x=>x[1]>0.5),ex:hEx});
+
+    /* spending */
+    const cats={};
+    for(const s of P.spending){
+      const a=I(s.start), b=I(s.end); if(a!=null&&t<a) continue; if(b!=null&&t>b) continue;
+      const amt=num(s.monthly)*(s.infl===false?1:iF); if(amt===0) continue;
+      const c=cats[s.cat]||(cats[s.cat]={amount:0,items:[],ex:false}); c.amount+=amt; c.items.push([s.name,amt]); if(hasEx(s)) c.ex=true;
+    }
+    for(const c of CAT_ORDER) if(cats[c]) outs.push({key:'cat-'+c,label:CATS[c],amount:cats[c].amount,items:cats[c].items,ex:cats[c].ex});
+
+    /* kids */
+    let kidOnce=0;
+    if(baby&&t>=bt){
+      const items=[];
+      if(t===bt&&num(baby.oneTime)>0){ kidOnce=num(baby.oneTime); items.push(['Birth costs & baby gear (one-time)',kidOnce]); }
+      if(num(baby.monthly)>0) items.push(['Baby essentials',num(baby.monthly)*iF]);
+      if(num(baby.insurance)>0) items.push(['Added health insurance',num(baby.insurance)*iF]);
+      if(baby.childcare&&baby.childcare.on&&t>=bt+num(baby.childcare.after)) items.push(['Childcare',num(baby.childcare.monthly)*iF]);
+      const amt=sum(items,x=>x[1]); if(amt>0) outs.push({key:'kids',label:'Kids',amount:amt,items,ex:hasEx(baby)});
+      if(t===bt) notes.push({title:'Baby arrives',amt:null,detail:kidOnce?usd(kidOnce)+' in one-time costs this month':''});
+    }
+
+    /* debts */
+    let dPay=0; const dItems=[]; let dEx=false;
+    for(const d of debts){ if(d.b<=0.5) continue; const int=d.b*d.r/12, pay=Math.min(d.pay,d.b+int); if(live) d.b=Math.max(0,d.b+int-pay); dPay+=pay; dItems.push([d.name,pay]); if(d.ex) dEx=true; if(d.b<=0.5&&d.paidOff==null) d.paidOff=t; }
+    if(dPay>0) outs.push({key:'debt',label:'Debt payments',amount:dPay,items:dItems,ex:dEx});
+
+    /* one-time events */
+    const ot=oneTimes.filter(x=>x.t===t); const otSum=sum(ot,x=>num(x.e.amount));
+    if(ot.length) outs.push({key:'once',label:'One-time this month',amount:otSum,items:ot.map(x=>[x.e.name,num(x.e.amount)]),ex:ot.some(x=>hasEx(x.e)),once:true});
+
+    const inTot=sum(incomes,x=>x.take), outTot=sum(outs,x=>x.amount), left=inTot-outTot;
+    if(live) sweep.b+=left; else sweep.b-=otSum+kidOnce;
+
+    /* sales first, then purchases */
+    for(const s of props){
+      if(s.owned&&s.sellT===t){
+        const sp=s.p.sell, price=num(sp.price), fees=price*(num(sp.commission)+num(sp.costs))/100, net=price-fees-s.L;
+        notes.push({title:shortName(s.p.name)+' sale closes',amt:net,detail:usd(price)+' price − '+usd(fees)+' commission & costs − '+usd(s.L)+' mortgage payoff'});
+        sweep.b+=net; s.owned=false; s.sold=true; s.soldT=t; s.salePrice=price; s.v=0; s.L=0;
+      }
+    }
+    for(const s of props){
+      if(!s.owned&&!s.sold&&s.buyT===t){
+        const b=s.p.buy, price=num(b.price), down=price*num(b.downPct)/100, close=price*num(b.closingPct)/100;
+        s.v=price; s.L=Math.max(0,price-down); s.rate=num(b.rate)/100; s.pay=amort(s.L,s.rate,num(b.term)||30); s.owned=true; s.boughtT=t;
+        sweep.b-=down+close;
+        notes.push({title:shortName(s.p.name)+' closes',amt:-(down+close),detail:usd(down)+' down + '+usd(close)+' closing costs · new mortgage '+usd(s.L)+' at '+num(b.rate)+'%'});
+      }
+    }
+    if(sweep.b<0){ for(const a of cashAcc){ if(a===sweep||a.b<=0) continue; const mv=Math.min(a.b,-sweep.b); a.b-=mv; sweep.b+=mv; if(sweep.b>=0) break; } }
+
+    const recurring=Math.max(1,outTot-otSum-kidOnce);
+    const target=num(S.reserveMonths)*recurring;
+    let cash=sum(cashAcc,a=>a.b);
+    if(live&&S.investExcess&&investAcc&&cash>target&&sweep.b>0){ const mv=Math.min(cash-target,sweep.b); sweep.b-=mv; investAcc.b+=mv; cash-=mv; invested=mv; }
+
+    const K={cash:0,invest:0,retire:0,other:0};
+    for(const a of acc) K[a.kind==='cash'||a.kind==='invest'||a.kind==='retire'?a.kind:'other']+=a.b;
+    let reVal=0, mort=0; for(const s of props) if(s.owned){ reVal+=s.v; mort+=s.L; }
+    const debt=sum(debts,d=>d.b), reEq=reVal-mort;
+    const assets=K.cash+K.invest+K.retire+K.other+reVal, liab=mort+debt, nw=assets-liab;
+    const sav=(inTot+pretax)>0?(left+pretax)/(inTot+pretax):0;
+
+    months.push({t,incomes,outs,inTot,outTot,left,notes,pretax,invested,cash,target,recurring,assets,liab,nw,sav,K,reVal,mort,debt,
+      acc:Object.fromEntries(acc.map(a=>[a.id,a.b])),
+      props:props.map(s=>({id:s.p.id,owned:s.owned,sold:s.sold,v:s.v,L:s.L,pay:s.pay,buyT:s.buyT,boughtT:s.boughtT,soldT:s.soldT,salePrice:s.salePrice})),
+      debts:Object.fromEntries(debts.map(d=>[d.id,d.b]))});
+    const by={p1:0,p2:0,joint:0,biz:0}; for(const x of incomes) by[ownKey(x.owner)]+=x.take;
+    for(const k of OWN) ser.inBy[k].push(by[k]);
+    ser.inTot.push(inTot); ser.out.push(outTot); ser.left.push(left); ser.cash.push(cash); ser.target.push(target); ser.nw.push(nw); ser.sav.push(sav);
+    const C=ser.comp;
+    C.cash.push(Math.max(0,K.cash)); C.invest.push(Math.max(0,K.invest)); C.retire.push(Math.max(0,K.retire)); C.re.push(Math.max(0,reEq)); C.other.push(Math.max(0,K.other));
+    C.neg.push(-(debt+Math.max(0,-K.cash)+Math.max(0,-K.invest)+Math.max(0,-K.retire)+Math.max(0,-K.other)+Math.max(0,-reEq)));
+    const pos=sum(incomes,x=>Math.max(0,x.take)), negs=sum(incomes,x=>Math.max(0,-x.take));
+    flowMax=Math.max(flowMax,pos,outTot+negs);
+  }
+  return {N,months,ser,flowMax,babyT:bt,baby,payoff:Object.fromEntries(debts.map(d=>[d.id,d.paidOff])),hasVirtualCash:acc.some(a=>a.id==='_cash')};
+}
+
+/* ---------- scenario items ---------- */
+function scenarioItems(){
+  const out=[];
+  for(const p of plan.properties){
+    if(p.sell) out.push({key:'sell:'+p.id,label:'Sell '+shortName(p.name),ym:p.sell.month,on:p.sell.on!==false});
+    if(p.status==='buying'&&p.buy) out.push({key:'buy:'+p.id,label:'Buy '+shortName(p.name),ym:p.buy.month,on:p.buy.on!==false});
+  }
+  for(const e of plan.events) out.push({key:'ev:'+e.id,label:e.name||'Life event',ym:e.month,on:e.on!==false});
+  const st=plan.settings.start;
+  out.forEach(o=>{ const t=ymIdx(o.ym,st); o.t=t==null?null:Math.max(0,t); });
+  return out.sort((a,b)=>(a.t==null?1e9:a.t)-(b.t==null?1e9:b.t));
+}
+function eventTs(){ const N=sim.N; return Array.from(new Set(scenarioItems().filter(s=>s.on&&s.t!=null&&s.t<N).map(s=>s.t))); }
+function toggleScenario(key,val){
+  const i=key.indexOf(':'), kind=key.slice(0,i), id=key.slice(i+1);
+  if(kind==='sell'){ const p=plan.properties.find(x=>x.id===id); if(p&&p.sell) p.sell.on=val; }
+  else if(kind==='buy'){ const p=plan.properties.find(x=>x.id===id); if(p&&p.buy) p.buy.on=val; }
+  else { const e=plan.events.find(x=>x.id===id); if(e) e.on=val; }
+  changed(tab==='events'||tab==='homes');
+}
+
+/* ---------- comparison ("before this edit") ---------- */
+function ghostLive(){ return ghost&&ghost!==sim?ghost:null; }
+function beginGhost(){ clearTimeout(ghostTimer); if(!ghost){ ghost=sim; pinned=false; } }
+function endGhostSoon(){
+  if(pinned) return; clearTimeout(ghostTimer);
+  ghostTimer=setTimeout(()=>{ if(!pinned&&ghost){ ghost=null; renderAll(); } },4000);
+}
+function clearGhost(){ clearTimeout(ghostTimer); ghost=null; pinned=false; renderAll(); }
+function renderGhostBar(){
+  const G=ghostLive(), bar=q('#ghostbar');
+  if(!G&&!pinned){ bar.hidden=true; return; }
+  bar.hidden=false;
+  const dEnd=G?sim.months[sim.N-1].nw-G.months[G.N-1].nw:0;
+  let txt;
+  if(!G) txt='<span class="gl-key"></span><b>Snapshot pinned.</b> Change anything to compare against it.';
+  else txt='<span class="gl-key"></span>Comparing to '+(pinned?'your pinned snapshot':'before this edit')+' · net worth at the end <b class="'+(dEnd>=0?'good-t':'crit-t')+'">'+skusd(dEnd)+'</b>';
+  q('#ghostText').innerHTML=txt;
+  q('#ghostActs').innerHTML=(G&&!pinned?'<button type="button" class="linkish" data-act="pin" data-tip="Hold this comparison while you make more changes. Otherwise it clears a few seconds after you stop editing.">Keep comparing</button> · ':'')+'<button type="button" class="linkish" data-act="unghost" data-tip="Stop comparing and remove the dashed lines.">'+(pinned?'Unpin':'Clear')+'</button>';
+}
+
+/* ---------- number tweening ---------- */
+function tweenText(el,to,fmt){
+  if(!isFinite(to)){ el.textContent='—'; el._cur=null; return; }
+  const from=el._cur==null?to:el._cur;
+  cancelAnimationFrame(el._raf);
+  if(REDUCE||Math.abs(from-to)<1e-6){ el._cur=to; el.textContent=fmt(to); return; }
+  const t0=performance.now(), d=340;
+  const step=now=>{ const p=Math.min(1,(now-t0)/d), e=1-Math.pow(1-p,3); el._cur=from+(to-from)*e; el.textContent=fmt(el._cur); if(p<1) el._raf=requestAnimationFrame(step); };
+  el._raf=requestAnimationFrame(step);
+  clearTimeout(el._fb);
+  el._fb=setTimeout(()=>{ if(el._cur!==to){ cancelAnimationFrame(el._raf); el._cur=to; el.textContent=fmt(to); } },d+150);
+}
+
+/* ---------- timeline ---------- */
+function renderTimeline(){
+  const N=sim.N, scrub=q('#scrub');
+  scrub.max=N-1; scrub.value=sel; paintScrub();
+  const pos=t=>'calc(9px + (100% - 18px) * '+(t/(N-1)).toFixed(5)+')';
+  const items=scenarioItems(), groups={};
+  for(const s of items){ if(!s.on||s.t==null||s.t>=N) continue; (groups[s.t]=groups[s.t]||[]).push(s.label); }
+  const nt=nowIdx();
+  q('#pins').innerHTML=(nt>0&&nt<N?'<button type="button" class="pin now" style="left:'+pos(nt)+'" data-go="'+nt+'" aria-label="Now: '+esc(tLabel(nt,true))+'" data-tip="Now: '+esc(tLabel(nt,true))+'. Your balances were entered for '+esc(tLabel(0,true))+', so this month is a projection. Click to jump here."></button>':'')+Object.keys(groups).map(t=>{ const lbl=tLabel(+t)+': '+groups[t].join(', '); return '<button type="button" class="pin" style="left:'+pos(+t)+'" data-go="'+t+'" aria-label="'+esc(lbl)+'" data-tip="'+esc(lbl)+'. Click to jump there."></button>'; }).join('');
+  const tw=q('#track').clientWidth||600, yrsN=Math.ceil(N/12)+1, every=Math.max(1,Math.ceil(yrsN*40/tw));
+  let yrs='', c=0;
+  for(let t=0;t<N;t++){ const ym=idxYm(t,plan.settings.start); if(ym.endsWith('-01')){ if(c++%every===0) yrs+='<span style="left:'+pos(t)+'">'+ym.slice(0,4)+'</span>'; } }
+  q('#years').innerHTML=yrs;
+  q('#toggles').innerHTML=items.map(s=>{
+    const ok=s.t!=null&&s.t<N;
+    return '<span class="tg'+(s.on?'':' off')+'"><label'+tipAttr(s.on?'In the plan. Untick to see everything without it.':'Left out of the plan. Tick to add it back.')+'><input type="checkbox" data-tog="'+esc(s.key)+'"'+(s.on?' checked':'')+'><span>'+esc(s.label)+'</span></label><button type="button"'+(ok?' data-go="'+s.t+'"'+tipAttr('Jump to '+ymLabel(s.ym,true)):' disabled'+tipAttr('Set a month for this in the controls to place it on the timeline.'))+' aria-label="Show '+esc(ymLabel(s.ym,true))+'">'+esc(ymLabel(s.ym))+'</button></span>';
+  }).join('')||'<span class="ptxt">No events yet. Add a sale, purchase or life event in the controls.</span>';
+  renderTimeHead();
+}
+function paintScrub(){ const s=q('#scrub'); s.style.setProperty('--p',(sim.N>1?sel/(sim.N-1)*100:0).toFixed(2)+'%'); }
+function renderTimeHead(){
+  q('#tlMonth').textContent=tLabel(sel,true);
+  const here=scenarioItems().filter(s=>s.on&&s.t===sel).map(s=>s.label);
+  q('#tlRel').innerHTML=esc(relText(sel))+(sel===0&&nowIdx()!==0?' · as entered':'')+(here.length?' · <b>'+esc(here.join(', '))+'</b>':'');
+}
+
+/* ---------- headline numbers ---------- */
+const KPI={
+  nw:{get:(s,t)=>s.months[t].nw, fmt:usd, d:skusd, eps:1},
+  left:{get:(s,t)=>s.months[t].left, fmt:susd, d:skusd, eps:1},
+  runway:{get:(s,t)=>s.months[t].cash/s.months[t].recurring, fmt:v=>v.toFixed(1)+' mo', d:v=>(v>0?'+':'−')+Math.abs(v).toFixed(1)+' mo', eps:.05},
+  sav:{get:(s,t)=>s.months[t].sav*100, fmt:v=>Math.round(v)+'%', d:v=>(v>0?'+':'−')+Math.abs(v).toFixed(1)+' pts', eps:.05},
+  end:{get:s=>s.months[s.N-1].nw, fmt:usd, d:skusd, eps:1}
+};
+function renderKPIs(){
+  const m=sim.months[sel], bm=base.months[Math.min(sel,base.N-1)], G=ghostLive(), R=num(plan.settings.reserveMonths);
+  const subs={
+    nw:sel===0?(nowIdx()===0?'As entered today':'As entered for '+tLabel(0)):(Math.abs(m.nw-bm.nw)<1?'Same as standing still':skusd(m.nw-bm.nw)+' vs. standing still'),
+    left:m.left<0?(savingsBal(m).bal<0?'From savings · overdrawn '+kusd(-savingsBal(m).bal):'From savings · '+kusd(savingsBal(m).bal)+' left'):'In '+kusd(m.inTot)+' · out '+kusd(m.outTot),
+    runway:'Target '+R+' months',
+    sav:'Incl. 401(k) & match',
+    end:skusd(sim.months[sim.N-1].nw-base.months[base.N-1].nw)+' vs. no events'
+  };
+  const runway=m.cash/m.recurring;
+  for(const el of qa('#kpis .kpi')){
+    const k=el.dataset.kpi, cfg=KPI[k], v=cfg.get(sim,sel);
+    tweenText(el.querySelector('.v'),v,cfg.fmt);
+    el.querySelector('.s').textContent=subs[k];
+    if(k==='end') el.querySelector('.k').textContent='Net worth by '+tLabel(sim.N-1);
+    if(k==='left') el.querySelector('.v').classList.toggle('crit-t',m.left<0);
+    if(k==='runway'){ el.classList.remove('good','warn','crit'); el.classList.add(m.cash<0||runway<2?'crit':runway>=R-0.05?'good':'warn'); }
+    const dl=el.querySelector('.dl');
+    if(G){
+      const gv=cfg.get(G,Math.min(sel,G.N-1)), d=v-gv;
+      if(Math.abs(d)>=cfg.eps){
+        const txt=cfg.d(d);
+        if(dl.textContent!==txt){ el.classList.remove('pulse'); void el.offsetWidth; el.classList.add('pulse'); }
+        dl.textContent=txt; dl.className='dl show '+(d>0?'up':'down'); continue;
+      }
+    }
+    dl.className='dl';
+  }
+}
+
+/* ---------- flow map (animated sankey) ---------- */
+const FS={cur:new Map(),raf:0,k:null,kT:null,hover:null};
+const OUT_COLOR={housing:'--c-housing',kids:'--c-kids',debt:'--c-debt',once:'--c-once'};
+function outColor(key){ if(OUT_COLOR[key]) return 'var('+OUT_COLOR[key]+')'; if(key.startsWith('cat-')) return 'var(--c-'+key.slice(4)+')'; return 'var(--c-other)'; }
+function itemsRows(items){ return items.slice().sort((a,b)=>b[1]-a[1]).slice(0,7).map(x=>tr(x[0],usd(x[1]))).join('')+(items.length>7?'<div class="sub">+'+(items.length-7)+' more</div>':''); }
+function flowNodes(m){
+  const nodes=[];
+  const ins=m.incomes.slice().sort((a,b)=>(OWN.indexOf(ownKey(a.owner))-OWN.indexOf(ownKey(b.owner)))||(b.take-a.take));
+  for(const i of ins){
+    const o=ownKey(i.owner);
+    let sub='';
+    if(i.kind==='w2') sub=usd(i.gross)+' gross'+(i.contrib>0.5?' · '+usd(i.contrib)+' to 401(k)':'');
+    else if(i.kind==='self') sub=usd(i.gross)+' gross, after self-employment tax';
+    else if(i.kind==='rental') sub='Rent '+usd(i.rent)+' less mortgage, taxes, insurance & upkeep';
+    else if(i.kind==='credit') sub='Federal credit, spread across the year';
+    if(i.leave) sub+='<br>On leave · week '+i.leave.week+' of '+Math.round(i.leave.weeks)+' · leave pay '+usd(i.leave.ben)+'/wk';
+    else if(i.changed) sub+='<br>New amount in effect';
+    const tip='<div class="tm">'+esc(ownerName(i.owner))+' · '+esc(KIND[i.kind]||'')+'</div><div class="tt">'+esc(i.name)+'</div>'+tr('Take-home',usd(i.take)+'/mo')+'<div class="sub">'+sub+'</div>';
+    if(i.take>=0) nodes.push({key:'in:'+i.id,side:'L',label:i.name,amt:i.take,color:'var(--o-'+o+')',tip,flag:i.leave?'on leave':''});
+    else nodes.push({key:'neg:'+i.id,side:'R',label:i.name+' (net cost)',amt:-i.take,color:'var(--o-'+o+')',tip});
+  }
+  for(const o of m.outs){
+    const tip='<div class="tm">'+(o.once?'One-time':'Monthly')+(o.sub?' · '+esc(o.sub):'')+'</div><div class="tt">'+esc(o.label)+'</div>'+itemsRows(o.items)+tr('Total',usd(o.amount),{tot:1})+(m.inTot>0?'<div class="sub">'+Math.round(o.amount/m.inTot*100)+'% of take-home</div>':'');
+    nodes.push({key:'out:'+o.key,side:'R',label:o.label,amt:o.amount,color:outColor(o.key),tip});
+  }
+  if(m.left>=0){
+    const det=m.invested>1?usd(m.invested)+' moved to investments, the rest stays in savings':'Lands in savings';
+    nodes.push({key:'save',side:'R',label:'Left over',amt:m.left,color:'var(--good)',tip:'<div class="tm">What\'s left</div><div class="tt">Left over</div>'+tr('This month',susd(m.left),{cls:'good-t'})+'<div class="sub">'+det+'</div>',strong:true});
+  } else {
+    const sv=savingsBal(m), svTxt=sv.name+': '+usd(sv.bal);
+    nodes.push({key:'short',side:'L',label:'From savings',amt:-m.left,color:'var(--crit)',sub:svTxt,subShort:'Bal. '+usd(sv.bal),subCrit:sv.bal<0,
+      tip:'<div class="tm">Shortfall</div><div class="tt">Spending more than comes in</div>'+tr('Covered from savings',usd(-m.left),{cls:'crit-t'})+tr(sv.name+' balance after',usd(sv.bal),{tot:1,cls:sv.bal<0?'crit-t':''}),strong:true});
+  }
+  return nodes;
+}
+function savingsBal(m){
+  const a=plan.accounts.find(x=>x.kind==='cash'&&x.sweep)||plan.accounts.find(x=>x.kind==='cash');
+  return a?{name:a.name||'Savings',bal:m.acc[a.id]||0}:{name:'Cash',bal:m.acc._cash||0};
+}
+function renderFlow(){
+  const m=sim.months[sel];
+  q('#flowMonth').textContent=tLabel(sel,true);
+  q('#owners').innerHTML=OWN.filter(k=>sim.ser.inBy[k].some(v=>Math.abs(v)>0.5)).map(k=>'<span class="own" style="--oc:var(--o-'+k+')"'+tipAttr(ownerTip(k))+'><i></i>'+esc(ownerName(k))+'</span>').join('');
+  const W=q('#flow').clientWidth||800;
+  FS.kT=(W<620?220:300)/Math.max(1,sim.flowMax);
+  if(FS.k==null) FS.k=FS.kT;
+  const nodes=flowNodes(m), seen=new Set();
+  nodes.forEach((n,i)=>{
+    seen.add(n.key);
+    const c=FS.cur.get(n.key);
+    if(c){ const v=c.v, enter=c.enter&&!c.gone; Object.assign(c,n,{v,ord:i,gone:false,enter:enter||c.gone,last:n.amt||c.last}); }
+    else FS.cur.set(n.key,Object.assign({},n,{v:REDUCE?n.amt:0,ord:i,enter:!REDUCE,gone:false,last:n.amt}));
+  });
+  for(const c of FS.cur.values()) if(!seen.has(c.key)&&!c.gone){ c.gone=true; c.last=Math.max(c.v,1); c.amt=0; c.ord=1000+c.ord; }
+  if(REDUCE){ settleFlow(); return; }
+  if(!FS.raf){ FS.last=performance.now(); FS.raf=requestAnimationFrame(flowTick); }
+  clearTimeout(FS.fb);
+  FS.fb=setTimeout(()=>{ if(FS.raf&&performance.now()-FS.last>250){ cancelAnimationFrame(FS.raf); FS.raf=0; settleFlow(); } },300);
+  q('#flowScale').textContent='Scaled to the biggest month in the plan · '+usd(sim.flowMax)+'/mo';
+}
+function settleFlow(){ for(const [k,c] of FS.cur){ c.v=c.amt; c.enter=false; if(c.gone) FS.cur.delete(k); } FS.k=FS.kT; drawFlow(); }
+function flowTick(){
+  FS.raf=0; FS.last=performance.now(); let moving=false;
+  for(const [k,c] of FS.cur){
+    const d=c.amt-c.v;
+    if(Math.abs(d)<0.5){ c.v=c.amt; c.enter=false; if(c.gone) FS.cur.delete(k); }
+    else { c.v+=d*0.2; moving=true; }
+  }
+  const dk=FS.kT-FS.k;
+  if(Math.abs(dk)>FS.kT*0.002){ FS.k+=dk*0.2; moving=true; } else FS.k=FS.kT;
+  drawFlow();
+  if(moving) FS.raf=requestAnimationFrame(flowTick);
+}
+function trunc(s,n){ s=String(s); return s.length>n?s.slice(0,Math.max(1,n-1))+'…':s; }
+function subFit(c,n){ return c.sub.length<=n||!c.subShort?trunc(c.sub,n):trunc(c.subShort,n); }
+function drawFlow(){
+  const host=q('#flow'); if(!host) return;
+  const W=Math.max(300,Math.round(host.clientWidth)), narrow=W<620;
+  const gut=narrow?Math.min(120,Math.round(W*0.31)):176, nw=narrow?8:10, cw=narrow?12:16, rowMin=narrow?34:40, gap=narrow?6:10, padT=34, padB=8;
+  const Ls=[], Rs=[]; for(const c of FS.cur.values()) (c.side==='L'?Ls:Rs).push(c);
+  Ls.sort((a,b)=>a.ord-b.ord); Rs.sort((a,b)=>a.ord-b.ord);
+  const k=FS.k;
+  const fade=c=>c.gone?Math.max(0,Math.min(1,c.v/Math.max(1,c.last))):c.enter?Math.max(0,Math.min(1,c.v/Math.max(1,c.amt))):1;
+  const layout=list=>{ let H=0; const rows=list.map((c,i)=>{ const f=fade(c), h=Math.max(0,c.v*k), rh=Math.max(h,(rowMin+(c.sub?16:0))*f), g=i?gap*f:0; H+=rh+g; return {c,f,h,rh,g}; }); return {rows,H}; };
+  const LL=layout(Ls), RR=layout(Rs);
+  const sumL=sum(Ls,c=>c.v)*k, sumR=sum(Rs,c=>c.v)*k, ch=Math.max(sumL,sumR,2);
+  const inner=Math.max(LL.H,RR.H,ch,narrow?180:220), H=inner+padT+padB;
+  const xL=gut, xR=W-gut-nw, xC=(W-cw)/2, cy=padT+(inner-ch)/2;
+  const chars=Math.max(6,Math.floor((gut-16)/(narrow?6.4:6.9)));
+  const hv=FS.hover;
+  let ribs='', nodes='', labels='';
+  const side=(L,isLeft,sumSide)=>{
+    let y=padT+(inner-L.H)/2, a=cy+(ch-sumSide)/2;
+    for(const r of L.rows){
+      y+=r.g;
+      const c=r.c, ny=y+(r.rh-r.h)/2, hl=hv===c.key?' hl':'';
+      const x0=isLeft?xL+nw:xC+cw, x1=isLeft?xC:xR, y0=isLeft?ny:a, y1=isLeft?a:ny, mx=(x0+x1)/2, th=r.h;
+      if(th>0.05){
+        ribs+='<path class="rib'+hl+'" data-k="'+esc(c.key)+'" d="M'+x0.toFixed(1)+','+y0.toFixed(1)+'C'+mx.toFixed(1)+','+y0.toFixed(1)+' '+mx.toFixed(1)+','+y1.toFixed(1)+' '+x1.toFixed(1)+','+y1.toFixed(1)+'L'+x1.toFixed(1)+','+(y1+th).toFixed(1)+'C'+mx.toFixed(1)+','+(y1+th).toFixed(1)+' '+mx.toFixed(1)+','+(y0+th).toFixed(1)+' '+x0.toFixed(1)+','+(y0+th).toFixed(1)+'Z" fill="'+c.color+'" fill-opacity="'+(c.strong?.5:.36)+'"/>';
+      }
+      nodes+='<rect class="rib'+hl+'" data-k="'+esc(c.key)+'" x="'+(isLeft?xL:xR)+'" y="'+ny.toFixed(1)+'" width="'+nw+'" height="'+Math.max(r.h,1).toFixed(1)+'" rx="2" fill="'+c.color+'" opacity="'+r.f.toFixed(2)+'"/>';
+      const cyR=y+r.rh/2-(c.sub?8:0), tx=isLeft?xL-10:xR+nw+10, an=isLeft?'end':'start';
+      if(r.f>0.05) labels+='<g class="lbl'+hl+'" data-k="'+esc(c.key)+'" opacity="'+r.f.toFixed(2)+'" style="cursor:default"><rect x="'+(isLeft?0:xR+nw)+'" y="'+y.toFixed(1)+'" width="'+(gut-nw+2)+'" height="'+r.rh.toFixed(1)+'" fill="transparent"/>'+
+        '<text class="ln" x="'+tx+'" y="'+(cyR-3).toFixed(1)+'" text-anchor="'+an+'">'+esc(trunc(c.label,chars))+'</text>'+
+        '<text class="la" x="'+tx+'" y="'+(cyR+13).toFixed(1)+'" text-anchor="'+an+'"'+(c.key==='save'?' style="fill:var(--good-t)"':c.key==='short'?' style="fill:var(--crit-t)"':'')+'>'+usd(c.v)+(c.flag?' · '+esc(c.flag):'')+'</text>'+
+        (c.sub?'<text class="ls"'+(c.subCrit?' style="fill:var(--crit-t)"':'')+' x="'+tx+'" y="'+(cyR+28).toFixed(1)+'" text-anchor="'+an+'">'+esc(subFit(c,Math.floor((gut-12)/5.9)))+'</text>':'')+'</g>';
+      y+=r.rh; a+=th;
+    }
+  };
+  side(LL,true,sumL); side(RR,false,sumR);
+  const m=sim.months[sel];
+  const center='<rect x="'+xC.toFixed(1)+'" y="'+cy.toFixed(1)+'" width="'+cw+'" height="'+ch.toFixed(1)+'" rx="3" fill="var(--ink)"/>'+
+    '<text class="lc" x="'+(xC+cw/2).toFixed(1)+'" y="'+(cy-20).toFixed(1)+'" text-anchor="middle">Household</text>'+
+    '<text class="lct" x="'+(xC+cw/2).toFixed(1)+'" y="'+(cy-4).toFixed(1)+'" text-anchor="middle">'+usd(m.inTot)+'</text>';
+  const head='<text class="lc" x="'+xL+'" y="12" text-anchor="end">In</text><text class="lc" x="'+(xR+nw)+'" y="12">Out</text>';
+  const svg=host.querySelector('svg');
+  const html='<svg viewBox="0 0 '+W+' '+Math.ceil(H)+'" class="'+(hv?'hovering':'')+'" role="img" aria-label="Money flow for '+esc(tLabel(sel,true))+': '+usd(m.inTot)+' in, '+usd(m.outTot)+' out">'+head+ribs+nodes+center+labels+'</svg>';
+  if(svg) svg.outerHTML=html; else host.insertAdjacentHTML('afterbegin',html);
+}
+function bindFlowHover(){
+  const host=q('#flow'), tip=host.querySelector('.tip');
+  host.addEventListener('pointermove',e=>{
+    const el=e.target.closest('[data-k]');
+    const k=el?el.dataset.k:null;
+    if(k!==FS.hover){ FS.hover=k; const svg=host.querySelector('svg'); if(svg){ svg.classList.toggle('hovering',!!k); qa('[data-k]',svg).forEach(x=>x.classList.toggle('hl',x.dataset.k===k)); } }
+    const c=k&&FS.cur.get(k);
+    if(!c){ tip.hidden=true; return; }
+    tip.innerHTML=c.tip; tip.hidden=false;
+    const r=host.getBoundingClientRect(); let x=e.clientX-r.left+14, y=e.clientY-r.top+12;
+    if(x+tip.offsetWidth>r.width) x=e.clientX-r.left-14-tip.offsetWidth;
+    if(y+tip.offsetHeight>r.height) y=Math.max(0,r.height-tip.offsetHeight);
+    tip.style.left=Math.max(0,x)+'px'; tip.style.top=y+'px';
+  });
+  host.addEventListener('pointerleave',()=>{ FS.hover=null; tip.hidden=true; const svg=host.querySelector('svg'); if(svg){ svg.classList.remove('hovering'); qa('.hl',svg).forEach(x=>x.classList.remove('hl')); } });
+}
+
+/* ---------- this-month spotlight ---------- */
+function renderSpot(){
+  const m=sim.months[sel], b=sim.baby, bt=sim.babyT;
+  const homes=plan.properties.filter((p,i)=>p.role!=='rental'&&m.props[i]&&m.props[i].owned).map(p=>p.name);
+  let people='<span class="tok" style="--oc:var(--o-p1)"><b>'+esc((plan.people.p1||'1').slice(0,1))+'</b>'+esc(plan.people.p1||'Person 1')+'</span>'+
+    '<span class="tok" style="--oc:var(--o-p2)"><b>'+esc((plan.people.p2||'2').slice(0,1))+'</b>'+esc(plan.people.p2||'Person 2')+'</span>';
+  if(b&&bt!=null) people+=sel>=bt?'<span class="tok" style="--oc:var(--o-joint)"'+tipAttr('Born '+ymLabel(b.month,true)+'. Baby costs, leave and the child tax credit are in the numbers from that month.')+'><b>B</b>Baby</span>':'<span class="tok due"'+tipAttr('From the Baby arrives life event. Costs, parental leave and the child tax credit start that month.')+'><b></b>Baby due '+esc(ymLabel(b.month))+'</span>';
+  const months=m.cash/m.recurring, R=num(plan.settings.reserveMonths);
+  let pill;
+  if(m.cash<0) pill='<span class="pill crit"><span class="ic">✕</span>Cash runs out · short '+usd(-m.cash)+'</span>';
+  else if(months>=R-0.05) pill='<span class="pill good"><span class="ic">✓</span>'+months.toFixed(1)+' months of spending in cash</span>';
+  else if(months>=2) pill='<span class="pill warn"><span class="ic">!</span>'+months.toFixed(1)+' months in cash · under the '+R+'-month target</span>';
+  else pill='<span class="pill crit"><span class="ic">✕</span>Only '+months.toFixed(1)+' months of spending in cash</span>';
+  pill=pill.replace('<span class="pill','<span'+tipAttr('Cash on hand divided by one month of regular spending, against the '+R+'-month reserve target in Settings. Green meets the target, amber is below it, red is under 2 months.')+' class="pill');
+  const notes=m.notes.map(n=>'<div class="note"><div class="nr"><span>'+esc(n.title)+'</span>'+(n.amt!=null?'<b class="'+(n.amt>=0?'good-t':'crit-t')+'">'+susd(n.amt)+'</b>':'')+'</div>'+(n.detail?'<div class="nd">'+esc(n.detail)+'</div>':'')+'</div>').join('');
+  const nxt=scenarioItems().find(s=>s.on&&s.t!=null&&s.t>sel&&s.t<sim.N);
+  const paid=plan.debts.filter(d=>sim.payoff[d.id]===sel).map(d=>d.name);
+  const paidNote=paid.length?'<div class="note"><div class="nr"><span>'+esc(paid.join(', '))+' paid off</span><b class="good-t">✓</b></div></div>':'';
+  q('#spot').innerHTML=
+    '<div class="people">'+people+'</div>'+
+    '<div><div class="sp-title">'+esc(tLabel(sel,true))+'</div><div class="sp-where">'+(homes.length?'Home: '+esc(homes.join(' + ')):'No primary home this month')+'</div></div>'+
+    pill+
+    ((notes||paidNote)?'<div class="notes">'+notes+paidNote+'</div>':'')+
+    (nxt?'<div class="next"'+tipAttr('The next sale, purchase or life event after the shown month.')+'><span>Next: <b>'+esc(nxt.label)+'</b><br>'+esc(spanText(nxt.t-sel))+' away · '+esc(ymLabel(nxt.ym))+'</span><button type="button" class="btn" data-go="'+nxt.t+'">Jump</button></div>':'')+
+    '<div class="sp-foot"'+tipAttr('401(k) contributions and the employer match come out before tax, so they aren\'t in the flow map, but they grow the retirement balances every month.')+'>Plus <b>'+usd(m.pretax)+'</b> a month into 401(k)s before tax, match included.'+(m.invested>1?' <b>'+usd(m.invested)+'</b> swept into investments.':'')+'</div>';
+}
+
+/* ---------- own & owe ---------- */
+function renderSheet(){
+  const m=sim.months[sel], bm=base.months[Math.min(sel,base.N-1)];
+  q('#sheetMonth').textContent=sel===0?(nowIdx()===0?'today':'as entered for '+tLabel(0,true)):'end of '+tLabel(sel,true);
+  const diff=m.nw-bm.nw, dta=m.assets>0?m.liab/m.assets*100:0;
+  q('#nwRow').innerHTML='<div'+tipAttr('Total value of every account and property in the shown month.')+'><span class="k">Own</span><span class="v">'+usd(m.assets)+'</span></div><div'+tipAttr('Mortgages plus every other debt still owed.')+'><span class="k">Owe</span><span class="v">'+usd(m.liab)+'</span></div><div'+tipAttr('What\'s owed divided by what\'s owned. Lower is stronger; under 30% is generally comfortable.')+'><span class="k">Debt to assets</span><span class="v">'+dta.toFixed(1)+'%</span></div>'+
+    '<div class="big"'+tipAttr('Own minus owe. The subtext compares it to a plan with none of the events.')+'><span class="k">Net worth</span><span class="v">'+usd(m.nw)+'</span>'+(sel>0?'<div class="vs">'+(Math.abs(diff)<1?'Same as standing still':susd(diff)+' vs. standing still')+'</div>':'')+'</div>';
+  let html='';
+  if(plan.properties.length) html+=grp('Real estate',usd(sum(m.props,s=>s.owned?s.v:0))+' value',plan.properties.map((p,i)=>propCard(p,m.props[i],m)).join(''));
+  for(const [k,lab] of ACC_GROUPS){
+    const list=plan.accounts.filter(a=>a.kind===k);
+    if(k==='cash'&&sim.hasVirtualCash) list.push({id:'_cash',name:'Cash',kind:'cash',owner:'joint',ex:[]});
+    if(!list.length) continue;
+    html+=grp(lab,usd(sum(list,a=>m.acc[a.id]||0)),list.map(a=>accCard(a,m)).join(''));
+  }
+  if(plan.debts.length){
+    html+=grp('Debts',usd(sum(plan.debts,d=>m.debts[d.id]||0))+' owed',plan.debts.map(d=>{
+      const bal=m.debts[d.id]||0, po=sim.payoff[d.id];
+      const sub=bal<=0.5?'Paid off'+(po!=null?' in '+tLabel(po):''):usd(num(d.payment))+'/mo at '+num(d.rate)+'%'+(po!=null?' · paid off '+tLabel(po):' · not paid off within this plan');
+      return '<article class="pc'+(bal<=0.5?' sold':'')+'" style="--oc:var(--k-debt)"><div class="fc-row"><span class="own" style="--oc:var(--o-'+ownKey(d.owner)+')"><i></i>'+esc(ownerName(d.owner))+'</span>'+exTag(d)+'</div><h4>'+esc(d.name)+'</h4><div class="pc-val">'+usd(bal)+'</div><div class="pc-sub">'+sub+'</div></article>';
+    }).join(''));
+  }
+  q('#groups').innerHTML=html;
+}
+function grp(t,tot,cards){ return '<div><div class="grp-h"><span class="eyebrow"'+tipAttr(GRP_TIP[t])+'>'+esc(t)+'</span><b>'+tot+'</b></div><div class="cards">'+cards+'</div></div>'; }
+function propCard(p,s,m){
+  const o=ownKey(p.owner);
+  let cls='', badge='Owned', val; const subs=[];
+  const roleTxt=p.role==='rental'?'Rental':'Home';
+  if(s.sold){ cls='sold'; badge='Sold '+tLabel(s.soldT); val=usd(s.salePrice); subs.push('Sale price'); }
+  else if(p.status==='buying'&&!s.owned){
+    if(!(p.buy&&p.buy.on)){ cls='off'; badge='Not in this plan'; } else { cls='upcoming'; badge='Closing '+ymLabel(p.buy.month); }
+    val=usd(num(p.buy&&p.buy.price)); subs.push('Price · '+num(p.buy&&p.buy.downPct)+'% down at '+num(p.buy&&p.buy.rate)+'%');
+  } else {
+    if(p.sell&&p.sell.on) badge='Selling '+ymLabel(p.sell.month); else if(s.boughtT!=null) badge='Bought '+tLabel(s.boughtT);
+    val=usd(s.v);
+    const eq=s.v-s.L, pct=s.v>0?Math.max(0,Math.min(100,eq/s.v*100)):0;
+    subs.push('<div class="eq"'+tipAttr('Equity '+Math.round(pct)+'%: the filled part is what you own outright (value minus mortgage).')+'><span style="width:'+pct.toFixed(1)+'%"></span></div>');
+    subs.push('Equity '+usd(eq)+' · Mortgage '+usd(s.L));
+    if(p.role==='rental'){ const inc=m.incomes.find(x=>x.id==='prop-'+p.id); if(inc) subs.push('Rent '+usd(inc.rent)+'/mo · nets '+usd(inc.take)+'/mo'); }
+    else if(s.L>0.5) subs.push(usd(s.pay)+'/mo principal & interest');
+  }
+  return '<article class="pc '+cls+'" style="--oc:var(--o-'+o+')"><div class="fc-row"><span class="own"><i></i>'+esc(ownerName(p.owner))+'</span><span class="badge"'+tipAttr(BADGE_TIP(badge))+'>'+esc(badge)+'</span>'+exTag(p)+'</div>'+
+    '<h4>'+esc(p.name)+'</h4><div class="place">'+esc((p.place?p.place+' · ':'')+roleTxt)+'</div><div class="pc-val">'+val+'</div>'+
+    subs.map(x=>x.startsWith('<div')?x:'<div class="pc-sub">'+x+'</div>').join('')+'</article>';
+}
+function accCard(a,m){
+  const o=ownKey(a.owner), bal=m.acc[a.id]||0;
+  let sub;
+  if(a.kind==='cash') sub=(num(a.yield)>0?num(a.yield)+'% interest':'No interest')+(a.sweep?' · monthly surplus lands here':'');
+  else if(a.kind==='business') sub=num(a.ret)>0?num(a.ret)+'% growth a year':'Held at its current value';
+  else if(a.kind==='vehicle') sub=num(a.ret)<0?'Loses about '+Math.abs(num(a.ret))+'% of its value a year':'Held at its current value';
+  else if(a.kind==='insurance') sub=num(a.ret)+'% assumed cash-value growth a year';
+  else if(a.kind==='crypto') sub=num(a.ret)?num(a.ret)+'% assumed return a year':'Held at its current value';
+  else sub=num(a.ret)+'% assumed return a year';
+  if(a.kind==='invest'&&plan.settings.investExcess) sub+=' · receives cash above the reserve';
+  return '<article class="pc" style="--oc:var(--o-'+o+')"><div class="fc-row"><span class="own"><i></i>'+esc(ownerName(a.owner))+'</span>'+exTag(a)+'</div><h4>'+esc(a.name)+'</h4><div class="pc-val'+(bal<0?' crit-t':'')+'">'+usd(bal)+'</div><div class="pc-sub">'+esc(sub)+'</div></article>';
+}
+
+/* ---------- charts ---------- */
+function niceTicks(lo,hi,n){
+  if(!isFinite(lo)||!isFinite(hi)){lo=0;hi=1;}
+  if(hi-lo<1e-9) hi=lo+1;
+  const raw=(hi-lo)/n, mag=Math.pow(10,Math.floor(Math.log10(raw))), e=raw/mag;
+  const step=(e>=7.5?10:e>=3.5?5:e>=1.5?2:1)*mag;
+  const a=Math.floor(lo/step)*step, b=Math.ceil(hi/step)*step, out=[];
+  for(let v=a;v<=b+step/2;v+=step) out.push(Math.round(v/step)*step);
+  return out;
+}
+function linePath(vals,x,y){ let d=''; for(let t=0;t<vals.length;t++) d+=(t?'L':'M')+x(t).toFixed(1)+','+y(vals[t]).toFixed(1); return d; }
+function bandPath(lo,hi,x,y){ let d=''; const N=hi.length; for(let t=0;t<N;t++) d+=(t?'L':'M')+x(t).toFixed(1)+','+y(hi[t]).toFixed(1); for(let t=N-1;t>=0;t--) d+='L'+x(t).toFixed(1)+','+y(lo[t]).toFixed(1); return d+'Z'; }
+function ghostPath(vals,x,y){ return vals?'<path class="ghl" d="'+linePath(vals,x,y)+'"/>':''; }
+function arrMin(a){ let m=Infinity; for(const v of a) if(v<m) m=v; return m; }
+function arrMax(a){ let m=-Infinity; for(const v of a) if(v>m) m=v; return m; }
+function chart(host,cfg){
+  const W=Math.max(260,Math.round(host.clientWidth||600)), H=cfg.h||(W<520?190:228);
+  const pad={l:52,r:12,t:10,b:24}, N=cfg.N, iw=W-pad.l-pad.r, ih=H-pad.t-pad.b;
+  const all=niceTicks(cfg.min,cfg.max,W<520?3:4), hi=all[all.length-1];
+  const lo=cfg.min<0&&all[0]<cfg.min*1.2?cfg.min*1.2:all[0];
+  const ticks=all.filter(v=>v>=lo-1e-6);
+  const x=t=>pad.l+(N>1?t/(N-1):0)*iw, y=v=>pad.t+(1-(v-lo)/((hi-lo)||1))*ih;
+  let s='<svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+esc(cfg.label)+'">';
+  for(const v of ticks){ const yy=y(v).toFixed(1); s+='<line class="'+(v===0?'base':'gl')+'" x1="'+pad.l+'" x2="'+(W-pad.r)+'" y1="'+yy+'" y2="'+yy+'"/><text class="ax" x="'+(pad.l-8)+'" y="'+yy+'" text-anchor="end" dy=".32em">'+kusd(v)+'</text>'; }
+  const every=(N/12)>(W<520?5:11)?2:1; let c=0;
+  for(let t=0;t<N;t++){ const ym=idxYm(t,plan.settings.start); if(ym.endsWith('-01')){ if(c++%every===0) s+='<text class="ax" x="'+x(t).toFixed(1)+'" y="'+(H-6)+'" text-anchor="middle">'+ym.slice(0,4)+'</text>'; } }
+  for(const t of cfg.evTs||[]) s+='<line class="evl" x1="'+x(t).toFixed(1)+'" x2="'+x(t).toFixed(1)+'" y1="'+pad.t+'" y2="'+(H-pad.b)+'"/>';
+  s+=cfg.body(x,y,lo,hi);
+  s+='<line class="sel" x1="'+x(sel).toFixed(1)+'" x2="'+x(sel).toFixed(1)+'" y1="'+pad.t+'" y2="'+(H-pad.b)+'"/>';
+  if(cfg.dot) s+='<circle class="seldot" r="4" cx="'+x(sel).toFixed(1)+'" cy="'+y(cfg.dot[sel]).toFixed(1)+'"/>';
+  s+='<line class="hov" x1="0" x2="0" y1="'+pad.t+'" y2="'+(H-pad.b)+'" visibility="hidden"/>';
+  s+='<rect x="'+pad.l+'" y="0" width="'+iw+'" height="'+H+'" fill="transparent" style="cursor:crosshair"/></svg><div class="tip" hidden></div>';
+  host.innerHTML=s; host._x=x; host._y=y; host._dot=cfg.dot||null;
+  const svg=host.querySelector('svg'), tip=host.querySelector('.tip'), hov=svg.querySelector('.hov');
+  const tAt=ev=>{ const r=svg.getBoundingClientRect(), px=(ev.clientX-r.left)*(W/r.width); return Math.max(0,Math.min(N-1,Math.round((px-pad.l)/iw*(N-1)))); };
+  svg.addEventListener('pointermove',ev=>{
+    const t=tAt(ev), xx=x(t), r=svg.getBoundingClientRect(), sc=r.width/W;
+    hov.setAttribute('x1',xx); hov.setAttribute('x2',xx); hov.setAttribute('visibility','visible');
+    tip.innerHTML=cfg.tip(t); tip.hidden=false;
+    let left=xx*sc+14; const tw=tip.offsetWidth; if(left+tw>r.width) left=xx*sc-14-tw; tip.style.left=Math.max(0,left)+'px'; tip.style.top='4px';
+  });
+  svg.addEventListener('pointerleave',()=>{ tip.hidden=true; hov.setAttribute('visibility','hidden'); });
+  svg.addEventListener('click',ev=>{ stop(); setSel(tAt(ev)); });
+}
+function tr(label,val,o){ o=o||{}; return '<div class="r'+(o.tot?' tot':'')+'"><span>'+(o.gh?'<i class="gh"></i>':o.c?'<i style="--c:var('+o.c+')"></i>':'')+esc(label)+'</span><b'+(o.cls?' class="'+o.cls+'"':'')+'>'+val+'</b></div>'; }
+const GHOST_LG='<span class="lg ghost" data-tip="The same chart for the plan as it was before this edit, or your pinned snapshot."><i class="gh"></i>Before this edit</span>';
+function lgItem(label,icon,tip){ return '<span class="lg"'+tipAttr(tip)+'>'+icon+esc(label)+'</span>'; }
+function drawCharts(){
+  const N=sim.N, evTs=eventTs(), S=sim.ser, G=ghostLive(), GS=G?G.ser:null;
+  const gs=a=>a?a.slice(0,N):null;
+  const gLbl=pinned?'Pinned snapshot':'Before this edit';
+  const glg=G?GHOST_LG.replace('Before this edit',gLbl):'';
+
+  /* composition */
+  const present=COMP.filter(c=>S.comp[c[0]].some(v=>v>0.5));
+  let cum=new Array(N).fill(0); const bands=[];
+  for(const c of present){ const lo=cum.slice(); cum=cum.map((v,t)=>v+S.comp[c[0]][t]); bands.push({c,lo,hi:cum.slice()}); }
+  const hasNeg=S.comp.neg.some(v=>v<-0.5), gNW=G?gs(GS.nw):null;
+  const m0=sim.months[N-1];
+  q('#compCap').textContent='What we own stacked above zero, other debts below. The line is the net: '+usd(m0.nw)+' by '+tLabel(N-1)+'.';
+  q('#lgComp').innerHTML=present.map(c=>lgItem(c[1],'<i style="--c:var('+c[2]+')"></i>',COMP_TIP[c[0]])).join('')+(hasNeg?lgItem('Debts','<i style="--c:var(--k-debt)"></i>','Car loans, student loans, cards and other debts that aren\'t mortgages, shown below zero.'):'')+lgItem('Net worth','<i class="ln"></i>','Everything owned minus everything owed.')+glg;
+  chart(q('#chComp .plot'),{N,evTs,min:Math.min(0,arrMin(S.comp.neg),gNW?arrMin(gNW):0),max:Math.max(arrMax(cum),arrMax(S.nw),gNW?arrMax(gNW):0),dot:S.nw,h:q('#chComp').clientWidth<520?210:260,label:'Net worth broken into cash, investments, retirement, home equity and other assets, less debts',
+    body:(x,y)=>{ let s='';
+      for(const b of bands) s+='<path d="'+bandPath(b.lo,b.hi,x,y)+'" fill="var('+b.c[2]+')" fill-opacity=".8" stroke="var(--surface)" stroke-width="1" stroke-linejoin="round"/>';
+      if(hasNeg) s+='<path d="'+bandPath(new Array(N).fill(0),S.comp.neg,x,y)+'" fill="var(--k-debt)" fill-opacity=".55"/>';
+      s+=ghostPath(gNW,x,y)+'<path d="'+linePath(S.nw,x,y)+'" fill="none" stroke="var(--ink)" stroke-width="2.25" stroke-linejoin="round"/>';
+      return s; },
+    tip:t=>{ const m=sim.months[t]; let h='<div class="tm">'+tLabel(t,true)+'</div>';
+      for(const c of present.slice().reverse()){ const v=S.comp[c[0]][t]; if(v>0.5) h+=tr(c[1],usd(v),{c:c[2]}); }
+      if(S.comp.neg[t]<-0.5) h+=tr('Debts',usd(S.comp.neg[t]),{c:'--k-debt'});
+      h+=tr('Net worth',usd(m.nw),{tot:1});
+      if(gNW&&t<gNW.length) h+=tr(gLbl,usd(gNW[t]),{gh:1})+tr('Change',skusd(m.nw-gNW[t]),{cls:m.nw>=gNW[t]?'good-t':'crit-t'});
+      return h; }});
+
+  /* in vs out */
+  const fb=[]; let fc=new Array(N).fill(0);
+  const earners=OWN.filter(k=>S.inBy[k].some(v=>v>0.5));
+  for(const k of earners){ const lo=fc.slice(); fc=fc.map((c,t)=>c+Math.max(0,S.inBy[k][t])); fb.push({k,lo,hi:fc.slice()}); }
+  const gIn=G?gs(GS.inTot):null, gOut=G?gs(GS.out):null;
+  q('#lgFlow').innerHTML=earners.map(k=>lgItem(ownerName(k),'<i style="--c:var(--o-'+k+')"></i>',ownerTip(k))).join('')+lgItem('Money out','<i class="ln"></i>','Everything going out each month: housing, spending, kids, debt payments and one-time costs.')+glg;
+  chart(q('#chFlow .plot'),{N,evTs,min:0,max:Math.max(arrMax(fc),arrMax(S.out),gIn?arrMax(gIn):0,gOut?arrMax(gOut):0),label:'Monthly take-home stacked by earner versus monthly spending',
+    body:(x,y)=>{ let s='';
+      for(const b of fb) s+='<path d="'+bandPath(b.lo,b.hi,x,y)+'" fill="var(--o-'+b.k+')" fill-opacity=".85" stroke="var(--surface)" stroke-width="1.25" stroke-linejoin="round"/>';
+      s+=ghostPath(gIn,x,y)+ghostPath(gOut,x,y)+'<path d="'+linePath(S.out,x,y)+'" fill="none" stroke="var(--ink)" stroke-width="2" stroke-linejoin="round"/>';
+      return s; },
+    tip:t=>{ const m=sim.months[t]; let h='<div class="tm">'+tLabel(t,true)+'</div>';
+      for(const k of earners){ const v=S.inBy[k][t]; if(Math.abs(v)>0.5) h+=tr(ownerName(k),usd(v),{c:'--o-'+k}); }
+      h+=tr('Money in',usd(m.inTot),{tot:1})+tr('Money out',usd(m.outTot))+tr('Left over',susd(m.left),{cls:m.left>=0?'good-t':'crit-t'});
+      if(G&&t<G.N){ const gm=G.months[t]; h+=tr(gLbl+', left',susd(gm.left),{gh:1}); }
+      return h; }});
+
+  /* cash */
+  let minI=0; for(let t=1;t<N;t++) if(S.cash[t]<S.cash[minI]) minI=t;
+  const minM=S.cash[minI]/sim.months[minI].recurring, gCash=G?gs(GS.cash):null;
+  q('#cashCap').textContent='Checking and savings combined. Lowest point: '+usd(S.cash[minI])+' in '+tLabel(minI)+' ('+minM.toFixed(1)+' months of spending).';
+  q('#lgCash').innerHTML=lgItem('Cash','<i class="ln" style="--c:var(--k-cash)"></i>','Checking and savings combined at the end of each month.')+lgItem(num(plan.settings.reserveMonths)+'-month reserve','<i class="dash"></i>','The cash target: '+num(plan.settings.reserveMonths)+' months of regular spending, set in Settings. It rises as spending rises.')+glg;
+  chart(q('#chCash .plot'),{N,evTs,min:Math.min(0,arrMin(S.cash),gCash?arrMin(gCash):0),max:Math.max(arrMax(S.cash),arrMax(S.target),gCash?arrMax(gCash):0),dot:S.cash,label:'Cash on hand over time against the reserve target',
+    body:(x,y,lo)=>{ const y0=y(Math.max(lo,0)); let area='M'+x(0).toFixed(1)+','+y0.toFixed(1); for(let t=0;t<N;t++) area+='L'+x(t).toFixed(1)+','+y(S.cash[t]).toFixed(1); area+='L'+x(N-1).toFixed(1)+','+y0.toFixed(1)+'Z';
+      return '<path d="'+area+'" fill="var(--k-cash)" fill-opacity=".14"/><path d="'+linePath(S.target,x,y)+'" fill="none" stroke="var(--muted)" stroke-width="1.5" stroke-dasharray="5 4"/>'+ghostPath(gCash,x,y)+'<path d="'+linePath(S.cash,x,y)+'" fill="none" stroke="var(--k-cash)" stroke-width="2.25" stroke-linejoin="round"/>'; },
+    tip:t=>{ const m=sim.months[t]; let h='<div class="tm">'+tLabel(t,true)+'</div>'+tr('Cash',usd(m.cash),{c:'--k-cash'})+tr('Reserve target',usd(m.target))+tr('Months covered',(m.cash/m.recurring).toFixed(1),{tot:1});
+      if(gCash&&t<gCash.length) h+=tr(gLbl,usd(gCash[t]),{gh:1}); return h; }});
+
+  /* plan vs standing still */
+  const B=base.ser.nw.slice(0,N), endDiff=S.nw[N-1]-B[N-1];
+  q('#nwCap').textContent='Net worth with every event against none of them. After '+Math.round(N/12)+' years: '+susd(endDiff)+'.';
+  q('#lgNW').innerHTML=lgItem('This plan','<i class="ln"></i>','Net worth with every ticked event included.')+lgItem('Standing still','<i class="dash"></i>','The same starting balances, incomes and spending with every event switched off.')+glg;
+  chart(q('#chNW .plot'),{N,evTs,min:Math.min(0,arrMin(S.nw),arrMin(B),gNW?arrMin(gNW):0),max:Math.max(arrMax(S.nw),arrMax(B),gNW?arrMax(gNW):0),dot:S.nw,label:'Net worth over time, this plan versus no changes',
+    body:(x,y,lo)=>{ const y0=y(Math.max(lo,0)); let area='M'+x(0).toFixed(1)+','+y0.toFixed(1); for(let t=0;t<N;t++) area+='L'+x(t).toFixed(1)+','+y(S.nw[t]).toFixed(1); area+='L'+x(N-1).toFixed(1)+','+y0.toFixed(1)+'Z';
+      return '<path d="'+area+'" fill="var(--ink)" fill-opacity=".06"/><path d="'+linePath(B,x,y)+'" fill="none" stroke="var(--muted)" stroke-width="2" stroke-dasharray="5 4"/>'+ghostPath(gNW,x,y)+'<path d="'+linePath(S.nw,x,y)+'" fill="none" stroke="var(--ink)" stroke-width="2.25" stroke-linejoin="round"/>'; },
+    tip:t=>{ let h='<div class="tm">'+tLabel(t,true)+'</div>'+tr('This plan',usd(S.nw[t]))+tr('Standing still',usd(B[t]))+tr('Difference',susd(S.nw[t]-B[t]),{tot:1});
+      if(gNW&&t<gNW.length) h+=tr(gLbl,usd(gNW[t]),{gh:1}); return h; }});
+
+  renderYearTable();
+}
+function updateCursors(){
+  qa('.plot').forEach(h=>{ if(!h._x) return; const xx=h._x(sel).toFixed(1); const l=h.querySelector('.sel'); if(l){ l.setAttribute('x1',xx); l.setAttribute('x2',xx); }
+    const d=h.querySelector('.seldot'); if(d&&h._dot){ d.setAttribute('cx',xx); d.setAttribute('cy',h._y(h._dot[sel]).toFixed(1)); } });
+  qa('#yearTable tbody tr').forEach(r=>r.classList.toggle('cur',+r.dataset.y0<=sel&&sel<=+r.dataset.y1));
+}
+function renderYearTable(){
+  const groups=[]; let cur=null;
+  sim.months.forEach((m,t)=>{ const yr=idxYm(t,plan.settings.start).slice(0,4); if(!cur||cur.yr!==yr){ cur={yr,ts:[]}; groups.push(cur); } cur.ts.push(t); });
+  let h='<thead><tr>'+YEAR_COLS.map(c=>'<th'+tipAttr(c[1])+'>'+esc(c[0])+'</th>').join('')+'</tr></thead><tbody>';
+  for(const g of groups){
+    const ms=g.ts.map(t=>sim.months[t]), first=g.ts[0], last=g.ts[g.ts.length-1], n=ms.length;
+    const ai=sum(ms,m=>m.inTot)/n, ao=sum(ms,m=>m.outTot)/n, al=ai-ao, ap=sum(ms,m=>m.pretax)/n, sr=(ai+ap)>0?(al+ap)/(ai+ap)*100:0, d=sim.months[last].nw-base.months[Math.min(last,base.N-1)].nw;
+    h+='<tr data-go="'+first+'" data-y0="'+first+'" data-y1="'+last+'" class="'+(first<=sel&&sel<=last?'cur':'')+'"><td>'+g.yr+(n<12?' <span style="color:var(--muted)">('+n+' mo)</span>':'')+'</td><td>'+usd(ai)+'</td><td>'+usd(ao)+'</td><td class="'+(al>=0?'good-t':'crit-t')+'">'+susd(al)+'</td><td>'+Math.round(sr)+'%</td><td>'+usd(sim.months[last].cash)+'</td><td>'+usd(sim.months[last].nw)+'</td><td>'+(Math.abs(d)<1?'—':susd(d))+'</td></tr>';
+  }
+  q('#yearTable').innerHTML=h+'</tbody>';
+}
+
+/* ---------- banner ---------- */
+const STALE_KEY='wealth-map/stale-ok';
+function renderStale(){
+  const el=q('#stale'), nt=nowIdx();
+  let ok=''; try{ ok=sessionStorage.getItem(STALE_KEY)||''; }catch(e){}
+  if(nt<=0||ok===plan.settings.start){ el.hidden=true; return; }
+  el.hidden=false;
+  el.innerHTML='<svg class="clock" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="10" cy="10" r="8"/><path d="M10 5.5V10l3 2"/></svg>'+
+    '<div><b>These balances are from '+esc(tLabel(0,true))+', '+esc(spanText(nt))+' ago.</b> The upright line on the timeline marks this month, projected from those older numbers. Once you\'ve refreshed your balances, start the plan from this month.</div>'+
+    '<div class="acts"><button type="button" class="btn primary" data-act="restart"'+tipAttr('Sets Balances are as of to '+ymLabel(nowYm(),true)+' and opens Accounts. Update the balances in Accounts, Homes and Debts so they match today. Events keep their dates.')+'>Start from '+esc(ymLabel(nowYm()))+'</button>'+
+    '<button type="button" class="btn" data-act="stale-ok"'+tipAttr('Hide this until the next time you open Wealth Map.')+'>Not now</button></div>';
+}
+function renderBanner(){
+  renderStale();
+  let n=0; for(const c of COLLS) for(const it of plan[c]) if(hasEx(it)) n++;
+  const el=q('#banner');
+  if(!n){ el.hidden=true; return; }
+  el.hidden=false;
+  el.innerHTML='<span class="exmark">Example</span><div><b>'+n+' '+(n===1?'entry still uses':'entries still use')+' placeholder figures.</b> Anything marked Example is a stand-in until you replace it in the controls.</div>';
+}
+
+/* ---------- editor ---------- */
+const TABS=[['income','Income','incomes'],['homes','Homes','properties'],['accounts','Accounts','accounts'],['debts','Debts','debts'],['spending','Spending','spending'],['events','Life events','events'],['settings','Settings',null]];
+function fid(path){ return 'f-'+path.replace(/[^a-zA-Z0-9]+/g,'-'); }
+function getPath(path){ return path.split('.').reduce((o,k)=>o==null?undefined:o[k],plan); }
+function setPath(path,val){ const ks=path.split('.'); let o=plan; for(let i=0;i<ks.length-1;i++){ if(o[ks[i]]==null) o[ks[i]]={}; o=o[ks[i]]; } o[ks[ks.length-1]]=val; }
+function itemKey(path){ const p=path.split('.'); if(COLLS.includes(p[0])&&p.length>2) return {item:plan[p[0]][+p[1]],key:p.slice(2).join('.')}; return {item:null,key:null}; }
+function isEx(path){ const r=itemKey(path); return !!(r.item&&r.item.ex&&r.item.ex.includes(r.key)); }
+function unEx(path){ const r=itemKey(path); if(r.item&&r.item.ex){ const i=r.item.ex.indexOf(r.key); if(i>=0) r.item.ex.splice(i,1); } }
+function fmtIn(v){ if(v==null||v==='') return ''; const n=Number(v); if(!isFinite(n)) return String(v); return Number.isInteger(n)&&Math.abs(n)>=1000?nf.format(n):String(n); }
+function lab(path,label,scrub){
+  const h=helpFor(path), t=h?(scrub?h+' Drag the label sideways to adjust.':h):(scrub?'Drag sideways to adjust.':'');
+  return '<span class="fl"'+(scrub?' data-scrub="'+fid(path)+'"':'')+tipAttr(t)+'><span class="tl'+(h?' u':'')+'">'+esc(label)+'</span>'+(isEx(path)?'<span class="exmark">Example</span>':'')+'</span>';
+}
+function fNum(path,label,o){ o=o||{}; const id=fid(path), v=getPath(path);
+  return '<label class="fld'+(o.full?' full':'')+'" for="'+id+'">'+lab(path,label,true)+'<span class="inp">'+(o.pre?'<i>'+o.pre+'</i>':'')+'<input id="'+id+'" type="text" inputmode="decimal" autocomplete="off" data-path="'+path+'" data-t="num"'+(o.step?' data-step="'+o.step+'"':'')+(o.neg?' data-neg="1"':'')+(o.suf?' data-suf="'+esc(o.suf)+'"':'')+' value="'+esc(fmtIn(v))+'"'+(o.ph?' placeholder="'+esc(o.ph)+'"':'')+'>'+(o.suf?'<i class="s">'+o.suf+'</i>':'')+'</span>'+(o.hint?'<span class="fh">'+o.hint+'</span>':'')+'</label>'; }
+function fMonth(path,label,o){ o=o||{}; const id=fid(path), v=getPath(path)||'';
+  return '<label class="fld" for="'+id+'">'+lab(path,label)+'<span class="inp"><input id="'+id+'" type="month" placeholder="YYYY-MM" data-path="'+path+'" data-t="month" value="'+esc(v)+'"></span>'+(o.hint?'<span class="fh">'+o.hint+'</span>':'')+'</label>'; }
+function fText(path,label,o){ o=o||{}; const id=fid(path), v=getPath(path)||'';
+  return '<label class="fld'+(o.full?' full':'')+'" for="'+id+'">'+lab(path,label)+'<span class="inp"><input id="'+id+'" type="text" data-path="'+path+'" data-t="text" value="'+esc(v)+'"></span>'+(o.hint?'<span class="fh">'+o.hint+'</span>':'')+'</label>'; }
+function fSel(path,label,opts,o){ o=o||{}; const id=fid(path), v=getPath(path);
+  if(!opts.some(x=>String(x[0])===String(v))) opts=[['','Choose one']].concat(opts);
+  return '<label class="fld" for="'+id+'">'+lab(path,label)+'<span class="inp"><select id="'+id+'" data-path="'+path+'" data-t="sel"'+(o.re?' data-re="1"':'')+'>'+opts.map(x=>'<option value="'+esc(x[0])+'"'+(String(v)===String(x[0])?' selected':'')+'>'+esc(x[1])+'</option>').join('')+'</select></span>'+(o.hint?'<span class="fh">'+o.hint+'</span>':'')+'</label>'; }
+function fBool(path,label,o){ o=o||{}; const id=fid(path), v=getPath(path);
+  return '<label class="chk'+(o.full?' fld full':'')+'" for="'+id+'"><input type="checkbox" id="'+id+'" data-path="'+path+'" data-t="bool"'+(v?' checked':'')+(o.re?' data-re="1"':'')+'><span'+tipAttr(helpFor(path))+'>'+esc(label)+'</span></label>'; }
+function ownerOpts(){ return OWN.map(k=>[k,ownerName(k)]); }
+function head(path,del,extra){ return '<div class="ed-head"><input class="ed-name" id="'+fid(path+'.name')+'" aria-label="Name" data-path="'+path+'.name" data-t="text" value="'+esc(getPath(path+'.name')||'')+'" data-tip="Click to rename. The name shows on the flow map, cards and charts.">'+(extra||'')+'<button type="button" class="del" data-del="'+del+'" data-tip="Remove this from the plan. Click once, then again to confirm.">Remove</button></div>'; }
+function item(inner,dim){ return '<div class="ed-item'+(dim?' dim':'')+'">'+inner+'</div>'; }
+function addBtn(what,label){ return '<button type="button" class="btn" data-add="'+what+'"'+tipAttr(ADD_TIP[what])+'>+ '+esc(label)+'</button>'; }
+
+const EDIT={
+  income(){
+    let h='<p class="ptxt">Tax rate means every income tax combined (federal, Social Security and Medicare, state) as a share of gross pay. A recent pay stub or tax return gives the real figure.</p>';
+    plan.incomes.forEach((i,k)=>{ const p='incomes.'+k;
+      h+=item(head(p,p)+'<div class="fgrid">'+fSel(p+'.owner','Whose',ownerOpts())+fSel(p+'.kind','Type',[['w2','Paycheck (W-2)'],['self','Self-employed / 1099'],['other','Other income']],{re:1})+
+        fNum(p+'.annual','Gross per year',{pre:'$'})+fNum(p+'.tax','Tax rate',{suf:'%'})+fNum(p+'.growth','Raise per year',{suf:'%',neg:1})+
+        (i.kind==='w2'?fNum(p+'.k401','401(k) contribution',{suf:'%'})+fNum(p+'.match','Employer match',{suf:'%'}):'')+
+        fMonth(p+'.start','Starts',{hint:'Blank if it already pays'})+fMonth(p+'.end','Ends',{hint:'Blank if ongoing'})+'</div>');
+    });
+    return h+'<div class="addrow">'+addBtn('incomes','Add income')+'</div>';
+  },
+  homes(){
+    let h='<p class="ptxt">Home costs land in Money out. Rentals show their net cash flow in Money in. Mark a property as a future purchase to model buying it.</p>';
+    plan.properties.forEach((pr,k)=>{ const p='properties.'+k; let g='';
+      g+=fText(p+'.place','Town')+fSel(p+'.role','Use',[['home','Our home'],['rental','Rental']],{re:1})+fSel(p+'.owner','Whose',ownerOpts())+fSel(p+'.status','Status',[['owned','Own it now'],['buying','Planning to buy']],{re:1});
+      if(pr.status==='buying'){
+        g+='<div class="sub-h">Purchase</div>'+fBool(p+'.buy.on','Include the purchase',{re:1,full:1})+fMonth(p+'.buy.month','Closing month')+fNum(p+'.buy.price','Price',{pre:'$'})+fNum(p+'.buy.downPct','Down payment',{suf:'%'})+fNum(p+'.buy.closingPct','Closing costs',{suf:'%',hint:'Lender, title, prepaid taxes'})+fNum(p+'.buy.rate','Mortgage rate',{suf:'%'})+fNum(p+'.buy.term','Term',{suf:'yrs',step:1});
+      } else {
+        g+='<div class="sub-h">Value & mortgage today</div>'+fNum(p+'.value','Market value',{pre:'$'})+fNum(p+'.loanBal','Mortgage balance',{pre:'$'})+fNum(p+'.rate','Mortgage rate',{suf:'%'})+fNum(p+'.payment','Principal & interest',{pre:'$',suf:'/mo'});
+      }
+      g+='<div class="sub-h">Running costs</div>'+fNum(p+'.taxYr','Property tax',{pre:'$',suf:'/yr'})+fNum(p+'.insYr','Insurance',{pre:'$',suf:'/yr'})+fNum(p+'.maintPct','Upkeep, % of value',{suf:'%/yr'})+fNum(p+'.hoaMo','HOA',{pre:'$',suf:'/mo'})+fNum(p+'.appr','Appreciation',{suf:'%/yr',neg:1});
+      if(pr.role==='rental') g+=fNum(p+'.rentMo','Rent, all units',{pre:'$',suf:'/mo'})+fNum(p+'.vacancy','Vacancy',{suf:'%'})+fNum(p+'.mgmt','Management fee',{suf:'%'});
+      else g+=fNum(p+'.utilMo','Utilities',{pre:'$',suf:'/mo'});
+      if(pr.sell){ g+='<div class="sub-h">Planned sale</div>'+fBool(p+'.sell.on','Include the sale',{re:1,full:1})+fMonth(p+'.sell.month','Closing month')+fNum(p+'.sell.price','Sale price',{pre:'$'})+fNum(p+'.sell.commission','Commission',{suf:'%'})+fNum(p+'.sell.costs','Other seller costs',{suf:'%',hint:'Transfer taxes, attorney, credits'})+
+        '<div class="fld full"><button type="button" class="link-btn" data-act="rmsale" data-i="'+k+'" data-tip="Drop the planned sale entirely. To compare without it instead, untick Include the sale.">Remove the sale</button></div>'; }
+      else if(pr.status!=='buying') g+='<div class="fld full"><button type="button" class="link-btn" data-act="addsale" data-i="'+k+'" data-tip="Add a sale with a closing month, price and selling costs. Proceeds after the mortgage payoff land in cash.">+ Plan a sale of this property</button></div>';
+      h+=item(head(p,p)+'<div class="fgrid">'+g+'</div>');
+    });
+    return h+'<div class="addrow">'+addBtn('properties','Add property')+'</div>';
+  },
+  accounts(){
+    let h='<p class="ptxt">Cash accounts cover spending. Each month\'s surplus or shortfall goes through the account marked for it. Retirement accounts receive the 401(k) contributions set under Income; with none listed, those go to the investment account.</p>';
+    plan.accounts.forEach((a,k)=>{ const p='accounts.'+k; let g=fSel(p+'.kind','Type',[['cash','Cash & savings'],['retire','Retirement'],['invest','Investments'],['insurance','Life insurance cash value'],['crypto','Crypto'],['vehicle','Vehicle'],['business','Business']],{re:1})+fSel(p+'.owner','Whose',ownerOpts())+fNum(p+'.bal','Balance today',{pre:'$'});
+      if(a.kind==='cash') g+=fNum(p+'.yield','Interest',{suf:'% APY'})+'<label class="chk fld full" for="'+fid(p+'.sweep')+'"'+tipAttr(HELP['accounts.sweep'])+'><input type="radio" name="sweep" id="'+fid(p+'.sweep')+'" data-path="'+p+'" data-t="sweep"'+(a.sweep?' checked':'')+'>Monthly surplus goes here</label>';
+      else if(a.kind==='vehicle') g+=fNum(p+'.ret','Value change',{suf:'%/yr',neg:1,hint:'Negative for depreciation'});
+      else g+=fNum(p+'.ret',a.kind==='business'||a.kind==='insurance'?'Growth':'Return',{suf:'%/yr',neg:1});
+      h+=item(head(p,p)+'<div class="fgrid">'+g+'</div>');
+    });
+    return h+'<div class="addrow">'+addBtn('accounts','Add account')+'</div>';
+  },
+  debts(){
+    let h='<p class="ptxt">Car loans, student loans, cards. Mortgages live with each property under Homes.</p>';
+    plan.debts.forEach((d,k)=>{ const p='debts.'+k;
+      h+=item(head(p,p)+'<div class="fgrid">'+fSel(p+'.owner','Whose',ownerOpts())+fNum(p+'.bal','Balance',{pre:'$'})+fNum(p+'.rate','Interest rate',{suf:'%'})+fNum(p+'.payment','Payment',{pre:'$',suf:'/mo'})+'</div>');
+    });
+    return h+'<div class="addrow">'+addBtn('debts','Add debt')+'</div>';
+  },
+  spending(){
+    let h='<p class="ptxt">Everyday spending, before housing, kids and debts (those come from their own tabs). Use start and end months for costs that change.</p>';
+    plan.spending.forEach((s,k)=>{ const p='spending.'+k;
+      h+=item(head(p,p)+'<div class="fgrid">'+fSel(p+'.cat','Category',CAT_ORDER.map(c=>[c,CATS[c]]))+fNum(p+'.monthly','Amount',{pre:'$',suf:'/mo'})+fMonth(p+'.start','Starts')+fMonth(p+'.end','Ends')+fBool(p+'.infl','Rises with inflation',{full:1})+'</div>');
+    });
+    return h+'<div class="addrow">'+addBtn('spending','Add spending')+'</div>';
+  },
+  events(){
+    let h='<p class="ptxt">Changes that happen at a point in time. Untick one to see the plan without it. Home sales and purchases are set up under Homes.</p>';
+    const w2=plan.incomes.filter(i=>i.kind==='w2').map(i=>[i.id,i.name+' ('+ownerName(i.owner)+')']);
+    const allInc=plan.incomes.map(i=>[i.id,i.name+' ('+ownerName(i.owner)+')']);
+    plan.events.forEach((e,k)=>{ const p='events.'+k; let g=fBool(p+'.on','Include in the plan',{re:1})+fMonth(p+'.month',e.type==='baby'?'Due month':'Month');
+      if(e.type==='baby'){
+        g+=fNum(p+'.oneTime','Birth & gear, one-time',{pre:'$'})+fNum(p+'.monthly','Baby essentials',{pre:'$',suf:'/mo',hint:'Diapers, formula, clothes'})+fNum(p+'.insurance','Added health insurance',{pre:'$',suf:'/mo'})+fNum(p+'.ctc','Child tax credit',{pre:'$',suf:'/yr',hint:'$2,200 per child for 2026'});
+        g+='<div class="sub-h">Parental leave</div><p class="fh" style="grid-column:1/-1">Paid leave replaces part of a paycheck while a parent is out. Set the weeks for each paycheck, then the benefit rate and weekly cap from the state or employer plan. For unpaid weeks, set the benefit rate to 0.</p>';
+        (e.leave||[]).forEach((L,j)=>{ const lp=p+'.leave.'+j; g+=fSel(lp+'.incomeId','Paycheck on leave',w2.length?w2:[['','Add a W-2 income first']])+fNum(lp+'.weeks','Weeks out',{suf:'wks',step:1})+'<div class="fld full"><button type="button" class="link-btn" data-del="'+lp+'" data-tip="Remove this leave. Click once, then again to confirm.">Remove this leave</button></div>'; });
+        g+='<div class="fld full"><button type="button" class="link-btn" data-add="leave:'+k+'" data-tip="Add parental leave weeks for another paycheck.">+ Add leave for a paycheck</button></div>';
+        g+=fNum(p+'.leavePct','Benefit, % of wages',{suf:'%',step:1})+fNum(p+'.leaveCap','Weekly cap',{pre:'$',suf:'/wk',hint:'The plan\'s weekly maximum'});
+        g+='<div class="sub-h">Childcare</div>'+fBool(p+'.childcare.on','Plan for paid childcare',{re:1,full:1});
+        if(e.childcare&&e.childcare.on) g+=fNum(p+'.childcare.after','Starts after',{suf:'months',step:1})+fNum(p+'.childcare.monthly','Cost',{pre:'$',suf:'/mo'});
+        else g+='<p class="fh" style="grid-column:1/-1">Off for now. Turn it on to test the cost of paid childcare.</p>';
+      } else if(e.type==='income'){
+        g+=fSel(p+'.incomeId','Which income',allInc.length?allInc:[['','Add an income first']])+fNum(p+'.annual','New gross per year',{pre:'$',hint:'Raises then apply from this amount'});
+      } else {
+        g+=fNum(p+'.amount','Cost',{pre:'$',neg:1,hint:'Negative for a windfall'});
+      }
+      const tag='<span class="badge"'+tipAttr(e.type==='baby'?'Adds baby costs, parental leave, optional childcare and the child tax credit from the due month.':e.type==='income'?'Changes one income\'s gross pay from this month on.':'A single cost (or windfall) in one month.')+'>'+(e.type==='baby'?'Baby':e.type==='income'?'Income change':'One-time')+'</span>';
+      h+=item(head(p,p,tag)+'<div class="fgrid">'+g+'</div>',!e.on);
+    });
+    return h+'<div class="addrow">'+addBtn('ev:income','Income change')+addBtn('ev:oneTime','One-time cost')+(plan.events.some(e=>e.type==='baby')?'':addBtn('ev:baby','A baby'))+'</div>';
+  },
+  settings(){
+    const g=fText('people.p1','First person')+fText('people.p2','Second person')+
+      fMonth('settings.start','Balances are as of')+fSel('settings.years','Look ahead',[[5,'5 years'],[10,'10 years'],[15,'15 years'],[20,'20 years'],[30,'30 years']],{re:1})+
+      fNum('settings.inflation','Inflation',{suf:'%/yr',neg:1})+fNum('settings.reserveMonths','Cash reserve target',{suf:'months',step:0.5,hint:'Months of spending kept in cash'})+
+      fBool('settings.investExcess','Move cash above the reserve into investments',{full:1});
+    return item('<div class="fgrid">'+g+'</div>')+
+      item('<div class="ed-head"><b>Back up or move the plan</b></div><p class="ptxt">Copy the whole plan as text to keep a backup, or paste one in to load it.</p><div class="addrow"><button type="button" class="btn" data-act="copy" data-tip="Copy the whole plan as text to the clipboard. Paste it somewhere safe as a backup.">Copy plan</button></div><textarea id="planText" aria-label="Plan text" placeholder="Paste a copied plan here"></textarea><div class="addrow"><button type="button" class="btn" data-act="load" data-tip="Replace the current plan with the text pasted above.">Load pasted plan</button><span class="msg" id="ioMsg" role="status"></span></div>')+
+      item('<div class="ed-head"><b>Start over</b></div><p class="ptxt">Replace everything with the example plan. Saved numbers will be overwritten.</p><div class="addrow"><button type="button" class="del" style="margin-left:0" data-act="reset" data-tip="Replace everything with the example plan. Click once, then again to confirm.">Reset to the example plan</button></div>');
+  }
+};
+function renderEditor(){
+  q('#tabs').innerHTML=TABS.map(t=>'<button type="button" class="tab" role="tab" id="tab-'+t[0]+'" aria-controls="panel" aria-selected="'+(t[0]===tab)+'" data-tab="'+t[0]+'"'+tipAttr(TAB_TIP[t[0]])+'>'+esc(t[1])+(t[2]?'<span class="n">'+plan[t[2]].length+'</span>':'')+'</button>').join('');
+  q('#panel').setAttribute('aria-labelledby','tab-'+tab);
+  q('#panel').innerHTML=EDIT[tab]();
+}
+const TEMPL={
+  incomes:()=>({id:uid('inc'),name:'New income',owner:'p1',kind:'w2',annual:0,tax:25,growth:3,k401:0,match:0,start:null,end:null,ex:[]}),
+  properties:()=>({id:uid('p'),name:'New property',place:'',role:'rental',owner:'biz',status:'owned',value:0,appr:3,loanBal:0,rate:0,payment:0,taxYr:0,insYr:0,maintPct:1,utilMo:0,hoaMo:0,rentMo:0,vacancy:5,mgmt:0,ex:[]}),
+  accounts:()=>({id:uid('a'),name:'New account',kind:'cash',owner:'joint',bal:0,yield:0,ret:6,sweep:false,ex:[]}),
+  debts:()=>({id:uid('d'),name:'New debt',owner:'joint',bal:0,rate:0,payment:0,ex:[]}),
+  spending:()=>({id:uid('s'),name:'New spending',cat:'other',monthly:0,infl:true,start:null,end:null,ex:[]}),
+  'ev:income':()=>({id:uid('e'),type:'income',on:true,name:'Income change',month:idxYm(Math.min(sel+1,sim.N-1),plan.settings.start),incomeId:(plan.incomes[0]||{}).id||'',annual:num((plan.incomes[0]||{}).annual),ex:[]}),
+  'ev:oneTime':()=>({id:uid('e'),type:'oneTime',on:true,name:'One-time cost',month:idxYm(Math.min(sel+1,sim.N-1),plan.settings.start),amount:0,ex:[]}),
+  'ev:baby':()=>({id:uid('e'),type:'baby',on:true,name:'Baby arrives',month:idxYm(Math.min(12,sim.N-1),plan.settings.start),oneTime:3500,monthly:900,insurance:250,ctc:2200,leavePct:70,leaveCap:1000,leave:[],childcare:{on:false,after:12,monthly:1500},ex:[]})
+};
+
+/* ---------- live scrubbing of number fields ---------- */
+function stepFor(inp){
+  if(inp.dataset.step) return +inp.dataset.step;
+  const v=Math.abs(num(inp.value)), suf=inp.dataset.suf||'';
+  if(suf.indexOf('%')>=0) return v>=20?0.5:0.1;
+  const x=Math.max(v,500)/100, p=Math.pow(10,Math.floor(Math.log10(x))), r=x/p;
+  return (r>=5?5:r>=2?2:1)*p;
+}
+function setNum(inp,v,step){
+  const min=inp.dataset.neg?-Infinity:0, dec=(String(step).split('.')[1]||'').length;
+  v=Math.max(min,Math.round(v/step)*step); v=+v.toFixed(dec);
+  const txt=fmtIn(v); if(inp.value===txt) return;
+  inp.value=txt; apply(inp);
+}
+let scrub=null, eatClick=false;
+function bindScrub(){
+  const panel=q('#panel');
+  panel.addEventListener('pointerdown',e=>{
+    eatClick=false;
+    const h=e.target.closest('[data-scrub]'); if(!h||e.button!==0) return;
+    const inp=document.getElementById(h.dataset.scrub); if(!inp) return;
+    scrub={h,inp,x:e.clientX,start:num(inp.value),step:stepFor(inp),moved:false,id:e.pointerId};
+  });
+  window.addEventListener('pointermove',e=>{
+    if(!scrub||e.pointerId!==scrub.id) return;
+    const dx=e.clientX-scrub.x;
+    if(!scrub.moved){ if(Math.abs(dx)<4) return; scrub.moved=true; document.body.classList.add('scrubbing'); scrub.h.classList.add('active'); beginGhost(); try{ scrub.h.setPointerCapture(e.pointerId); }catch(_){} }
+    e.preventDefault();
+    setNum(scrub.inp,scrub.start+Math.round(dx/5)*scrub.step*(e.shiftKey?10:1),scrub.step);
+  });
+  const end=()=>{ if(!scrub) return; const s=scrub; scrub=null; if(s.moved){ eatClick=true; document.body.classList.remove('scrubbing'); s.h.classList.remove('active'); endGhostSoon(); } };
+  window.addEventListener('pointerup',end); window.addEventListener('pointercancel',end);
+  panel.addEventListener('click',e=>{ if(eatClick&&e.target.closest('[data-scrub],label')){ e.preventDefault(); } eatClick=false; },true);
+  panel.addEventListener('keydown',e=>{
+    const el=e.target; if(!el.dataset||el.dataset.t!=='num') return;
+    if(e.key!=='ArrowUp'&&e.key!=='ArrowDown') return;
+    e.preventDefault(); beginGhost();
+    const st=stepFor(el); setNum(el,num(el.value)+(e.key==='ArrowUp'?1:-1)*st*(e.shiftKey?10:1),st);
+  });
+}
+
+/* ---------- state changes ---------- */
+let pend=null;
+function cancelPending(){ if(pend){ cancelAnimationFrame(pend.r); clearTimeout(pend.t); pend=null; } }
+function scheduleRecalc(){
+  if(pend) return;
+  const run=()=>{ if(!pend) return; cancelPending(); recalc(); };
+  pend={r:requestAnimationFrame(run),t:setTimeout(run,60)};
+}
+function renderAll(){
+  renderTimeline(); renderKPIs(); renderFlow(); renderSpot(); renderSheet(); drawCharts(); renderBanner(); renderGhostBar();
+}
+function recalc(){
+  normalize(plan);
+  sim=simulate(plan,false); base=simulate(plan,true);
+  if(sel>sim.N-1) sel=sim.N-1;
+  renderAll();
+}
+function changed(structural){
+  if(structural){ cancelPending(); recalc(); renderEditor(); }
+  else scheduleRecalc();
+  scheduleSave();
+}
+function setSel(t){
+  sel=Math.max(0,Math.min(sim.N-1,t)); q('#scrub').value=sel; paintScrub();
+  renderTimeHead(); renderKPIs(); renderFlow(); renderSpot(); renderSheet(); updateCursors();
+}
+function apply(el){
+  const path=el.dataset.path, t=el.dataset.t; let v;
+  if(t==='sweep'){ plan.accounts.forEach(a=>a.sweep=false); const a=getPath(path); if(a) a.sweep=true; changed(true); return; }
+  if(t==='num'){ const raw=el.value.trim(); if(raw===''||raw==='-') v=null; else { const n=parseFloat(raw.replace(/[,$%\s]/g,'')); if(!isFinite(n)) return; v=n; } }
+  else if(t==='bool') v=el.checked;
+  else if(t==='month'){ const raw=el.value.trim(); if(raw==='') v=null; else if(/^\d{4}-\d{2}$/.test(raw)) v=raw; else return; }
+  else if(t==='sel'&&path==='settings.years') v=Number(el.value);
+  else v=el.value;
+  setPath(path,v); unEx(path);
+  const mk=el.closest('.fld'); if(mk){ const x=mk.querySelector('.exmark'); if(x) x.remove(); }
+  changed(el.dataset.re==='1');
+}
+
+/* ---------- saving (this browser only) ---------- */
+const LS_KEY='wealth-map/plan';
+let saveTimer=null;
+const STATUS={example:'Example plan · edits save in this browser',dirty:'Saving…',local:'Saved in this browser',error:'Not saving here · use Copy plan in Settings'};
+function setStatus(s){ q('#save').dataset.s=s; q('#saveText').textContent=STATUS[s]||s; }
+function localSave(){ try{ localStorage.setItem(LS_KEY,JSON.stringify(plan)); return true; }catch(e){ return false; } }
+function localLoad(){ try{ const s=localStorage.getItem(LS_KEY); return s?JSON.parse(s):null; }catch(e){ return null; } }
+function scheduleSave(){ clearTimeout(saveTimer); setStatus('dirty'); saveTimer=setTimeout(()=>setStatus(localSave()?'local':'error'),600); }
+
+/* ---------- playback ---------- */
+function stop(){ if(playing){ clearInterval(playing); playing=null; const b=q('#btnPlay'); b.setAttribute('aria-pressed','false'); b.querySelector('span').textContent='Play'; } }
+function play(){
+  if(playing){ stop(); return; }
+  if(sel>=sim.N-1) setSel(0);
+  const b=q('#btnPlay'); b.setAttribute('aria-pressed','true'); b.querySelector('span').textContent='Pause';
+  playing=setInterval(()=>{ if(sel>=sim.N-1){ stop(); return; } setSel(sel+1); },150);
+}
+
+/* ---------- theme & layout ---------- */
+function paintThemeBtn(){ const cur=document.documentElement.dataset.theme==='light'?'light':'dark'; q('#btnTheme span').textContent=cur==='light'?'Dark':'Light'; }
+function toggleTheme(){
+  const next=document.documentElement.dataset.theme==='light'?'dark':'light';
+  document.documentElement.dataset.theme=next; try{ localStorage.setItem('wealth-map/theme',next); }catch(e){}
+  paintThemeBtn();
+}
+function setFocusMode(on){
+  q('#app').classList.toggle('focus',on);
+  const b=q('#btnFocus'); b.setAttribute('aria-pressed',String(on)); b.textContent=on?'← Show controls':'Hide controls →';
+  try{ localStorage.setItem('wealth-map/focus',on?'1':'0'); }catch(e){}
+}
+function setSheet(open){ q('#app').classList.toggle('sheet',open); if(open){ const f=q('#tab-'+tab); if(f) f.focus({preventScroll:true}); } }
+
+/* ---------- events ---------- */
+function bindEvents(){
+  q('#btnPlay').addEventListener('click',play);
+  q('#btnToday').addEventListener('click',()=>{ stop(); setSel(todayT()); });
+  q('#scrub').addEventListener('input',e=>{ stop(); setSel(+e.target.value); });
+  q('#btnTheme').addEventListener('click',toggleTheme);
+  q('#btnFocus').addEventListener('click',()=>setFocusMode(!q('#app').classList.contains('focus')));
+  q('#fab').addEventListener('click',()=>setSheet(true));
+  q('#btnSheetClose').addEventListener('click',()=>setSheet(false));
+  const panel=q('#panel');
+  panel.addEventListener('input',e=>{ const el=e.target.closest('[data-path]'); if(!el) return; beginGhost(); apply(el); });
+  panel.addEventListener('focusin',e=>{ if(e.target.closest('[data-path]')) beginGhost(); });
+  q('#inspector').addEventListener('focusout',e=>{ if(!e.relatedTarget||!q('#inspector').contains(e.relatedTarget)) endGhostSoon(); });
+  q('#toggles').addEventListener('change',e=>{ const tg=e.target.closest('[data-tog]'); if(tg){ beginGhost(); toggleScenario(tg.dataset.tog,tg.checked); endGhostSoon(); } });
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&q('#app').classList.contains('sheet')) setSheet(false); });
+  document.addEventListener('click',e=>{
+    const go=e.target.closest('[data-go]'); if(go){ stop(); setSel(+go.dataset.go); return; }
+    const tb=e.target.closest('[data-tab]'); if(tb){ tab=tb.dataset.tab; renderEditor(); const f=q('#tab-'+tab); if(f) f.focus(); q('#inspector').scrollTop=0; return; }
+    const add=e.target.closest('[data-add]');
+    if(add){ const w=add.dataset.add; beginGhost();
+      if(w.startsWith('leave:')){ const ev=plan.events[+w.split(':')[1]]; if(ev){ const firstW2=plan.incomes.find(i=>i.kind==='w2'); ev.leave.push({incomeId:firstW2?firstW2.id:'',weeks:12}); } }
+      else if(w.startsWith('ev:')) plan.events.push(TEMPL[w]());
+      else plan[w].push(TEMPL[w]());
+      changed(true); endGhostSoon(); return; }
+    const del=e.target.closest('[data-del]');
+    if(del){
+      if(!del.classList.contains('armed')){ const orig=del.textContent; del.classList.add('armed'); del.textContent='Confirm remove'; setTimeout(()=>{ if(del.isConnected&&del.classList.contains('armed')){ del.classList.remove('armed'); del.textContent=orig; } },4000); return; }
+      beginGhost();
+      const parts=del.dataset.del.split('.'), idx=+parts.pop(), arr=getPath(parts.join('.'));
+      if(Array.isArray(arr)) arr.splice(idx,1);
+      changed(true); endGhostSoon(); return; }
+    const act=e.target.closest('[data-act]'); if(!act) return;
+    const a=act.dataset.act;
+    if(a==='pin'){ if(!ghost) ghost=sim; pinned=true; clearTimeout(ghostTimer); renderAll(); }
+    else if(a==='unghost') clearGhost();
+    else if(a==='stale-ok'){ try{ sessionStorage.setItem(STALE_KEY,plan.settings.start); }catch(err){} renderStale(); }
+    else if(a==='restart'){
+      plan.settings.start=nowYm(); sel=0; ghost=null; pinned=false; tab='accounts';
+      changed(true);
+      if(matchMedia('(max-width:1099px)').matches) setSheet(true); else setFocusMode(false);
+      q('#inspector').scrollTop=0;
+    }
+    else if(a==='stale-ok'){ try{ sessionStorage.setItem(STALE_KEY,plan.settings.start); }catch(err){} renderStale(); }
+    else if(a==='restart'){
+      plan.settings.start=nowYm(); sel=0; ghost=null; pinned=false; tab='accounts';
+      changed(true);
+      if(matchMedia('(max-width:1099px)').matches) setSheet(true); else setFocusMode(false);
+      q('#inspector').scrollTop=0;
+    }
+    else if(a==='addsale'){ const p=plan.properties[+act.dataset.i]; p.sell={on:true,month:idxYm(Math.min(12,sim.N-1),plan.settings.start),price:num(p.value),commission:5,costs:1.5}; beginGhost(); changed(true); endGhostSoon(); }
+    else if(a==='rmsale'){ const p=plan.properties[+act.dataset.i]; delete p.sell; p.ex=(p.ex||[]).filter(k=>!k.startsWith('sell.')); beginGhost(); changed(true); endGhostSoon(); }
+    else if(a==='copy'){ const txt=JSON.stringify(plan); const msg=q('#ioMsg');
+      const fallback=()=>{ const ta=q('#planText'); ta.value=txt; ta.focus(); ta.select(); msg.textContent='Selected below. Copy it with the keyboard.'; };
+      try{ navigator.clipboard.writeText(txt).then(()=>{ msg.textContent='Copied to the clipboard.'; },fallback); }catch(err){ fallback(); } }
+    else if(a==='load'){ const msg=q('#ioMsg'); try{ const p=JSON.parse(q('#planText').value); if(!p||!Array.isArray(p.incomes)||!Array.isArray(p.accounts)) throw new Error('shape'); plan=normalize(p); sel=0; ghost=null; pinned=false; changed(true); q('#ioMsg').textContent='Plan loaded.'; }catch(err){ msg.textContent='That text isn\'t a copied plan. Use Copy plan to get one.'; } }
+    else if(a==='reset'){
+      if(!act.classList.contains('armed')){ act.classList.add('armed'); act.textContent='Confirm: replace my numbers'; setTimeout(()=>{ if(act.isConnected){ act.classList.remove('armed'); act.textContent='Reset to the example plan'; } },5000); return; }
+      plan=clone(DEFAULT); sel=0; ghost=null; pinned=false; changed(true);
+    }
+  });
+  let seenNow=nowYm();
+  document.addEventListener('visibilitychange',()=>{ if(!document.hidden&&nowYm()!==seenNow){ seenNow=nowYm(); renderAll(); } });
+  bindScrub(); bindFlowHover();
+  let lastW=0;
+  const ro=new ResizeObserver(()=>{ const w=q('#canvas').clientWidth; if(w!==lastW){ lastW=w; renderTimeline(); drawCharts(); renderFlow(); drawFlow(); } });
+  ro.observe(q('#canvas'));
+  if(document.fonts&&document.fonts.ready) document.fonts.ready.then(()=>{ drawFlow(); });
+}
+
+/* ---------- boot ---------- */
+function boot(){
+  paintThemeBtn();
+  try{ if(localStorage.getItem('wealth-map/focus')==='1') setFocusMode(true); }catch(e){}
+  const saved=localLoad();
+  if(saved&&Array.isArray(saved.incomes)&&Array.isArray(saved.accounts)){ plan=normalize(saved); setStatus('local'); }
+  else { plan=normalize(clone(DEFAULT)); setStatus('example'); }
+  bindEvents(); bindTips();
+  recalc(); renderEditor();
+  if(todayT()>0) setSel(todayT());
+}
+
+/* ---------- gate ---------- */
+const CF_KEY='cf-unlocked';
+const gate=q('#gate'), main=q('#main-content'), gIn=q('#gate-input'), gBtn=q('#gate-btn'), gErr=q('#gate-error');
+let booted=false;
+function unlock(){ sessionStorage.setItem(CF_KEY,'1'); gate.classList.add('hidden'); main.classList.add('unlocked'); if(!booted){ booted=true; boot(); } }
+function tryPassword(){
+  if(gIn.value.toLowerCase()==='team fam'){ gBtn.textContent='✓ Unlocked'; gBtn.classList.add('ok'); setTimeout(unlock,380); }
+  else { gErr.style.display='block'; gIn.classList.remove('error'); void gIn.offsetWidth; gIn.classList.add('error'); gIn.value=''; gIn.focus(); }
+}
+gBtn.addEventListener('click',tryPassword);
+gIn.addEventListener('keydown',e=>{ if(e.key==='Enter') tryPassword(); else { gIn.classList.remove('error'); gErr.style.display='none'; } });
+if(sessionStorage.getItem(CF_KEY)==='1') unlock(); else gIn.focus();
+})();
+</script>
+</body>
+</html>
